@@ -1,0 +1,12 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/schema"
+import "github.com/caarvid/armadan/internal/utils"
+
+templ WeekList(weeks []schema.GetWeeksRow, isEditable bool) {
+	<div id="week-list" class="grid grid-cols-3 gap-3 items-start">
+		for _, week := range weeks {
+			@WeekCard(week, utils.GetWeekDates(int(week.Nr)), isEditable)
+		}
+	</div>
+}

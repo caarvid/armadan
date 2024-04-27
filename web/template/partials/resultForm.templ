@@ -1,0 +1,65 @@
+package partials
+
+import "fmt"
+
+templ resultCell(nr int) {
+	<div class="flex flex-col items-center gap-1 border-r mr-[-1px] pr-2">
+		<span class="border-b w-full text-center font-semibold">{ fmt.Sprint(nr) }</span>
+		<span class="grid grid-cols-2 w-full text-center">
+			<span class="border-r mr-[-1px]">{ fmt.Sprint(nr) }</span>
+			<span class="opacity-60">{ fmt.Sprint(nr) }</span>
+		</span>
+		<input
+			data-nr={ fmt.Sprint(nr) }
+			type="number"
+			class="input-number text-center"
+		/>
+	</div>
+}
+
+templ ResultForm() {
+	<form
+		class="flex-col gap-2 flex"
+		id="result-form"
+		_="
+			on input 
+				set out to 0
+				set in to 0
+				for inp in <input/> in me
+					set i to (value of inp) as Int
+					if i is greater than 0
+						if (@data-nr of inp) as Int is less than 10
+							set out to out + i
+						else
+							set in to in + i
+						end
+					end
+				end
+				put out into #strokes-out
+				put in into #strokes-in
+				put in+out into #strokes-total
+		"
+	>
+		<div class="grid grid-cols-10 gap-2 border-b pb-2">
+			for i := range 9 {
+				@resultCell(i + 1)
+			}
+			<div class="flex flex-col items-center gap-1">
+				<span class="border-b w-full text-center font-semibold">OUT</span>
+				<span id="strokes-out" class="flex-1 flex items-center justify-center font-bold">0</span>
+			</div>
+		</div>
+		<div class="grid grid-cols-10 gap-2">
+			for i := range 9 {
+				@resultCell(i + 10)
+			}
+			<div class="flex flex-col items-center gap-1">
+				<span class="border-b w-full text-center font-semibold">IN</span>
+				<span id="strokes-in" class="flex-1 flex items-center justify-center font-bold">0</span>
+			</div>
+		</div>
+		<div class="self-end border-t pt-2 px-2 font-bold">
+			<span>Totalt: <span id="strokes-total">0</span></span>
+		</div>
+	</form>
+}

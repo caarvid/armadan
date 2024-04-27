@@ -1,0 +1,14 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/schema"
+
+templ Post(post schema.Post) {
+	<div class="rounded-l border bg-card text-card-foreground shadow p-3">
+		<h3 class="font-semibold leading-none tracking-tight mb-2 text-2xl">{ post.Title }</h3>
+		<div class="mb-1">{ post.Body }</div>
+		<div class="flex justify-between opacity-50">
+			<div>{ post.Author }</div>
+			<div>{ post.CreatedAt.Time.Format("2006-01-02") }</div>
+		</div>
+	</div>
+}

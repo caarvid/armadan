@@ -1,0 +1,14 @@
+package views
+
+import "github.com/caarvid/armadan/web/template/partials"
+
+templ Login() {
+	@document("Armadan") {
+		@partials.Header()
+		@partials.Content("content") {
+			<div class="flex flex-auto items-center justify-center">
+				@partials.LoginForm()
+			</div>
+		}
+	}
+}

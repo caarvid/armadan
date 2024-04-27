@@ -1,0 +1,21 @@
+package views
+
+templ document(title string) {
+	<html>
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link rel="icon" type="image/svg+xml" href="/public/assets/favicon.svg"/>
+			<script src="/public/scripts/hyperscript.js"></script>
+			<script src="/public/scripts/htmx.min.js"></script>
+			<script src="/public/scripts/json-form.js"></script>
+			<title>{ title }</title>
+			<link rel="stylesheet" href="/public/main.css"/>
+		</head>
+		<body class="overflow-y-hidden">
+			<section class="overflow-y-hidden flex flex-auto flex-col min-h-screen max-h-screen">
+				{ children... }
+			</section>
+		</body>
+	</html>
+}

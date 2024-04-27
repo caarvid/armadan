@@ -1,0 +1,21 @@
+package views
+
+import "github.com/caarvid/armadan/internal/schema"
+import "fmt"
+
+templ ManageResults(players []schema.GetPlayersRow) {
+	@AdminLayout() {
+		@adminHeader() {
+			<h3 class="font-semibold leading-none tracking-tight text-2xl">Resultat</h3>
+		}
+		<div>
+			<select name="player" class="select">
+				<option disabled hidden selected value>Spelare</option>
+				for _, p := range players {
+					<option value={ p.ID.String() }>{ fmt.Sprintf("%s, %s", p.LastName, p.FirstName) }</option>
+				}
+			</select>
+		</div>
+		<div id="form-container"></div>
+	}
+}

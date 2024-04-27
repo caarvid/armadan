@@ -1,0 +1,15 @@
+package views
+
+import "github.com/caarvid/armadan/web/template/partials"
+import "github.com/caarvid/armadan/internal/schema"
+
+templ Schedule(weeks []schema.GetWeeksRow) {
+	@document("Armadan") {
+		@partials.Header()
+		@partials.Content("content") {
+			<div class="flex flex-col gap-2 flex-1 lg:w-8/12 lg:flex-none mt-4">
+				@partials.WeekList(weeks, false)
+			</div>
+		}
+	}
+}

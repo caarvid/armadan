@@ -1,0 +1,17 @@
+package views
+
+import "github.com/caarvid/armadan/internal/schema"
+import "github.com/caarvid/armadan/web/template/partials"
+
+templ Index(posts []schema.Post) {
+	@document("Armadan") {
+		@partials.Header()
+		@partials.Content("content") {
+			<div class="flex flex-col gap-2 flex-1 lg:w-8/12 lg:flex-none">
+				for _, post := range posts {
+					@partials.Post(post)
+				}
+			</div>
+		}
+	}
+}

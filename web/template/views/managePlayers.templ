@@ -1,0 +1,22 @@
+package views
+
+import "github.com/caarvid/armadan/web/template/partials"
+import "github.com/caarvid/armadan/internal/schema"
+
+templ ManagePlayers(players []schema.GetPlayersRow) {
+	@AdminLayout() {
+		@adminHeader() {
+			<h3 class="font-semibold leading-none tracking-tight text-2xl">Spelare</h3>
+		}
+		<form class="flex gap-3" hx-post="/api/players" hx-target="#player-list" hx-swap="outerHTML" hx-ext="json-form">
+			<input name="firstName" type="text" class="input basis-1/5" placeholder="Förnamn" required autocomplete="off"/>
+			<input name="lastName" type="text" class="input basis-1/5" placeholder="Efternamn" required autocomplete="off"/>
+			<input name="email" type="text" class="input basis-5/12" placeholder="Email" required autocomplete="off"/>
+			<input name="hcp" type="number" step="0.1" class="input basis-2/12" placeholder="Hcp" required autocomplete="off"/>
+			<button type="submit" class="btn-default">
+				@partials.PlusIcon()
+			</button>
+		</form>
+		@partials.PlayerList(players)
+	}
+}

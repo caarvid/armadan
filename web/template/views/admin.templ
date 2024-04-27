@@ -1,0 +1,80 @@
+package views
+
+import "github.com/caarvid/armadan/web/template/partials"
+
+type item struct {
+	text string
+	url  string
+	icon templ.Component
+}
+
+var items = [5]item{
+	{"Inlägg", "/admin/posts", partials.PostIcon()},
+	{"Resultat", "/admin/results", partials.ResultIcon()},
+	{"Schema", "/admin/weeks", partials.ScheduleIcon()},
+	{"Banor", "/admin/courses", partials.GolfIcon()},
+	{"Spelare", "/admin/players", partials.UserIcon()},
+}
+
+templ sidebarItem(i item) {
+	<li
+		class="cursor-pointer gap-2 relative flex items-center h-10 pl-10 mt-1 mb-2 hover:underline underline-offset-4"
+		hx-get={ i.url }
+		hx-select="#admin-content"
+		hx-target="#admin-content"
+		hx-swap="outerHTML"
+	>
+		<span class="absolute h-2 w-2 bg-slate-700 left-5 hidden" style="border-radius: 50%"></span>
+		@i.icon
+		{ i.text }
+	</li>
+}
+
+templ adminSidebar() {
+	<aside class="relative flex min-w-0 flex-shrink-0 flex-grow-0 basis-48 border-r-2">
+		<ul
+			class="flex-1 m-0 pt-6 text-lg"
+			_="
+			init
+				for x in (<li /> in me)
+					if @hx-get of x is pathname of the location of the window
+					 	remove .hidden from first <span /> in x
+					end
+				end
+			on click
+				if target matches <li />
+					for elem in (<li /> in me)
+						add .hidden to first <span /> in elem
+					end
+					remove .hidden from first <span /> in target
+				end
+		"
+		>
+			for _, i := range items {
+				@sidebarItem(i)
+			}
+		</ul>
+	</aside>
+}
+
+templ adminHeader() {
+	<div class="relative flex items-center justify-between mb-4 p-2 border-b-2">
+		{ children... }
+	</div>
+}
+
+templ AdminLayout() {
+	@document("Armadan") {
+		@partials.Header()
+		@partials.Content("content") {
+			<section class="overflow-y-hidden flex flex-auto max-h-screen min-h-0">
+				@adminSidebar()
+				@partials.Content("admin-content") {
+					<div class="relative flex flex-col flex-1 px-5">
+						{ children... }
+					</div>
+				}
+			</section>
+		}
+	}
+}

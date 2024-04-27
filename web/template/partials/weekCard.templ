@@ -1,0 +1,94 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/schema"
+import "fmt"
+import "github.com/caarvid/armadan/internal/utils"
+
+templ WeekCardForm(week schema.GetWeekRow, courses []schema.GetCoursesRow, tees []schema.Tee) {
+	<form
+		class={ "flex px-3 py-2 group border rounded-l shadow flex-col relative mb-0" }
+		hx-put={ fmt.Sprintf("/api/weeks/%s", week.ID) }
+		hx-swap="outerHTML"
+		hx-ext="json-form"
+		hx-target="#week-list"
+	>
+		<div class={ "text-5xl flex items-center justify-center border-b-2 pb-2 flex-col" }>
+			<input class="input" value={ fmt.Sprintf("%d", week.Nr) } required type="number" name="nr"/>
+		</div>
+		<div class="flex flex-col pt-2 gap-2">
+			<select
+				name="courseId"
+				class="select"
+				hx-get="/admin/weeks/tees"
+				hx-target="next select"
+				hx-swap="outerHTML"
+				required
+			>
+				for _, course := range courses {
+					<option
+						value={ course.ID.String() }
+						if course.ID==week.Course.Id {
+							selected="selected"
+						}
+					>
+						{ course.Name }
+					</option>
+				}
+			</select>
+			<select class="select" name="teeId" required value={ week.Tee.Id.String() }>
+				for _, tee := range tees {
+					<option
+						value={ tee.ID.String() }
+						if tee.ID==week.Tee.Id {
+							selected="selected"
+						}
+					>{ tee.Name }</option>
+				}
+			</select>
+		</div>
+		<div class="flex gap-2 mt-3">
+			<button
+				hx-get={ fmt.Sprintf("/admin/weeks/%s/edit/cancel", week.ID) }
+				hx-swap="outerHTML"
+				type="button"
+				type="button"
+				class="flex-1 btn-secondary"
+				hx-target="closest form"
+			>Avbryt</button>
+			<button type="submit" class="flex-1 btn-default">Spara</button>
+		</div>
+	</form>
+}
+
+templ WeekCard(week schema.GetWeeksRow, weekDates *utils.WeekDates, isEditable bool) {
+	<div
+		class={ "flex px-3 py-2 group border rounded-l shadow flex-col relative" , templ.KV("opacity-40",
+	weekDates.IsPreviousWeek()) }
+	>
+		if isEditable {
+			<div
+				hx-get={ fmt.Sprintf("/admin/weeks/%s/edit", week.ID) }
+				hx-target="closest .group"
+				hx-swap="outerHTML"
+				class="absolute opacity-0 group-hover:opacity-100 right-2 text-xl hover:bg-slate-100 p-1 rounded-lg"
+			>
+				@EditIcon()
+			</div>
+		}
+		<div
+			class={ "text-5xl flex items-center justify-center border-b-2 pb-2 flex-col" , templ.KV("text-orange-600",
+		weekDates.IsActive()) }
+		>
+			{ fmt.Sprintf("v.%d", week.Nr) }
+			<div class="text-sm opacity-60 mt-1">
+				{ weekDates.Format() }
+			</div>
+		</div>
+		<div class="flex flex-col pt-2">
+			<div class="text-lg font-semibold">
+				{ week.Course.Name }
+			</div>
+			<div class="text-sm opacity-60">{ fmt.Sprintf("Tee: %s", week.Tee.Name) }</div>
+		</div>
+	</div>
+}

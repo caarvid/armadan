@@ -1,0 +1,12 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/schema"
+
+templ WeekTeeSelect(tees []schema.Tee) {
+	<select name="teeId" class="select" id="tees" required>
+		<option hidden disabled selected value>Tee</option>
+		for _, tee := range tees {
+			<option value={ tee.ID.String() }>{ tee.Name }</option>
+		}
+	</select>
+}
