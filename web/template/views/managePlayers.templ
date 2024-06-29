@@ -8,7 +8,7 @@ templ ManagePlayers(players []schema.GetPlayersRow) {
 		@adminHeader() {
 			<h3 class="font-semibold leading-none tracking-tight text-2xl">Spelare</h3>
 		}
-		<form class="flex gap-3" hx-post="/api/players" hx-target="#player-list" hx-swap="outerHTML" hx-ext="json-form">
+		<form class="flex gap-3" hx-post="/api/players" hx-target="#player-list" hx-swap="outerHTML" hx-ext="json-form" hx-on::after-request="if(event.detail.successful) this.reset()">
 			<input name="firstName" type="text" class="input basis-1/5" placeholder="Förnamn" required autocomplete="off"/>
 			<input name="lastName" type="text" class="input basis-1/5" placeholder="Efternamn" required autocomplete="off"/>
 			<input name="email" type="text" class="input basis-5/12" placeholder="Email" required autocomplete="off"/>

@@ -35,6 +35,10 @@ func (h *Handler) ForgotPasswordView(c echo.Context) error {
 	return views.ForgotPassword().Render(c.Request().Context(), c.Response().Writer)
 }
 
+func (h *Handler) ResetPasswordView(c echo.Context) error {
+	return views.ResetPassword().Render(c.Request().Context(), c.Response().Writer)
+}
+
 func (h *Handler) AdminView(c echo.Context) error {
 	return c.Redirect(http.StatusPermanentRedirect, "/admin/posts")
 }

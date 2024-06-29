@@ -1,0 +1,81 @@
+package partials
+
+templ WrongCredentials() {
+	<div
+		id="login-error"
+		_="init set #password.value to ''"
+		class="relative w-full rounded-lg border px-4 py-2 text-sm border-destructive/50 text-destructive mb-3 bg-destructive-background"
+	>
+		Fel email eller lösenord
+	</div>
+}
+
+templ LoginForm() {
+	<div id="login-form" class="flex flex-col w-11/12 sm:w-8/12 lg:w-6/12 xl:w-1/3">
+		<div class="text-2xl font-bold text-center mb-4">Välkommen</div>
+		<div id="login-error"></div>
+		<form
+			_="on input hide #login-error with *display"
+			class="flex flex-col gap-3"
+			hx-post="/auth/login"
+			hx-swap="outerHTML"
+			hx-select="#content"
+			hx-target="#content"
+			hx-ext="json-form"
+		>
+			<input type="email" name="email" class="input" placeholder="Email" autocomplete="off" required/>
+			<input
+				id="password"
+				type="password"
+				name="password"
+				class="input"
+				placeholder="Lösenord"
+				autocomplete="off"
+				required
+			/>
+			<div class="flex justify-between items-center">
+				<label for="keepLoggedIn">
+					<input type="checkbox" name="keepLoggedIn" id="keepLoggedIn"/>
+					Håll mig inloggad
+				</label>
+				<button
+					type="button"
+					class="btn-link p-0"
+					hx-get="/forgot-password"
+					hx-select="#forgot-password-form"
+					hx-target="#login-form"
+					hx-swap="outerHTML swap:100ms"
+				>Glömt lösenord?</button>
+			</div>
+			<button class="btn-default w-1/2 self-center" type="submit">Logga in</button>
+		</form>
+	</div>
+}
+
+templ ForgotPasswordForm() {
+	<div id="forgot-password-form" class="flex flex-col w-11/12 sm:w-8/12 lg:w-6/12 xl:w-1/3">
+		<div class="text-2xl font-bold text-center mb-4">Glömt lösenord</div>
+		<form class="flex flex-col gap-3" hx-post="/forgot">
+			<input type="text" name="email" class="input" placeholder="Email" autocomplete="off"/>
+			<button class="btn-default w-1/2 self-center mt-2" type="submit">Skicka</button>
+			<button
+				class="btn-link"
+				hx-get="/login"
+				hx-select="#login-form"
+				hx-target="#forgot-password-form"
+				hx-swap="outerHTML swap:100ms"
+			>Tillbaka</button>
+		</form>
+	</div>
+}
+
+templ ResetPasswordForm() {
+	<div id="reset-password-form" class="flex flex-col w-11/12 sm:w-8/12 lg:w-6/12 xl:w-1/3">
+		<div class="text-2xl font-bold text-center mb-4">Återställ lösenord</div>
+		<form class="flex flex-col gap-3" hx-post="/reset-password" hx-ext="json-form">
+			<input type="password" name="newPassword" class="input" placeholder="Nytt lösenord" autocomplete="off"/>
+			<input type="password" name="repeatPassword" class="input" placeholder="Upprepa lösenord" autocomplete="off"/>
+			<button class="btn-default w-1/2 self-center mt-2" type="submit">Spara lösenord</button>
+		</form>
+	</div>
+}

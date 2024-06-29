@@ -107,7 +107,7 @@ func (h *Handler) CancelEditWeek(c echo.Context) error {
 		return err
 	}
 
-	return partials.WeekCard(schema.GetWeeksRow(week), utils.GetWeekDates(int(week.Nr)), true).Render(c.Request().Context(), c.Response().Writer)
+	return partials.WeekCard(schema.GetWeeksRow(week), utils.GetWeekDates(utils.GetFirstOfJanuary(), int(week.Nr)), true).Render(c.Request().Context(), c.Response().Writer)
 }
 
 type updateWeekData struct {

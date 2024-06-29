@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/caarvid/armadan/internal/schema"
+	"github.com/caarvid/armadan/internal/utils"
 	"github.com/caarvid/armadan/internal/validation"
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/web/template/views"
@@ -58,6 +59,7 @@ type createPlayerData struct {
 	FirstName string `json:"firstName" validate:"required"`
 	LastName  string `json:"lastName" validate:"required"`
 	Email     string `json:"email" validate:"required,email"`
+	Password  string `json:"password"`
 }
 
 func (h *Handler) InsertPlayer(c echo.Context) error {
@@ -68,14 +70,22 @@ func (h *Handler) InsertPlayer(c echo.Context) error {
 	}
 
 	pw, err := randutil.Alphanumeric(24)
+	if err != nil {
+		return err
+	}
 
+	if len(data.Password) > 0 {
+		pw = data.Password
+	}
+
+	hash, err := utils.GenerateHash(pw, nil)
 	if err != nil {
 		return err
 	}
 
 	user, err := h.db.CreateUser(c.Request().Context(), &schema.CreateUserParams{
 		Email:    data.Email,
-		Password: pw,
+		Password: hash.Encode(),
 	})
 
 	if err != nil {
@@ -159,9 +169,17 @@ func (h *Handler) UpdatePlayer(c echo.Context) error {
 }
 
 func (h *Handler) DeletePlayer(c echo.Context) error {
-	if err := validation.ValidateRequest(c, &idParam{}); err != nil {
+	params := idParam{}
+
+	if err := validation.ValidateRequest(c, &params); err != nil {
 		return err
 	}
 
-	return c.HTML(http.StatusOK, "")
+	err := h.db.DeleteUser(c.Request().Context(), params.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusOK)
 }

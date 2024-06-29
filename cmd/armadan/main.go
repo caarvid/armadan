@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/caarvid/armadan/internal/handlers"
+	m "github.com/caarvid/armadan/internal/middleware"
 	"github.com/caarvid/armadan/internal/routes"
 	"github.com/caarvid/armadan/internal/schema"
 	"github.com/caarvid/armadan/internal/validation"
@@ -51,6 +52,7 @@ func initializeApp() *echo.Echo {
 	app.Validator = validation.NewValidator(validator.New(validator.WithRequiredStructEnabled()))
 	app.Pre(middleware.RemoveTrailingSlash())
 	app.Static("/public", "web/static")
+	app.Use(m.DefaultContext)
 
 	return app
 }
@@ -73,7 +75,7 @@ func start() error {
 	queries := schema.New(dbPool)
 	handlers := handlers.Init(queries, dbPool)
 
-	routes.Register(app, handlers)
+	routes.Register(app, handlers, queries)
 
 	return app.Start(":8080")
 }

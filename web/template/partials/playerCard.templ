@@ -4,24 +4,58 @@ import "github.com/caarvid/armadan/internal/schema"
 import "fmt"
 
 templ PlayerCardForm(player schema.GetPlayerRow) {
-	<form
-		class="rounded-l border flex flex-col bg-card gap-3 text-card-foreground shadow p-3"
-		hx-put={ fmt.Sprintf("/api/players/%s", player.ID) }
-		hx-target="#player-list"
-		hx-swap="outerHTML"
-		hx-ext="json-form"
-	>
-		<div class="flex gap-2">
-			<input name="firstName" type="text" class="input basis-1/5" placeholder="Förnamn" required autocomplete="off" value={ player.FirstName }/>
-			<input name="lastName" type="text" class="input basis-1/5" placeholder="Efternamn" required autocomplete="off" value={ player.LastName }/>
-			<input name="email" type="text" class="input basis-5/12 flex-grow" placeholder="Email" required autocomplete="off" value={ player.Email.String }/>
-		</div>
-		<div class="flex gap-2 self-end">
-			<button class="btn-secondary" hx-get={ fmt.Sprintf("/admin/players/%s/edit/cancel", player.ID) } hx-swap="outerHTML" hx-target="closest form">Avbryt</button>
-			<button class="btn-default" type="submit">Spara</button>
-		</div>
-	</form>
+	<tr class="tr">
+		<td colspan="100">
+			<form
+				class="rounded-l border flex flex-col bg-card gap-3 text-card-foreground shadow p-3"
+				hx-put={ fmt.Sprintf("/api/players/%s", player.ID) }
+				hx-target="#player-list"
+				hx-swap="outerHTML"
+				hx-ext="json-form"
+			>
+				<div class="flex gap-2">
+					<input name="firstName" type="text" class="input basis-1/5" placeholder="Förnamn" required autocomplete="off" value={ player.FirstName }/>
+					<input name="lastName" type="text" class="input basis-1/5" placeholder="Efternamn" required autocomplete="off" value={ player.LastName }/>
+					<input name="email" type="text" class="input basis-5/12 flex-grow" placeholder="Email" required autocomplete="off" value={ player.Email.String }/>
+				</div>
+				<div class="flex gap-2 self-end">
+					<button class="btn-secondary" hx-get={ fmt.Sprintf("/admin/players/%s/edit/cancel", player.ID) } hx-swap="outerHTML" hx-target="closest form">Avbryt</button>
+					<button class="btn-default" type="submit">Spara</button>
+				</div>
+			</form>
+		</td>
+	</tr>
 }
+
+templ Player(player schema.GetPlayersRow) {
+	<tr class="tr group">
+		<td class="td">{ fmt.Sprintf("%s, %s", player.LastName, player.FirstName) }</td>
+		<td class="td opacity-50">{ player.Email.String }</td>
+		<td class="td">
+			<div class="flex gap-2 text-xl opacity-0 group-hover:opacity-100 ml-auto justify-end">
+				<span
+					hx-get={ fmt.Sprintf("/admin/players/%s/edit", player.ID) }
+					hx-target="closest .group"
+					hx-swap="innerHTML"
+					class="hover:bg-slate-200 p-1 rounded-lg"
+				>
+					@EditIcon()
+				</span>
+				<span
+					hx-delete={ fmt.Sprintf("/api/players/%s", player.UserID) }
+					hx-confirm={ fmt.Sprintf("Ta bort '%s %s'?", player.FirstName, player.LastName) }
+					hx-target="closest .group"
+					hx-swap="delete"
+					class="hover:bg-red-100 p-1 rounded-lg hover:text-destructive"
+				>
+					@DeleteIcon()
+				</span>
+			</div>
+		</td>
+	</tr>
+}
+
+/*
 
 templ Player(player schema.GetPlayersRow) {
 	<div class="rounded-l group border flex bg-card gap-2 text-card-foreground shadow p-3 items-center">
@@ -37,10 +71,10 @@ templ Player(player schema.GetPlayersRow) {
 				@EditIcon()
 			</span>
 			<span
-				hx-delete={ fmt.Sprintf("/api/players/%s", player.ID) }
+				hx-delete={ fmt.Sprintf("/api/players/%s", player.UserID) }
 				hx-confirm={ fmt.Sprintf("Ta bort '%s %s'?", player.FirstName, player.LastName) }
 				hx-target="closest .group"
-				hx-swap="outerHTML"
+				hx-swap="delete"
 				class="hover:bg-red-100 p-1 rounded-lg hover:text-destructive"
 			>
 				@DeleteIcon()
@@ -48,3 +82,5 @@ templ Player(player schema.GetPlayersRow) {
 		</div>
 	</div>
 }
+
+*/

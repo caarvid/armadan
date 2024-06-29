@@ -4,9 +4,9 @@ import "github.com/caarvid/armadan/internal/schema"
 import "github.com/caarvid/armadan/internal/utils"
 
 templ WeekList(weeks []schema.GetWeeksRow, isEditable bool) {
-	<div id="week-list" class="grid grid-cols-3 gap-3 items-start">
+	<div id="week-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 items-start">
 		for _, week := range weeks {
-			@WeekCard(week, utils.GetWeekDates(int(week.Nr)), isEditable)
+			@WeekCard(week, utils.GetWeekDates(utils.GetFirstOfJanuary(), int(week.Nr)), isEditable)
 		}
 	</div>
 }

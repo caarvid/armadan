@@ -11,6 +11,9 @@ templ document(title string) {
 			<script src="/public/scripts/json-form.js"></script>
 			<title>{ title }</title>
 			<link rel="stylesheet" href="/public/main.css"/>
+			<script>
+				htmx.config.responseHandling.unshift({ code: "422", swap: true });
+			</script>
 		</head>
 		<body class="overflow-y-hidden">
 			<section class="overflow-y-hidden flex flex-auto flex-col min-h-screen max-h-screen">
