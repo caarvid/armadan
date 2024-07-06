@@ -5,6 +5,7 @@ import (
 
 	"github.com/caarvid/armadan/internal/schema"
 	"github.com/caarvid/armadan/internal/utils"
+	"github.com/caarvid/armadan/internal/utils/response"
 	"github.com/caarvid/armadan/internal/validation"
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/web/template/views"
@@ -63,7 +64,10 @@ func (h *Handler) InsertWeek(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error")
 	}
 
-	return partials.WeekList(weeks, true).Render(c.Request().Context(), c.Response().Writer)
+	return response.
+		New(c, partials.WeekTable(weeks)).
+		WithToast(response.Success, "Vecka sparad").
+		HTML()
 }
 
 func (h *Handler) EditWeek(c echo.Context) error {
@@ -91,7 +95,7 @@ func (h *Handler) EditWeek(c echo.Context) error {
 		return err
 	}
 
-	return partials.WeekCardForm(week, courses, tees).Render(c.Request().Context(), c.Response().Writer)
+	return partials.EditWeekRow(week, courses, tees).Render(c.Request().Context(), c.Response().Writer)
 }
 
 func (h *Handler) CancelEditWeek(c echo.Context) error {
@@ -107,7 +111,7 @@ func (h *Handler) CancelEditWeek(c echo.Context) error {
 		return err
 	}
 
-	return partials.WeekCard(schema.GetWeeksRow(week), utils.GetWeekDates(utils.GetFirstOfJanuary(), int(week.Nr)), true).Render(c.Request().Context(), c.Response().Writer)
+	return partials.WeekRow(schema.GetWeeksRow(week), utils.GetWeekDates(int(week.Nr))).Render(c.Request().Context(), c.Response().Writer)
 }
 
 type updateWeekData struct {
@@ -141,5 +145,24 @@ func (h *Handler) UpdateWeek(c echo.Context) error {
 		return err
 	}
 
-	return partials.WeekList(weeks, true).Render(c.Request().Context(), c.Response().Writer)
+	return response.
+		New(c, partials.WeekTable(weeks)).
+		WithToast(response.Success, "Vecka uppdaterad").
+		HTML()
+}
+
+func (h *Handler) DeleteWeek(c echo.Context) error {
+	params := idParam{}
+
+	if err := validation.ValidateRequest(c, &params); err != nil {
+		return err
+	}
+
+	err := h.db.DeleteWeek(c.Request().Context(), params.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return partials.SuccessToast("Vecka borttagen").Render(c.Request().Context(), c.Response().Writer)
 }

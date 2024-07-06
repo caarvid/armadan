@@ -1,8 +1,10 @@
 package partials
 
 import "github.com/caarvid/armadan/internal/schema"
+import "time"
+import "fmt"
 
-templ Post(post schema.Post) {
+templ PostCard(post schema.Post) {
 	<div class="rounded-l border bg-card text-card-foreground shadow p-3">
 		<h3 class="font-semibold leading-none tracking-tight mb-2 text-2xl">{ post.Title }</h3>
 		<div class="mb-1">{ post.Body }</div>
@@ -11,4 +13,81 @@ templ Post(post schema.Post) {
 			<div>{ post.CreatedAt.Time.Format("2006-01-02") }</div>
 		</div>
 	</div>
+}
+
+templ PostList(posts []schema.Post) {
+	@Table("post-list") {
+		<thead class="thead">
+			<tr class="tr">
+				<th class="th w-1/3">Titel</th>
+				<th class="th w-1/5">Inlagd av</th>
+				<th class="th w-1/5">Datum</th>
+				<th class="th"></th>
+			</tr>
+		</thead>
+		<tbody class="tbody">
+			for _, post := range posts {
+				@Post(post)
+			}
+		</tbody>
+	}
+}
+
+templ Post(post schema.Post) {
+	<tr class="tr group">
+		<td class="td">{ post.Title }</td>
+		<td class="td">{ post.Author }</td>
+		<td class="td">{ post.CreatedAt.Time.Format(time.DateTime) }</td>
+		<td class="td">
+			<div class="flex gap-3 ml-auto justify-end">
+				<button
+					class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
+					hx-get={ fmt.Sprintf("/admin/posts/edit/%s", post.ID) }
+					hx-target="body"
+					hx-swap="beforeend"
+				>
+					Ändra	
+				</button>
+				<button
+					class="btn-link p-0 h-auto text-primary/60 hover:text-destructive"
+					hx-delete={ fmt.Sprintf("/api/posts/%s", post.ID) }
+					hx-confirm={ fmt.Sprintf("Ta bort '%s'?", post.Title) }
+					hx-target="closest .group"
+					hx-swap="delete"
+				>
+					Ta bort	
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+templ EditPost(post schema.Post) {
+	@Modal("Uppdatera inlägg", false) {
+		<form
+			id="edit-post-form"
+			class="flex flex-col gap-3 flex-1 mb-0"
+			hx-put={ fmt.Sprintf("/api/posts/%s", post.ID) }
+			hx-target="#post-list"
+			hx-swap="outerHTML"
+			hx-ext="json-form"
+		>
+			<input required type="text" class="input" name="title" value={ post.Title }/>
+			<textarea
+				required
+				name="body"
+				rows="12"
+				class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+			>{ post.Body }</textarea>
+			<input type="text" required class="input" name="author" value={ post.Author }/>
+		</form>
+		<span class="flex justify-end gap-3">
+			<button
+				form="edit-post-form"
+				class="btn-default"
+				type="submit"
+				_="on click wait for htmx:afterRequest(successful) from #edit-post-form if successful trigger closeModal"
+			>Spara</button>
+		</span>
+	}
 }

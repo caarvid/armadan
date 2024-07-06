@@ -6,10 +6,6 @@ htmx.defineExtension("json-form", {
   },
 
   encodeParameters: function (_xhr, params, elt) {
-    if (elt.nodeName !== "FORM") {
-      return null;
-    }
-
     function unflatten(data) {
       const result = {};
 
@@ -34,7 +30,7 @@ htmx.defineExtension("json-form", {
     const obj = {};
 
     params.entries().forEach(([name, val]) => {
-      const e = elt.querySelector(`input[name="${name}"]`);
+      const e = elt.querySelector(`[name="${name}"]`);
 
       if (!e) {
         return;
@@ -46,9 +42,12 @@ htmx.defineExtension("json-form", {
           break;
         case "checkbox":
           obj[name] = val === "on";
+          break;
         case "hidden":
           if (e.getAttribute("data-type")) {
             obj[name] = Number(val);
+          } else {
+            obj[name] = val;
           }
           break;
         default:

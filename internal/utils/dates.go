@@ -32,11 +32,12 @@ func GetFirstOfJanuary() time.Time {
 	return time.Date(getCurrentYear(), time.January, 1, 0, 0, 0, 0, time.UTC)
 }
 
-func GetWeekDates(firstOfJan time.Time, nr int) *WeekDates {
+func GetWeekDates(nr int) *WeekDates {
 	if nr <= 0 {
 		return &WeekDates{}
 	}
 
+	firstOfJan := GetFirstOfJanuary()
 	startWeekday := time.Tuesday
 	startDate := firstOfJan.AddDate(0, 0, (nr-1)*7-int(firstOfJan.Weekday())).AddDate(0, 0, int(startWeekday))
 	endDate := startDate.AddDate(0, 0, 5)

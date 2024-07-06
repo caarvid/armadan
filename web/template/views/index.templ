@@ -9,7 +9,7 @@ templ Index(posts []schema.Post) {
 		@partials.Content("content") {
 			<div class="flex flex-col gap-2 flex-1 lg:w-8/12 lg:flex-none">
 				for _, post := range posts {
-					@partials.Post(post)
+					@partials.PostCard(post)
 				}
 			</div>
 		}

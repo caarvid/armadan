@@ -1,0 +1,20 @@
+package partials
+
+templ Modal(title string, wide bool) {
+	<div
+		id="modal"
+		class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center"
+		_="on closeModal add .closing then wait for animationend then remove me"
+	>
+		<div class="absolute -z-10 inset-0" _="on click trigger closeModal"></div>
+		<div id="modal-content" class={ "relative grid w-full gap-4 border bg-white p-6 shadow-lg max-h-[90%] overflow-y-scroll", templ.KV("max-w-[60%]", wide), templ.KV("max-w-lg", !wide) }>
+			<div class="absolute top-4 right-4 cursor-pointer opacity-70 hover:opacity-100 text-lg" _="on click trigger closeModal">
+				@CloseIcon()
+			</div>
+			<div class="flex flex-col space-y-1.5 text-center sm:text-left">
+				<div class="text-lg font-semibold tracking-tight leading-none">{ title }</div>
+			</div>
+			{ children... }
+		</div>
+	</div>
+}

@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/caarvid/armadan/internal/schema"
+	"github.com/caarvid/armadan/internal/utils/response"
 	"github.com/caarvid/armadan/internal/validation"
+	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/web/template/views"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -46,7 +48,7 @@ func (h *Handler) RemoveTee(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return c.HTML(http.StatusOK, "")
+	return partials.SuccessToast("Tee borttagen").Render(c.Request().Context(), c.Response().Writer)
 }
 
 func (h *Handler) CancelEditCourse(c echo.Context) error {
@@ -169,7 +171,16 @@ func (h *Handler) InsertCourse(c echo.Context) error {
 
 	tx.Commit(ctx)
 
-	return h.ManageCoursesView(c)
+	courses, err := h.db.GetCourses(c.Request().Context())
+
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "error")
+	}
+
+	return response.
+		New(c, views.ManageCourses(courses)).
+		WithToast(response.Success, "Bana sparad").
+		HTML()
 }
 
 type updatedHole struct {
@@ -277,10 +288,16 @@ func (h *Handler) UpdateCourse(c echo.Context) error {
 
 	tx.Commit(ctx)
 
-	return views.CourseCard(schema.GetCoursesRow{
-		ID:   course.ID,
-		Name: course.Name,
-	}).Render(ctx, c.Response().Writer)
+	courses, err := h.db.GetCourses(c.Request().Context())
+
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "error")
+	}
+
+	return response.
+		New(c, partials.CourseList(courses)).
+		WithToast(response.Success, "Bana uppdaterad").
+		HTML()
 }
 
 func (h *Handler) DeleteCourse(c echo.Context) error {
@@ -296,5 +313,5 @@ func (h *Handler) DeleteCourse(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return c.HTML(http.StatusOK, "")
+	return partials.SuccessToast("Bana borttagen").Render(c.Request().Context(), c.Response().Writer)
 }

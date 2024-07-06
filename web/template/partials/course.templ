@@ -1,0 +1,53 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/schema"
+import "strconv"
+import "github.com/caarvid/armadan/internal/utils"
+import "fmt"
+
+templ CourseRow(course schema.GetCoursesRow) {
+	<tr class="tr group">
+		<td class="td">{ course.Name }</td>
+		<td class="td">{ strconv.Itoa(int(course.Par)) }</td>
+		<td class="td">{ utils.TeeNameList(course.Tees) }</td>
+		<td class="td">
+			<div class="flex gap-3 text-sm ml-auto justify-end">
+				<button
+					class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
+					hx-get={ fmt.Sprintf("/admin/courses/edit/%s", course.ID) }
+					hx-target="body"
+					hx-swap="beforeend"
+				>
+					Ändra	
+				</button>
+				<button
+					class="btn-link p-0 h-auto text-primary/60 hover:text-destructive"
+					hx-delete={ fmt.Sprintf("/api/courses/%s", course.ID) }
+					hx-confirm={ fmt.Sprintf("Ta bort '%s'?", course.Name) }
+					hx-target="closest .group"
+					hx-swap="delete"
+				>
+					Ta bort	
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+templ CourseList(courses []schema.GetCoursesRow) {
+	@Table("course-list") {
+		<thead class="thead">
+			<tr class="tr">
+				<th class="th w-3/12">Namn</th>
+				<th class="th w-1/6">Par</th>
+				<th class="th w-1/5">Tees</th>
+				<th class="th"></th>
+			</tr>
+		</thead>
+		<tbody class="tbody">
+			for _, course := range courses {
+				@CourseRow(course)
+			}
+		</tbody>
+	}
+}

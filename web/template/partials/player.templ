@@ -1,0 +1,135 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/schema"
+import "fmt"
+
+templ newPlayerGridRow() {
+	<div class="grid grid-cols-4 gap-4 items-center">
+		{ children... }
+	</div>
+}
+
+templ newPlayerInputLabel(text, f string) {
+	<label
+		for={ f }
+		class="text-sm text-right font-medium leading-none"
+	>
+		{ text }
+	</label>
+}
+
+templ AddPlayer() {
+	@Modal("Lägg till spelare", false) {
+		<form
+			id="new-player-form"
+			class="grid gap-4 py-4 m-0"
+			hx-post="/api/players"
+			hx-target="#player-list"
+			hx-swap="outerHTML"
+			hx-ext="json-form"
+		>
+			@newPlayerGridRow() {
+				@newPlayerInputLabel("Förnamn:", "firstName")
+				<input id="firstName" name="firstName" type="text" class="input col-span-3" required autocomplete="off"/>
+			}
+			@newPlayerGridRow() {
+				@newPlayerInputLabel("Efternamn:", "lastName")
+				<input id="lastName" name="lastName" type="text" class="input col-span-3" required autocomplete="off"/>
+			}
+			@newPlayerGridRow() {
+				@newPlayerInputLabel("Email:", "email")
+				<input id="email" name="email" type="email" class="input col-span-3" required autocomplete="off"/>
+			}
+			@newPlayerGridRow() {
+				@newPlayerInputLabel("HCP:", "hcp")
+				<input id="hcp" name="hcp" type="number" step="0.1" class="input col-span-3" required autocomplete="off"/>
+			}
+		</form>
+		<div class="flex justify-end gap-3">
+			<button
+				type="submit"
+				class="btn-secondary"
+				form="new-player-form"
+				_="on click wait for htmx:afterRequest(successful) from #new-player-form if successful reset() the #new-player-form"
+			>Lägg till fler</button>
+			<button
+				type="submit"
+				class="btn-default"
+				form="new-player-form"
+				_="on click wait for htmx:afterRequest(successful) from #new-player-form if successful trigger closeModal"
+			>Spara</button>
+		</div>
+	}
+}
+
+templ EditPlayer(player schema.GetPlayerRow) {
+	<tr
+		class="tr hover:bg-white group"
+		hx-target="#player-list"
+		hx-swap="outerHTML"
+		hx-ext="json-form"
+		hx-include="input"
+		hx-put={ fmt.Sprintf("/api/players/%s", player.ID) }
+		hx-trigger={ fmt.Sprintf("click from:#save-%s", player.ID) }
+	>
+		<td class="td">
+			<input name="firstName" type="text" class="input" placeholder="Förnamn" required autocomplete="off" value={ player.FirstName }/>
+		</td>
+		<td class="td">
+			<input name="lastName" type="text" class="input" placeholder="Efternamn" required autocomplete="off" value={ player.LastName }/>
+		</td>
+		<td class="td">
+			<input name="email" type="email" class="input" placeholder="Email" required autocomplete="off" value={ player.Email.String }/>
+		</td>
+		<td class="td">
+			<input name="hcp" type="number" class="input" placeholder="HCP" required autocomplete="off" value={ "10.0" }/>
+		</td>
+		<td class="td">
+			<div class="flex gap-3 text-sm ml-auto justify-end">
+				<button
+					class="btn-ghost h-auto p-1 text-primary/60 hover:text-primary"
+					hx-include="unset"
+					hx-ext="unset"
+					hx-get={ fmt.Sprintf("/admin/players/%s/edit/cancel", player.ID) }
+					hx-target="closest .group"
+					hx-swap="outerHTML"
+				>
+					Avbryt
+				</button>
+				<button id={ fmt.Sprintf("save-%s", player.ID) } class="btn-ghost h-auto p-1">
+					Spara
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+templ Player(player schema.GetPlayersRow) {
+	<tr class="tr group">
+		<td class="td">{ player.FirstName }</td>
+		<td class="td">{ player.LastName }</td>
+		<td class="td">{ player.Email.String }</td>
+		<td class="td">10.0</td>
+		<td class="td">
+			<div class="flex gap-3 ml-auto justify-end">
+				<button
+					class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
+					hx-get={ fmt.Sprintf("/admin/players/%s/edit", player.ID) }
+					hx-target="closest .group"
+					hx-swap="outerHTML"
+				>
+					Ändra	
+				</button>
+				<button
+					class="btn-link p-0 h-auto text-primary/60 hover:text-destructive"
+					hx-delete={ fmt.Sprintf("/api/players/%s", player.UserID) }
+					hx-confirm={ fmt.Sprintf("Ta bort '%s %s'?", player.FirstName, player.LastName) }
+					hx-target="closest .group"
+					hx-swap="delete"
+				>
+					Ta bort	
+				</button>
+			</div>
+		</td>
+	</tr>
+}

@@ -26,7 +26,6 @@ func Register(app *echo.Echo, handler *handlers.Handler, db *schema.Queries) {
 	admin.GET("/posts", m.HxPushPath(handler.ManagePostsView))
 	admin.GET("/posts/new", m.HxPushPath(handler.CreatePostView))
 	admin.GET("/posts/edit/:id", handler.EditPost)
-	admin.GET("/posts/edit/:id/cancel", handler.CancelEditPost)
 
 	api.PUT("/posts/:id", handler.UpdatePost)
 	api.POST("/posts", handler.InsertPost)
@@ -56,9 +55,11 @@ func Register(app *echo.Echo, handler *handlers.Handler, db *schema.Queries) {
 
 	api.POST("/weeks", handler.InsertWeek)
 	api.PUT("/weeks/:id", handler.UpdateWeek)
+	api.DELETE("/weeks/:id", handler.DeleteWeek)
 
 	// Players
 	admin.GET("/players", m.HxPushPath(handler.ManagePlayersView))
+	admin.GET("/players/new", handler.NewPlayer)
 	admin.GET("/players/:id/edit", handler.EditPlayer)
 	admin.GET("/players/:id/edit/cancel", handler.CancelEditPlayer)
 

@@ -4,9 +4,8 @@ export
 init:
 	@touch .env
 
-dev:
-	@./scripts/clean.sh
-	@./scripts/dev.sh
+dev: 
+	@./scripts/dev.sh 
 
 clean:
 	@./scripts/clean.sh
@@ -25,3 +24,9 @@ migrations-up:
 
 migrations-down:
 	@goose -dir ./db/migrations postgres "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}" down
+
+start-db:
+	docker compose --file ./docker/db.yml --env-file ./.env up --detach
+
+stop-db:
+	docker compose --file ./docker/db.yml --env-file ./.env down 

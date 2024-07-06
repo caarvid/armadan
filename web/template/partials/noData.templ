@@ -1,0 +1,9 @@
+package partials
+
+templ NoData(msg string) {
+	<div class="flex flex-col absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] opacity-60">
+		<img src="/public/assets/no_data_found.svg" alt="no data" class="max-w-xs mb-8"/>
+		<div class="text-center text-xl font-semibold">Här var det tomt!</div>
+		<div class="text-center text-slate-500">{ msg }</div>
+	</div>
+}

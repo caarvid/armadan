@@ -1,49 +1,7 @@
 package views
 
-import "fmt"
 import "github.com/caarvid/armadan/internal/schema"
 import "github.com/caarvid/armadan/web/template/partials"
-
-templ postCard(post schema.Post) {
-	<h3 class="font-semibold leading-none tracking-tight text-xl">{ post.Title }</h3>
-	<span class="flex text-xl gap-3 items-center">
-		<span
-			class="cursor-pointer hover:text-card-foreground/50"
-			hx-get={ fmt.Sprintf("/admin/posts/edit/%s", post.ID.String()) }
-		>
-			@partials.EditIcon()
-		</span>
-		<span
-			class="cursor-pointer hover:text-destructive"
-			hx-swap="outerHTML"
-			hx-delete={ fmt.Sprintf("/api/posts/%s", post.ID.String()) }
-			hx-confirm={ fmt.Sprintf("Are you sure you want to remove '%s'?", post.Title) }
-		>
-			@partials.DeleteIcon()
-		</span>
-	</span>
-}
-
-templ AdminPostItem(post schema.Post) {
-	@postCard(post)
-}
-
-templ EditPost(post schema.Post) {
-	<form class="flex flex-col gap-3 flex-1 mb-0" hx-put={ fmt.Sprintf("/api/posts/%s", post.ID.String()) } hx-ext="json-form">
-		<input required type="text" class="input" name="title" value={ post.Title }/>
-		<textarea
-			required
-			name="body"
-			rows="12"
-			class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-		>{ post.Body }</textarea>
-		<input type="text" required class="input" name="author" value={ post.Author }/>
-		<span class="flex justify-end gap-2">
-			<button class="btn-secondary" type="button" hx-get={ fmt.Sprintf("/admin/posts/edit/%s/cancel", post.ID.String()) }>Avbryt</button>
-			<button class="btn-default" type="submit">Spara</button>
-		</span>
-	</form>
-}
 
 templ CreatePost() {
 	@AdminLayout() {
@@ -91,12 +49,10 @@ templ ManagePosts(posts []schema.Post) {
 				hx-target="#admin-content"
 			>Nytt inlägg</button>
 		}
-		<div class="flex flex-col flex-1 gap-2">
-			for _, post := range posts {
-				<div class="rounded-l border bg-card text-card-foreground shadow p-3 flex items-center justify-between" hx-target="closest div">
-					@postCard(post)
-				</div>
-			}
-		</div>
+		if len(posts) == 0 {
+			@partials.NoData("Nya inlägg kommer dyka upp här")
+		} else {
+			@partials.PostList(posts)
+		}
 	}
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/caarvid/armadan/internal/schema"
 	"github.com/caarvid/armadan/internal/utils"
+	"github.com/caarvid/armadan/internal/utils/response"
 	"github.com/caarvid/armadan/internal/validation"
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/web/template/views"
@@ -23,6 +24,10 @@ func (h *Handler) ManagePlayersView(c echo.Context) error {
 	return views.ManagePlayers(players).Render(c.Request().Context(), c.Response().Writer)
 }
 
+func (h *Handler) NewPlayer(c echo.Context) error {
+	return partials.AddPlayer().Render(c.Request().Context(), c.Response().Writer)
+}
+
 func (h *Handler) EditPlayer(c echo.Context) error {
 	p := &idParam{}
 
@@ -36,7 +41,7 @@ func (h *Handler) EditPlayer(c echo.Context) error {
 		return err
 	}
 
-	return partials.PlayerCardForm(player).Render(c.Request().Context(), c.Response().Writer)
+	return partials.EditPlayer(player).Render(c.Request().Context(), c.Response().Writer)
 }
 
 func (h *Handler) CancelEditPlayer(c echo.Context) error {
@@ -108,7 +113,10 @@ func (h *Handler) InsertPlayer(c echo.Context) error {
 		return err
 	}
 
-	return partials.PlayerList(players).Render(c.Request().Context(), c.Response().Writer)
+	return response.
+		New(c, partials.PlayerList(players)).
+		WithToast(response.Success, "Spelare sparad").
+		HTML()
 }
 
 type updatePlayerData struct {
@@ -165,7 +173,10 @@ func (h *Handler) UpdatePlayer(c echo.Context) error {
 		return err
 	}
 
-	return partials.PlayerList(players).Render(c.Request().Context(), c.Response().Writer)
+	return response.
+		New(c, partials.PlayerList(players)).
+		WithToast(response.Success, "Spelare uppdaterad").
+		HTML()
 }
 
 func (h *Handler) DeletePlayer(c echo.Context) error {
@@ -181,5 +192,5 @@ func (h *Handler) DeletePlayer(c echo.Context) error {
 		return err
 	}
 
-	return c.NoContent(http.StatusOK)
+	return partials.SuccessToast("Spelare borttagen").Render(c.Request().Context(), c.Response().Writer)
 }

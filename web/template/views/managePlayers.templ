@@ -7,16 +7,19 @@ templ ManagePlayers(players []schema.GetPlayersRow) {
 	@AdminLayout() {
 		@adminHeader() {
 			<h3 class="font-semibold leading-none tracking-tight text-2xl">Spelare</h3>
-		}
-		<form class="flex gap-3" hx-post="/api/players" hx-target="#player-list" hx-swap="outerHTML" hx-ext="json-form" hx-on::after-request="if(event.detail.successful) this.reset()">
-			<input name="firstName" type="text" class="input basis-1/5" placeholder="Förnamn" required autocomplete="off"/>
-			<input name="lastName" type="text" class="input basis-1/5" placeholder="Efternamn" required autocomplete="off"/>
-			<input name="email" type="text" class="input basis-5/12" placeholder="Email" required autocomplete="off"/>
-			<input name="hcp" type="number" step="0.1" class="input basis-2/12" placeholder="Hcp" required autocomplete="off"/>
-			<button type="submit" class="btn-default">
-				@partials.PlusIcon()
+			<button
+				hx-get="/admin/players/new"
+				hx-target="body"
+				hx-swap="beforeend"
+				class="btn-default"
+			>
+				Ny spelare
 			</button>
-		</form>
-		@partials.PlayerList(players)
+		}
+		if len(players) == 0 {
+			@partials.NoData("Nya spelare kommer dyka upp här")
+		} else {
+			@partials.PlayerList(players)
+		}
 	}
 }

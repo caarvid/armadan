@@ -32,7 +32,7 @@
   }
 
   .select {
-    @apply flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1;
+    @apply appearance-none relative flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .table {
@@ -62,7 +62,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* --background: 0 0% 100%; */
     --foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
@@ -105,37 +105,4 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-}
-
-#login-form {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-  transition: transform 200ms, opacity 200ms;
-}
-
-#login-form.htmx-swapping,
-#login-form.htmx-added {
-  opacity: 0;
-  transform: translate3d(-10rem, 0, 0);
-}
-
-#forgot-password-form {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-  transition: transform 200ms, opacity 200ms;
-}
-
-#forgot-password-form.htmx-swapping,
-#forgot-password-form.htmx-added {
-  opacity: 0;
-  transform: translate3d(10rem, 0, 0);
-}
-
-#login-error {
-  opacity: 1;
-  transition: opacity 200ms;
-}
-
-#login-error.htmx-added {
-  opacity: 0;
 }

@@ -3,15 +3,20 @@ package partials
 import "github.com/caarvid/armadan/internal/schema"
 
 templ PlayerList(players []schema.GetPlayersRow) {
-	<div id="player-list" class="flex flex-col gap-2 flex-1">
-		<div class="relative w-full overflow-auto">
-			<table class="w-full caption-bottom text-sm">
-				<tbody class="tbody">
-					for _, player := range players {
-						@Player(player)
-					}
-				</tbody>
-			</table>
-		</div>
-	</div>
+	@Table("player-list") {
+		<thead class="thead">
+			<tr class="tr">
+				<th class="th w-1/5">Förnamn</th>
+				<th class="th w-1/5">Efternamn</th>
+				<th class="th w-1/3">Email</th>
+				<th class="th w-1/12">HCP</th>
+				<th class="th"></th>
+			</tr>
+		</thead>
+		<tbody class="tbody">
+			for _, player := range players {
+				@Player(player)
+			}
+		</tbody>
+	}
 }

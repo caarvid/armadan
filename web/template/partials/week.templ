@@ -1,0 +1,127 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/schema"
+import "fmt"
+import "github.com/caarvid/armadan/internal/utils"
+
+templ WeekCard(week schema.GetWeeksRow, weekDates *utils.WeekDates) {
+	<div
+		class={ "flex px-3 py-2 group border rounded-l shadow flex-col relative" , templ.KV("opacity-40", weekDates.IsPreviousWeek()) }
+	>
+		<div
+			class={ "text-5xl flex items-center justify-center border-b-2 pb-2 flex-col" , templ.KV("text-orange-600", weekDates.IsActive()) }
+		>
+			{ fmt.Sprintf("v.%d", week.Nr) }
+			<div class="text-sm opacity-60 mt-1">
+				{ weekDates.Format() }
+			</div>
+		</div>
+		<div class="flex flex-col pt-2">
+			<div class="text-lg font-semibold">
+				{ week.Course.Name }
+			</div>
+			<div class="text-sm opacity-60">{ fmt.Sprintf("Tee: %s", week.Tee.Name) }</div>
+		</div>
+	</div>
+}
+
+templ EditWeekRow(week schema.GetWeekRow, courses []schema.GetCoursesRow, tees []schema.Tee) {
+	<tr
+		class="tr group"
+		hx-target="#week-list"
+		hx-swap="outerHTML"
+		hx-ext="json-form"
+		hx-include="input,select"
+		hx-put={ fmt.Sprintf("/api/weeks/%s", week.ID) }
+		hx-trigger={ fmt.Sprintf("click from:#save-%s", week.ID) }
+	>
+		<td class="td">
+			<input class="input" value={ fmt.Sprintf("%d", week.Nr) } required type="number" name="nr"/>
+		</td>
+		<td class="td opacity-40">&#8727;/&#8727; - &#8727;/&#8727;</td>
+		<td class="td">
+			<div class="select-wrapper">
+				<select
+					name="courseId"
+					class="select"
+					hx-get="/admin/weeks/tees"
+					hx-target="next select"
+					hx-swap="outerHTML"
+					required
+				>
+					for _, course := range courses {
+						<option
+							value={ course.ID.String() }
+							if course.ID==week.Course.Id {
+								selected="selected"
+							}
+						>
+							{ course.Name }
+						</option>
+					}
+				</select>
+			</div>
+		</td>
+		<td class="td">
+			<div class="select-wrapper">
+				<select class="select" name="teeId" required value={ week.Tee.Id.String() }>
+					for _, tee := range tees {
+						<option
+							value={ tee.ID.String() }
+							if tee.ID==week.Tee.Id {
+								selected="selected"
+							}
+						>{ tee.Name }</option>
+					}
+				</select>
+			</div>
+		</td>
+		<td class="td">
+			<div class="flex gap-3 text-sm ml-auto justify-end">
+				<button
+					class="btn-ghost h-auto p-1 text-primary/60 hover:text-primary"
+					hx-include="unset"
+					hx-ext="unset"
+					hx-get={ fmt.Sprintf("/admin/weeks/%s/edit/cancel", week.ID) }
+					hx-target="closest .group"
+					hx-swap="outerHTML"
+				>
+					Avbryt
+				</button>
+				<button id={ fmt.Sprintf("save-%s", week.ID) } class="btn-ghost h-auto p-1">
+					Spara
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+templ WeekRow(week schema.GetWeeksRow, weekDates *utils.WeekDates) {
+	<tr class="tr group">
+		<td class="td">{ fmt.Sprint(week.Nr) }</td>
+		<td class={ "td", templ.KV("text-orange-600", weekDates.IsActive()), templ.KV("opacity-40", weekDates.IsPreviousWeek()) }>{ weekDates.Format() }</td>
+		<td class="td">{ week.Course.Name }</td>
+		<td class="td">{ week.Tee.Name }</td>
+		<td class="td">
+			<div class="flex gap-3 ml-auto justify-end">
+				<button
+					class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
+					hx-get={ fmt.Sprintf("/admin/weeks/%s/edit", week.ID) }
+					hx-target="closest .group"
+					hx-swap="outerHTML"
+				>
+					Ändra	
+				</button>
+				<button
+					class="btn-link p-0 h-auto text-primary/60 hover:text-destructive"
+					hx-delete={ fmt.Sprintf("/api/weeks/%s", week.ID) }
+					hx-confirm={ fmt.Sprintf("Ta bort v.'%d'?", week.Nr) }
+					hx-target="closest .group"
+					hx-swap="delete"
+				>
+					Ta bort	
+				</button>
+			</div>
+		</td>
+	</tr>
+}
