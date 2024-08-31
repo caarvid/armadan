@@ -1,7 +1,10 @@
 package partials
 
+templ dropdown() {
+}
+
 templ tab(path, text string) {
-	<li hx-get={ path } class="cursor-pointer px-1 text-lg h-16 flex justify-center items-center underline-offset-8">{ text }</li>
+	<li hx-get={ path } class="cursor-pointer px-1 text-md h-16 flex justify-center items-center underline-offset-8 hover:opacity-50">{ text }</li>
 }
 
 templ tabs() {
@@ -29,7 +32,11 @@ templ tabs() {
 		if ctx.Value("isLoggedIn").(bool) {
 			@tab("/", "Hem")
 			@tab("/schedule", "Schema")
-			@tab("/admin", "Admin")
+			@tab("/leaderboard", "Ledartavla")
+			@tab("/results", "Resultat")
+			if ctx.Value("isModerator").(bool) {
+				@tab("/admin", "Admin")
+			}
 			@tab("/auth/logout", "Logga ut")
 		}
 	</ul>

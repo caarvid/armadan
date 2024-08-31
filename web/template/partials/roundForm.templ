@@ -1,0 +1,94 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/schema"
+import "fmt"
+
+templ formCell(header string) {
+	<div>
+		<div
+			class="bg-muted border-t border-b px-2 text-sm text-center"
+		>
+			{ header }
+		</div>
+		<div class="px-2 py-1">
+			{ children... }
+		</div>
+	</div>
+}
+
+templ NewRoundForm(resultId string, course schema.GetCourseRow, player schema.GetPlayerRow) {
+	<form
+		id="new-round-form"
+		class="flex flex-col gap-2"
+		hx-post={ fmt.Sprintf("/api/results/%s/round", resultId) }
+		hx-ext="json-form"
+	>
+		<input type="hidden" value={ course.ID.String() } name="courseId"/>
+		<input type="hidden" value={ player.ID.String() } name="playerId"/>
+		<input type="hidden" value={ player.Hcp.String() } name="hcp" data-type="number"/>
+		<div class="grid grid-cols-11">
+			@formCell("Hål")
+			for _, hole := range (*course.Holes)[:9] {
+				@formCell(fmt.Sprint(hole.Nr)) {
+					<input type="hidden" value={ hole.Id.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
+					<input type="hidden" value={ fmt.Sprint(hole.Index) } name={ fmt.Sprintf("scores.%d.index", hole.Nr-1) } data-type="number"/>
+					<input type="hidden" value={ fmt.Sprint(hole.Par) } name={ fmt.Sprintf("scores.%d.par", hole.Nr-1) } data-type="number"/>
+					<input
+						type="number"
+						name={ fmt.Sprintf("scores.%d.strokes", hole.Nr-1) }
+						class="input-number text-center shadow-none"
+						min="1"
+						max="10"
+					/>
+				}
+			}
+			@formCell("Ut")
+		</div>
+		<div class="grid grid-cols-11">
+			@formCell("Hål")
+			for _, hole := range (*course.Holes)[9:] {
+				@formCell(fmt.Sprint(hole.Nr)) {
+					<input type="hidden" value={ hole.Id.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
+					<input type="hidden" value={ fmt.Sprint(hole.Index) } name={ fmt.Sprintf("scores.%d.index", hole.Nr-1) } data-type="number"/>
+					<input type="hidden" value={ fmt.Sprint(hole.Par) } name={ fmt.Sprintf("scores.%d.par", hole.Nr-1) } data-type="number"/>
+					<input
+						type="number"
+						name={ fmt.Sprintf("scores.%d.strokes", hole.Nr-1) }
+						class="input-number text-center shadow-none"
+						min="1"
+						max="10"
+					/>
+				}
+			}
+			@formCell("In")
+		</div>
+		<div class="flex justify-end mt-2 gap-2">
+			<button type="button" class="btn-secondary" _="on click trigger closeModal">Avbryt</button>
+			<button type="submit" class="btn-default">Lägg till</button>
+		</div>
+	</form>
+}
+
+templ NewRoundModal(resultId string, players []schema.GetPlayersRow) {
+	@Modal("Ny runda", true) {
+		<div class="flex items-center gap-3">
+			<label for="players">Spelare:</label>
+			<div class="select-wrapper">
+				<select
+					id="players"
+					name="playerId"
+					class="select"
+					hx-get={ fmt.Sprintf("/admin/results/%s/form", resultId) }
+					hx-target="#form-wrapper"
+					hx-select="#new-round-form"
+				>
+					<option hidden disabled selected value></option>
+					for _, player := range players {
+						<option value={ player.ID.String() }>{ fmt.Sprintf("%s %s", player.FirstName, player.LastName) }</option>
+					}
+				</select>
+			</div>
+		</div>
+		<div id="form-wrapper"></div>
+	}
+}

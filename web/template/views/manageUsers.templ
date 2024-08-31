@@ -1,0 +1,17 @@
+package views
+
+import "github.com/caarvid/armadan/internal/schema"
+import "github.com/caarvid/armadan/web/template/partials"
+
+templ ManageUsers(users []schema.GetUsersRow) {
+	@AdminLayout() {
+		@adminHeader() {
+			<h3 class="font-semibold leading-none tracking-tight text-2xl">Användare</h3>
+		}
+		if len(users) == 0 {
+			@partials.NoData("Nya användare kommer dyka upp här")
+		} else {
+			@partials.UserTable(users)
+		}
+	}
+}

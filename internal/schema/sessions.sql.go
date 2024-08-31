@@ -51,18 +51,38 @@ func (q *Queries) DeleteSession(ctx context.Context, token string) error {
 }
 
 const getSessionByToken = `-- name: GetSessionByToken :one
-SELECT id, user_id, expires_at, is_active, token FROM user_sessions WHERE token = $1
+SELECT 
+  us.id,
+  us.user_id,
+  us.is_active,
+  us.expires_at,
+  us.token,
+  u.role,
+  u.email
+FROM user_sessions us LEFT JOIN users u ON u.id = us.user_id WHERE token = $1
 `
 
-func (q *Queries) GetSessionByToken(ctx context.Context, token string) (UserSession, error) {
+type GetSessionByTokenRow struct {
+	ID        uuid.UUID          `json:"id"`
+	UserID    uuid.UUID          `json:"userId"`
+	IsActive  bool               `json:"isActive"`
+	ExpiresAt pgtype.Timestamptz `json:"expiresAt"`
+	Token     string             `json:"token"`
+	Role      NullUsersRoleEnum  `json:"role"`
+	Email     pgtype.Text        `json:"email"`
+}
+
+func (q *Queries) GetSessionByToken(ctx context.Context, token string) (GetSessionByTokenRow, error) {
 	row := q.db.QueryRow(ctx, getSessionByToken, token)
-	var i UserSession
+	var i GetSessionByTokenRow
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
-		&i.ExpiresAt,
 		&i.IsActive,
+		&i.ExpiresAt,
 		&i.Token,
+		&i.Role,
+		&i.Email,
 	)
 	return i, err
 }

@@ -3,7 +3,9 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/caarvid/armadan/internal/constants"
 	"github.com/caarvid/armadan/internal/schema"
+	"github.com/caarvid/armadan/internal/utils/markdown"
 	"github.com/caarvid/armadan/internal/utils/response"
 	"github.com/caarvid/armadan/internal/validation"
 	"github.com/caarvid/armadan/web/template/partials"
@@ -42,6 +44,20 @@ func (h *Handler) EditPost(c echo.Context) error {
 	return partials.EditPost(post).Render(c.Request().Context(), c.Response().Writer)
 }
 
+type previewPostData struct {
+	Body string `json:"body" validate:"required"`
+}
+
+func (h *Handler) PreviewPost(c echo.Context) error {
+	data := previewPostData{}
+
+	if err := validation.ValidateRequest(c, &data); err != nil {
+		return err
+	}
+
+	return c.HTML(http.StatusOK, string(markdown.MdToHtml([]byte(data.Body))))
+}
+
 type updatePostData struct {
 	ID     uuid.UUID `param:"id" validate:"required,uuid4"`
 	Title  string    `json:"title" validate:"required"`
@@ -72,6 +88,8 @@ func (h *Handler) UpdatePost(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Error")
 	}
+
+	h.cache.Delete(constants.HomeCache)
 
 	return response.
 		New(c, partials.PostList(posts)).
@@ -108,6 +126,8 @@ func (h *Handler) InsertPost(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error")
 	}
 
+	h.cache.Delete(constants.HomeCache)
+
 	return response.
 		New(c, views.ManagePosts(posts)).
 		WithToast(response.Success, "Inlägg sparat").
@@ -126,6 +146,8 @@ func (h *Handler) DeletePost(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
+
+	h.cache.Delete(constants.HomeCache)
 
 	return partials.SuccessToast("Inlägg borttaget").Render(c.Request().Context(), c.Response().Writer)
 }

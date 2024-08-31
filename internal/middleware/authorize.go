@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/caarvid/armadan/internal/schema"
@@ -38,13 +37,9 @@ func Authorize(db *schema.Queries) echo.MiddlewareFunc {
 				return redirectToLogin(c)
 			}
 
-			c.SetRequest(c.Request().WithContext(
-				context.WithValue(
-					c.Request().Context(),
-					"isLoggedIn",
-					true,
-				),
-			))
+			c.Set("isLoggedIn", true)
+			c.Set("isModerator", utils.IsModerator(session.Role.UsersRoleEnum))
+			c.Set("isAdmin", utils.IsAdmin(session.Role.UsersRoleEnum))
 
 			return next(c)
 		}

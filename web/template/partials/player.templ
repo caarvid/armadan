@@ -82,7 +82,7 @@ templ EditPlayer(player schema.GetPlayerRow) {
 			<input name="email" type="email" class="input" placeholder="Email" required autocomplete="off" value={ player.Email.String }/>
 		</td>
 		<td class="td">
-			<input name="hcp" type="number" class="input" placeholder="HCP" required autocomplete="off" value={ "10.0" }/>
+			<input name="hcp" type="number" class="input" placeholder="HCP" required autocomplete="off" value={ player.Hcp.String() }/>
 		</td>
 		<td class="td">
 			<div class="flex gap-3 text-sm ml-auto justify-end">
@@ -109,7 +109,7 @@ templ Player(player schema.GetPlayersRow) {
 		<td class="td">{ player.FirstName }</td>
 		<td class="td">{ player.LastName }</td>
 		<td class="td">{ player.Email.String }</td>
-		<td class="td">10.0</td>
+		<td class="td">{ player.Hcp.String() }</td>
 		<td class="td">
 			<div class="flex gap-3 ml-auto justify-end">
 				<button

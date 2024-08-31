@@ -1,6 +1,8 @@
 package views
 
-import "github.com/caarvid/armadan/web/template/partials"
+import (
+	"github.com/caarvid/armadan/web/template/partials"
+)
 
 type item struct {
 	text string
@@ -14,6 +16,10 @@ var items = [5]item{
 	{"Schema", "/admin/weeks", partials.ScheduleIcon()},
 	{"Spelare", "/admin/players", partials.UserIcon()},
 	{"Banor", "/admin/courses", partials.GolfIcon()},
+}
+
+var dangerZone = [1]item{
+	{"Användare", "/admin/users", partials.AdminUserIcon()},
 }
 
 templ sidebarItem(i item) {
@@ -30,11 +36,10 @@ templ sidebarItem(i item) {
 	</li>
 }
 
-templ adminSidebar() {
-	<aside class="relative flex min-w-0 flex-shrink-0 flex-grow-0 basis-48 border-r-2">
-		<ul
-			class="flex-1 m-0 pt-6 text-lg"
-			_="
+templ sidebarList() {
+	<ul
+		class="m-0 text-lg"
+		_="
 			init
 				for x in (<li /> in me)
 					if @hx-get of x is pathname of the location of the window
@@ -49,11 +54,27 @@ templ adminSidebar() {
 					remove .hidden from first <span /> in target
 				end
 		"
-		>
-			for _, i := range items {
-				@sidebarItem(i)
+	>
+		{ children... }
+	</ul>
+}
+
+templ adminSidebar() {
+	<aside class="relative flex min-w-0 flex-shrink-0 flex-grow-0 basis-48 border-r-2">
+		<div class="flex pt-6 flex-col w-full">
+			@sidebarList() {
+				for _, i := range items {
+					@sidebarItem(i)
+				}
+				if ctx.Value("isAdmin").(bool) {
+					<div class="text-red-500 pb-8 border-t-2">
+						for _, i := range dangerZone {
+							@sidebarItem(i)
+						}
+					</div>
+				}
 			}
-		</ul>
+		</div>
 	</aside>
 }
 

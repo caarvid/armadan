@@ -10,13 +10,15 @@ import (
 func Register(app *echo.Echo, handler *handlers.Handler, db *schema.Queries) {
 	authorize := m.Authorize(db)
 
-	api := app.Group("/api")
+	api := app.Group("/api", authorize)
 	admin := app.Group("/admin", authorize)
 	auth := app.Group("/auth")
 
 	// Views
 	app.GET("/", m.HxPushPath(handler.HomeView), authorize)
 	app.GET("/schedule", m.HxPushPath(handler.ScheduleView), authorize)
+	app.GET("/leaderboard", m.HxPushPath(handler.LeaderboardView), authorize)
+	app.GET("/leaderboard/:id", handler.GetLeaderboardSummary, authorize)
 	app.GET("/login", m.HxPushPath(handler.LoginView))
 	app.GET("/forgot-password", m.HxPushPath(handler.ForgotPasswordView))
 	app.GET("/reset-password", m.HxPushPath(handler.ResetPasswordView))
@@ -29,10 +31,18 @@ func Register(app *echo.Echo, handler *handlers.Handler, db *schema.Queries) {
 
 	api.PUT("/posts/:id", handler.UpdatePost)
 	api.POST("/posts", handler.InsertPost)
+	api.POST("/posts/preview", handler.PreviewPost)
 	api.DELETE("/posts/:id", handler.DeletePost)
 
 	// Results
 	admin.GET("/results", m.HxPushPath(handler.ManageResultsView))
+	admin.GET("/results/:id", handler.EditResultView)
+	admin.GET("/results/new/:id", handler.AddNewResult)
+	admin.GET("/results/:id/round", handler.NewRound)
+	admin.GET("/results/:id/form", handler.NewRoundForm)
+
+	api.POST("/results/:id/round", handler.InsertRound)
+	api.DELETE("/results/round/:id", handler.DeleteRound)
 
 	// Courses
 	admin.GET("/courses", m.HxPushPath(handler.ManageCoursesView))
@@ -66,6 +76,15 @@ func Register(app *echo.Echo, handler *handlers.Handler, db *schema.Queries) {
 	api.POST("/players", handler.InsertPlayer)
 	api.PUT("/players/:id", handler.UpdatePlayer)
 	api.DELETE("/players/:id", handler.DeletePlayer)
+
+	// Users
+	admin.GET("/users", m.HxPushPath(handler.ManageUsersView))
+	admin.GET("/users/:id/edit", handler.EditUser)
+	admin.GET("/users/:id/edit/cancel", handler.CancelEditUser)
+
+	// TODO: Put this behind config flag in DB?
+	api.PUT("/users/:id", handler.UpdateUser)
+	api.POST("/users", handler.InsertAdminUser)
 
 	// Auth
 	auth.POST("/login", handler.Login)

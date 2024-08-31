@@ -3,8 +3,11 @@ package handlers
 import (
 	// "time"
 
+	"fmt"
+
 	"github.com/caarvid/armadan/internal/errors"
 	"github.com/caarvid/armadan/internal/schema"
+
 	// "github.com/caarvid/armadan/internal/schema"
 	"github.com/caarvid/armadan/internal/utils"
 	"github.com/caarvid/armadan/internal/validation"
@@ -15,7 +18,7 @@ import (
 type loginData struct {
 	Email        string `json:"email" validate:"required"`
 	Password     string `json:"password" validate:"required"`
-	KeepLoggedIn string `json:"keepLoggedIn"`
+	KeepLoggedIn bool   `json:"keepLoggedIn"`
 }
 
 type forgotPasswordData struct {
@@ -82,12 +85,14 @@ func (h *Handler) Login(c echo.Context) error {
 	hash, err := utils.DecodeHash(user.Password)
 
 	if err != nil {
+		fmt.Println("*** HERE 1")
 		return err
 	}
 
 	match, err := hash.Compare(data.Password)
 
 	if err != nil {
+		fmt.Println("*** HERE 2")
 		return err
 	}
 
@@ -95,9 +100,10 @@ func (h *Handler) Login(c echo.Context) error {
 		return errors.NewInvalidCredentialsError(c)
 	}
 
-	sess, err := h.db.CreateSession(c.Request().Context(), schema.NewSession(user.ID, data.KeepLoggedIn == "true"))
+	sess, err := h.db.CreateSession(c.Request().Context(), schema.NewSession(user.ID, data.KeepLoggedIn))
 
 	if err != nil {
+		fmt.Println("*** HERE 3")
 		return err
 	}
 

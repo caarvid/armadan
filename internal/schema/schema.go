@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func (sess *UserSession) IsValid() bool {
+func (sess *GetSessionByTokenRow) IsValid() bool {
 	return sess.IsActive && sess.ExpiresAt.Time.After(time.Now())
 }
 

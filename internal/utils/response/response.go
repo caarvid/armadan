@@ -3,10 +3,12 @@ package response
 import (
 	"bytes"
 	"net/http"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/labstack/echo/v4"
+	"github.com/patrickmn/go-cache"
 )
 
 const (
@@ -28,6 +30,12 @@ func New(ec echo.Context, comp templ.Component) *ResponseBuilder {
 		buf:     buf,
 		context: ec,
 	}
+}
+
+func (rb *ResponseBuilder) Cache(c *cache.Cache, key string, dur time.Duration) *ResponseBuilder {
+	c.Set(key, rb.buf, dur)
+
+	return rb
 }
 
 func (rb *ResponseBuilder) WithToast(t int, msg string) *ResponseBuilder {

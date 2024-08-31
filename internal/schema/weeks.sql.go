@@ -10,26 +10,37 @@ import (
 
 	"github.com/caarvid/armadan/internal/dto"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createWeek = `-- name: CreateWeek :one
-INSERT INTO weeks (nr, course_id, tee_id) VALUES ($1, $2, $3) RETURNING id, nr, course_id, tee_id
+INSERT INTO weeks (nr, course_id, tee_id, is_finals, finals_date) VALUES ($1, $2, $3, $4, $5) RETURNING id, nr, course_id, tee_id, finals_date, is_finals
 `
 
 type CreateWeekParams struct {
-	Nr       int32     `json:"nr"`
-	CourseID uuid.UUID `json:"courseId"`
-	TeeID    uuid.UUID `json:"teeId"`
+	Nr         int32              `json:"nr"`
+	CourseID   uuid.UUID          `json:"courseId"`
+	TeeID      uuid.UUID          `json:"teeId"`
+	IsFinals   pgtype.Bool        `json:"isFinals"`
+	FinalsDate pgtype.Timestamptz `json:"finalsDate"`
 }
 
 func (q *Queries) CreateWeek(ctx context.Context, arg *CreateWeekParams) (Week, error) {
-	row := q.db.QueryRow(ctx, createWeek, arg.Nr, arg.CourseID, arg.TeeID)
+	row := q.db.QueryRow(ctx, createWeek,
+		arg.Nr,
+		arg.CourseID,
+		arg.TeeID,
+		arg.IsFinals,
+		arg.FinalsDate,
+	)
 	var i Week
 	err := row.Scan(
 		&i.ID,
 		&i.Nr,
 		&i.CourseID,
 		&i.TeeID,
+		&i.FinalsDate,
+		&i.IsFinals,
 	)
 	return i, err
 }
@@ -48,6 +59,8 @@ WITH week_course_data AS (
 	SELECT
 		w.id,
 		w.nr,
+		w.finals_date,
+		w.is_finals,
 		jsonb_build_object(
 			'id', c.id,
 			'name', c.name
@@ -66,14 +79,16 @@ WITH week_course_data AS (
 	LEFT JOIN tees t ON t.id = w.tee_id
 	GROUP BY w.id, t.id, t.name
 )
-SELECT cd.id, cd.nr, cd.course, td.tee FROM week_course_data cd JOIN week_tee_data td USING (id) WHERE id = $1::UUID
+SELECT cd.id, cd.nr, cd.finals_date, cd.is_finals, cd.course, td.tee FROM week_course_data cd JOIN week_tee_data td USING (id) WHERE id = $1::UUID
 `
 
 type GetWeekRow struct {
-	ID     uuid.UUID       `json:"id"`
-	Nr     int32           `json:"nr"`
-	Course *dto.WeekCourse `json:"course"`
-	Tee    *dto.WeekTee    `json:"tee"`
+	ID         uuid.UUID          `json:"id"`
+	Nr         int32              `json:"nr"`
+	FinalsDate pgtype.Timestamptz `json:"finalsDate"`
+	IsFinals   pgtype.Bool        `json:"isFinals"`
+	Course     *dto.WeekCourse    `json:"course"`
+	Tee        *dto.WeekTee       `json:"tee"`
 }
 
 func (q *Queries) GetWeek(ctx context.Context, dollar_1 uuid.UUID) (GetWeekRow, error) {
@@ -82,6 +97,8 @@ func (q *Queries) GetWeek(ctx context.Context, dollar_1 uuid.UUID) (GetWeekRow, 
 	err := row.Scan(
 		&i.ID,
 		&i.Nr,
+		&i.FinalsDate,
+		&i.IsFinals,
 		&i.Course,
 		&i.Tee,
 	)
@@ -93,6 +110,8 @@ WITH week_course_data AS (
 	SELECT
 		w.id,
 		w.nr,
+		w.finals_date,
+		w.is_finals,
 		jsonb_build_object(
 			'id', c.id,
 			'name', c.name
@@ -111,14 +130,16 @@ WITH week_course_data AS (
 	LEFT JOIN tees t ON t.id = w.tee_id
 	GROUP BY w.id, t.id, t.name
 )
-SELECT cd.id, cd.nr, cd.course, td.tee FROM week_course_data cd JOIN week_tee_data td USING (id) ORDER BY nr ASC
+SELECT cd.id, cd.nr, cd.finals_date, cd.is_finals, cd.course, td.tee FROM week_course_data cd JOIN week_tee_data td USING (id) ORDER BY nr ASC
 `
 
 type GetWeeksRow struct {
-	ID     uuid.UUID       `json:"id"`
-	Nr     int32           `json:"nr"`
-	Course *dto.WeekCourse `json:"course"`
-	Tee    *dto.WeekTee    `json:"tee"`
+	ID         uuid.UUID          `json:"id"`
+	Nr         int32              `json:"nr"`
+	FinalsDate pgtype.Timestamptz `json:"finalsDate"`
+	IsFinals   pgtype.Bool        `json:"isFinals"`
+	Course     *dto.WeekCourse    `json:"course"`
+	Tee        *dto.WeekTee       `json:"tee"`
 }
 
 func (q *Queries) GetWeeks(ctx context.Context) ([]GetWeeksRow, error) {
@@ -133,6 +154,8 @@ func (q *Queries) GetWeeks(ctx context.Context) ([]GetWeeksRow, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Nr,
+			&i.FinalsDate,
+			&i.IsFinals,
 			&i.Course,
 			&i.Tee,
 		); err != nil {
@@ -147,7 +170,7 @@ func (q *Queries) GetWeeks(ctx context.Context) ([]GetWeeksRow, error) {
 }
 
 const updateWeek = `-- name: UpdateWeek :one
-UPDATE weeks SET nr = $1, course_id = $2, tee_id = $3 WHERE id = $4 RETURNING id, nr, course_id, tee_id
+UPDATE weeks SET nr = $1, course_id = $2, tee_id = $3 WHERE id = $4 RETURNING id, nr, course_id, tee_id, finals_date, is_finals
 `
 
 type UpdateWeekParams struct {
@@ -170,6 +193,8 @@ func (q *Queries) UpdateWeek(ctx context.Context, arg *UpdateWeekParams) (Week, 
 		&i.Nr,
 		&i.CourseID,
 		&i.TeeID,
+		&i.FinalsDate,
+		&i.IsFinals,
 	)
 	return i, err
 }

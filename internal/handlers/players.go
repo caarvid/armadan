@@ -11,6 +11,7 @@ import (
 	"github.com/caarvid/armadan/web/template/views"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/shopspring/decimal"
 	"go.step.sm/crypto/randutil"
 )
 
@@ -61,10 +62,10 @@ func (h *Handler) CancelEditPlayer(c echo.Context) error {
 }
 
 type createPlayerData struct {
-	FirstName string `json:"firstName" validate:"required"`
-	LastName  string `json:"lastName" validate:"required"`
-	Email     string `json:"email" validate:"required,email"`
-	Password  string `json:"password"`
+	FirstName string          `json:"firstName" validate:"required"`
+	LastName  string          `json:"lastName" validate:"required"`
+	Email     string          `json:"email" validate:"required,email"`
+	HCP       decimal.Decimal `json:"hcp" validate:"required"`
 }
 
 func (h *Handler) InsertPlayer(c echo.Context) error {
@@ -75,22 +76,20 @@ func (h *Handler) InsertPlayer(c echo.Context) error {
 	}
 
 	pw, err := randutil.Alphanumeric(24)
+
 	if err != nil {
 		return err
 	}
 
-	if len(data.Password) > 0 {
-		pw = data.Password
-	}
-
 	hash, err := utils.GenerateHash(pw, nil)
+
 	if err != nil {
 		return err
 	}
 
 	user, err := h.db.CreateUser(c.Request().Context(), &schema.CreateUserParams{
-		Email:    data.Email,
 		Password: hash.Encode(),
+		Email:    data.Email,
 	})
 
 	if err != nil {
@@ -100,6 +99,7 @@ func (h *Handler) InsertPlayer(c echo.Context) error {
 	_, err = h.db.CreatePlayer(c.Request().Context(), &schema.CreatePlayerParams{
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
+		Hcp:       data.HCP,
 		UserID:    user.ID,
 	})
 
@@ -120,10 +120,11 @@ func (h *Handler) InsertPlayer(c echo.Context) error {
 }
 
 type updatePlayerData struct {
-	ID        uuid.UUID `param:"id" validate:"required,uuid4"`
-	FirstName string    `json:"firstName" validate:"required"`
-	LastName  string    `json:"lastName" validate:"required"`
-	Email     string    `json:"email" validate:"required,email"`
+	ID        uuid.UUID       `param:"id" validate:"required,uuid4"`
+	FirstName string          `json:"firstName" validate:"required"`
+	LastName  string          `json:"lastName" validate:"required"`
+	Email     string          `json:"email" validate:"required,email"`
+	HCP       decimal.Decimal `json:"hcp" validate:"required"`
 }
 
 func (h *Handler) UpdatePlayer(c echo.Context) error {
@@ -146,6 +147,7 @@ func (h *Handler) UpdatePlayer(c echo.Context) error {
 		ID:        data.ID,
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
+		Hcp:       data.HCP,
 	})
 
 	if err != nil {

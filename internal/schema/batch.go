@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shopspring/decimal"
 )
 
 var (
@@ -82,10 +82,10 @@ type UpdateTeesBatchResults struct {
 }
 
 type UpdateTeesParams struct {
-	Name  string         `json:"name"`
-	Slope int32          `json:"slope"`
-	Cr    pgtype.Numeric `json:"cr"`
-	ID    uuid.UUID      `json:"id"`
+	Name  string          `json:"name"`
+	Slope int32           `json:"slope"`
+	Cr    decimal.Decimal `json:"cr"`
+	ID    uuid.UUID       `json:"id"`
 }
 
 func (q *Queries) UpdateTees(ctx context.Context, arg []*UpdateTeesParams) *UpdateTeesBatchResults {

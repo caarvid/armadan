@@ -7,7 +7,7 @@ templ Index(posts []schema.Post) {
 	@document("Armadan") {
 		@partials.Header()
 		@partials.Content("content") {
-			<div class="flex flex-col gap-2 flex-1 lg:w-8/12 lg:flex-none">
+			<div class="flex flex-col gap-3 flex-1 lg:w-8/12 lg:flex-none mt-2">
 				for _, post := range posts {
 					@partials.PostCard(post)
 				}

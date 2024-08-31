@@ -1,3 +1,7 @@
+input[type="checkbox"] {
+  accent-color: hsl(var(--primary));
+}
+
 select {
   cursor: pointer;
 }

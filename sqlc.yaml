@@ -14,6 +14,26 @@ sql:
         emit_params_struct_pointers: true
         json_tags_case_style: camel
         overrides:
+          - db_type: "numeric"
+            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "players.hcp"
+            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "rounds.new_hcp"
+            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "rounds.old_hcp"
+            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "tee_data.cr"
+            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "hole_data.hole_agg"
+            go_type:
+              import: "github.com/caarvid/armadan/internal/dto"
+              type: "HoleList"
+              pointer: true
+          - column: "tee_data.tee_agg"
+            go_type:
+              import: "github.com/caarvid/armadan/internal/dto"
+              type: "TeeList"
+              pointer: true
           - column: "hole_data.holes"
             go_type:
               import: "github.com/caarvid/armadan/internal/dto"

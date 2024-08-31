@@ -30,7 +30,7 @@ htmx.defineExtension("json-form", {
     const obj = {};
 
     params.entries().forEach(([name, val]) => {
-      const e = elt.querySelector(`[name="${name}"]`);
+      const e = document.body.querySelector(`[name="${name}"]`);
 
       if (!e) {
         return;

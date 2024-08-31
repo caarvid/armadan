@@ -1,0 +1,90 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/schema"
+import "fmt"
+
+var roles = [3]schema.UsersRoleEnum{
+	schema.UsersRoleEnumUser,
+	schema.UsersRoleEnumAdmin,
+	schema.UsersRoleEnumModerator,
+}
+
+templ EditUserRow(user schema.GetUserByIdRow) {
+	<tr
+		class="tr group"
+		hx-swap="outerHTML"
+		hx-ext="json-form"
+		hx-include="input,select"
+		hx-put={ fmt.Sprintf("/api/users/%s", user.ID) }
+		hx-trigger={ fmt.Sprintf("click from:#save-%s", user.ID) }
+	>
+		<td class="td">{ user.Email }</td>
+		<td class="td">
+			<div class="select-wrapper">
+				<select class="select" name="role" required value={ string(user.Role) }>
+					for _, role := range roles {
+						<option
+							value={ string(role) }
+							if role == user.Role {
+								selected="selected"
+							}
+						>{ string(role) }</option>
+					}
+				</select>
+			</div>
+		</td>
+		<td class="td">
+			<div class="flex gap-3 text-sm ml-auto justify-end">
+				<button
+					class="btn-ghost h-auto p-1 text-primary/60 hover:text-primary"
+					hx-include="unset"
+					hx-ext="unset"
+					hx-get={ fmt.Sprintf("/admin/users/%s/edit/cancel", user.ID) }
+					hx-target="closest .group"
+					hx-swap="outerHTML"
+				>
+					Avbryt
+				</button>
+				<button id={ fmt.Sprintf("save-%s", user.ID) } class="btn-ghost h-auto p-1">
+					Spara
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+templ UserRow(user schema.GetUsersRow) {
+	<tr class="tr group">
+		<td class="td">{ user.Email }</td>
+		<td class="td">{ string(user.Role) }</td>
+		<td class="td">
+			<div class="flex gap-3 ml-auto justify-end">
+				<button
+					class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
+					hx-get={ fmt.Sprintf("/admin/users/%s/edit", user.ID) }
+					hx-target="closest .group"
+					hx-swap="outerHTML"
+				>
+					Ändra	
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+templ UserTable(users []schema.GetUsersRow) {
+	@Table("user-list") {
+		<thead class="thead">
+			<tr class="tr">
+				<th class="th w-1/3">Email</th>
+				<th class="th w-1/6">Roll</th>
+				<th class="th"></th>
+			</tr>
+		</thead>
+		<tbody class="tbody">
+			for _, user := range users {
+				@UserRow(user)
+			}
+		</tbody>
+	}
+}

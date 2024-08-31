@@ -9,8 +9,8 @@ import (
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/web/template/views"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
+	"github.com/shopspring/decimal"
 )
 
 func (h *Handler) ManageCoursesView(c echo.Context) error {
@@ -90,15 +90,15 @@ type newHole struct {
 }
 
 type newTee struct {
-	Name  string         `json:"name" validate:"required"`
-	Slope int32          `json:"slope" validate:"requried"`
-	CR    pgtype.Numeric `json:"cr" validate:"required"`
+	Name  string          `json:"name" validate:"required"`
+	Slope int32           `json:"slope" validate:"requried"`
+	CR    decimal.Decimal `json:"cr" validate:"required"`
 }
 
 type createCourseData struct {
 	Name  string    `json:"name" validate:"required"`
-	Holes []newHole `json:"holes" validate:"required"`
-	Tees  []newTee  `json:"tees"`
+	Holes []newHole `json:"holes" validate:"required,dive"`
+	Tees  []newTee  `json:"tees" validate:"dive"`
 }
 
 func (h *Handler) InsertCourse(c echo.Context) error {
@@ -191,17 +191,17 @@ type updatedHole struct {
 }
 
 type updatedTee struct {
-	ID    uuid.UUID      `json:"id"`
-	Name  string         `json:"name" validate:"required"`
-	Slope int32          `json:"slope" validate:"requried"`
-	CR    pgtype.Numeric `json:"cr" validate:"required"`
+	ID    uuid.UUID       `json:"id"`
+	Name  string          `json:"name" validate:"required"`
+	Slope int32           `json:"slope" validate:"requried"`
+	CR    decimal.Decimal `json:"cr" validate:"required"`
 }
 
 type updateCourseData struct {
 	ID    uuid.UUID     `param:"id" validate:"required,uuid4"`
 	Name  string        `json:"name" validate:"required"`
-	Holes []updatedHole `json:"holes" validate:"required"`
-	Tees  []updatedTee  `json:"tees"`
+	Holes []updatedHole `json:"holes" validate:"required,dive"`
+	Tees  []updatedTee  `json:"tees" validate:"dive"`
 }
 
 func (h *Handler) UpdateCourse(c echo.Context) error {

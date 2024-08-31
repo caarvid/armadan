@@ -44,6 +44,40 @@ func (q *Queries) CreateHoles(ctx context.Context, arg []*CreateHolesParams) (in
 	return q.db.CopyFrom(ctx, []string{"holes"}, []string{"nr", "par", "index", "course_id"}, &iteratorForCreateHoles{rows: arg})
 }
 
+// iteratorForCreateScores implements pgx.CopyFromSource.
+type iteratorForCreateScores struct {
+	rows                 []*CreateScoresParams
+	skippedFirstNextCall bool
+}
+
+func (r *iteratorForCreateScores) Next() bool {
+	if len(r.rows) == 0 {
+		return false
+	}
+	if !r.skippedFirstNextCall {
+		r.skippedFirstNextCall = true
+		return true
+	}
+	r.rows = r.rows[1:]
+	return len(r.rows) > 0
+}
+
+func (r iteratorForCreateScores) Values() ([]interface{}, error) {
+	return []interface{}{
+		r.rows[0].RoundID,
+		r.rows[0].HoleID,
+		r.rows[0].Strokes,
+	}, nil
+}
+
+func (r iteratorForCreateScores) Err() error {
+	return nil
+}
+
+func (q *Queries) CreateScores(ctx context.Context, arg []*CreateScoresParams) (int64, error) {
+	return q.db.CopyFrom(ctx, []string{"scores"}, []string{"round_id", "hole_id", "strokes"}, &iteratorForCreateScores{rows: arg})
+}
+
 // iteratorForCreateTees implements pgx.CopyFromSource.
 type iteratorForCreateTees struct {
 	rows                 []*CreateTeesParams

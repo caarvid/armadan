@@ -1,0 +1,29 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/schema"
+import "fmt"
+
+templ weekBadge(nr, points int32) {
+	<div class="flex flex-col rounded-lg border text-center overflow-hidden">
+		<div class="py-2 w-full border-b bg-primary/90 text-primary-foreground font-bold">{ fmt.Sprintf("v.%d", nr) }</div>
+		<div class="py-2 bg-white w-full">
+			if points == 0 {
+				-	
+			} else {
+				{ fmt.Sprintf("+%d", points) }
+			}
+		</div>
+	</div>
+}
+
+templ LeaderboardSummary(summary []schema.GetLeaderboardSummaryRow) {
+	<tr class="tr bg-muted shadow-inner hover:bg-muted">
+		<td class="td" colspan="9999">
+			<div class="grid gap-3 p-2 grid-cols-4 md:grid-cols-6 xl:grid-cols-8">
+				for _, week := range summary {
+					@weekBadge(week.Nr, week.Points)
+				}
+			</div>
+		</td>
+	</tr>
+}

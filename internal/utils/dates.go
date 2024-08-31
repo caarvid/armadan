@@ -11,7 +11,7 @@ type WeekDates struct {
 }
 
 func (wd *WeekDates) Format() string {
-	return fmt.Sprintf("%s - %s", wd.start.Format("02/01"), wd.end.Format("02/01"))
+	return fmt.Sprintf("%s - %s", wd.start.Format("2/1"), wd.end.Format("2/1"))
 }
 
 func (wd *WeekDates) IsActive() bool {

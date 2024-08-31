@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/caarvid/armadan/internal/constants"
 	"github.com/caarvid/armadan/internal/schema"
 	"github.com/caarvid/armadan/internal/utils"
 	"github.com/caarvid/armadan/internal/utils/response"
@@ -10,6 +12,7 @@ import (
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/web/template/views"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -45,14 +48,38 @@ func (h *Handler) CourseTees(c echo.Context) error {
 	return partials.WeekTeeSelect(tees).Render(c.Request().Context(), c.Response().Writer)
 }
 
+type insertWeekData struct {
+	Nr         int32       `json:"nr" validate:"required"`
+	FinalsDate string      `json:"finalsDate" validate:"required_with=IsFinalWeek"`
+	CourseID   uuid.UUID   `json:"courseId" validate:"required,uuid4"`
+	TeeID      uuid.UUID   `json:"teeId" validate:"required,uuid4"`
+	IsFinals   pgtype.Bool `json:"isFinalsWeek"`
+}
+
 func (h *Handler) InsertWeek(c echo.Context) error {
-	week := schema.CreateWeekParams{}
+	week := insertWeekData{}
 
 	if err := validation.ValidateRequest(c, &week); err != nil {
 		return err
 	}
 
-	_, err := h.db.CreateWeek(c.Request().Context(), &week)
+	newWeek := &schema.CreateWeekParams{
+		Nr:       week.Nr,
+		CourseID: week.CourseID,
+		TeeID:    week.TeeID,
+		IsFinals: pgtype.Bool{Bool: false, Valid: true},
+	}
+
+	if week.IsFinals.Bool {
+		finalsDate, _ := time.Parse(time.DateOnly, week.FinalsDate)
+		newWeek.IsFinals = week.IsFinals
+		newWeek.FinalsDate = pgtype.Timestamptz{
+			Time:  finalsDate,
+			Valid: true,
+		}
+	}
+
+	_, err := h.db.CreateWeek(c.Request().Context(), newWeek)
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -63,6 +90,8 @@ func (h *Handler) InsertWeek(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Error")
 	}
+
+	h.cache.Delete(constants.ScheduleCache)
 
 	return response.
 		New(c, partials.WeekTable(weeks)).
@@ -116,9 +145,9 @@ func (h *Handler) CancelEditWeek(c echo.Context) error {
 
 type updateWeekData struct {
 	ID       uuid.UUID `param:"id" validate:"required,uuid4"`
-	Nr       int32     `json:"nr"`
-	CourseID uuid.UUID `json:"courseId"`
-	TeeID    uuid.UUID `json:"teeId"`
+	Nr       int32     `json:"nr" validate:"required"`
+	CourseID uuid.UUID `json:"courseId" validate:"required,uuid4"`
+	TeeID    uuid.UUID `json:"teeId" validate:"required,uuid4"`
 }
 
 func (h *Handler) UpdateWeek(c echo.Context) error {
@@ -145,6 +174,8 @@ func (h *Handler) UpdateWeek(c echo.Context) error {
 		return err
 	}
 
+	h.cache.Delete(constants.ScheduleCache)
+
 	return response.
 		New(c, partials.WeekTable(weeks)).
 		WithToast(response.Success, "Vecka uppdaterad").
@@ -163,6 +194,8 @@ func (h *Handler) DeleteWeek(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	h.cache.Delete(constants.ScheduleCache)
 
 	return partials.SuccessToast("Vecka borttagen").Render(c.Request().Context(), c.Response().Writer)
 }

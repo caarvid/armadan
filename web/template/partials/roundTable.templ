@@ -1,0 +1,54 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/schema"
+import "fmt"
+
+templ RoundTable(rounds []schema.GetRoundsByResultIdRow) {
+	@Table("rounds-table") {
+		<thead class="thead">
+			<tr class="tr">
+				<th class="th">Spelare</th>
+				<th class="th">HCP Diff.</th>
+				<th class="th">Ny HCP</th>
+				<th class="th">Brutto</th>
+				<th class="th">Netto</th>
+				<th class="th"></th>
+			</tr>
+		</thead>
+		<tbody class="tbody">
+			for _, round := range rounds {
+				<tr class="tr group">
+					<td class="td">{ fmt.Sprintf("%s %s", round.FirstName.String, round.LastName.String) }</td>
+					<td class="td">
+						if round.NewHcp.Sub(round.OldHcp).String() == "0" {
+							-
+						} else {
+							{ fmt.Sprintf("%s", round.NewHcp.Sub(round.OldHcp)) }
+						}
+					</td>
+					<td class="td">{ fmt.Sprintf("%s", round.NewHcp) }</td>
+					<td class="td">{ fmt.Sprint(round.GrossTotal) }</td>
+					<td class="td">{ fmt.Sprint(round.NetTotal) }</td>
+					<td class="td">
+						<div class="flex gap-3 ml-auto justify-end">
+							<button
+								class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
+							>
+								Ändra	
+							</button>
+							<button
+								class="btn-link p-0 h-auto text-primary/60 hover:text-destructive"
+								hx-delete={ fmt.Sprintf("/api/results/round/%s", round.ID) }
+								hx-confirm="Ta bort runda?"
+								hx-target="closest .group"
+								hx-swap="delete"
+							>
+								Ta bort	
+							</button>
+						</div>
+					</td>
+				</tr>
+			}
+		</tbody>
+	}
+}

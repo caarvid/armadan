@@ -10,7 +10,7 @@ import (
 
 	"github.com/caarvid/armadan/internal/dto"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shopspring/decimal"
 )
 
 const createCourse = `-- name: CreateCourse :one
@@ -37,10 +37,10 @@ type CreateHolesParams struct {
 }
 
 type CreateTeesParams struct {
-	Name     string         `json:"name"`
-	Slope    int32          `json:"slope"`
-	Cr       pgtype.Numeric `json:"cr"`
-	CourseID uuid.UUID      `json:"courseId"`
+	Name     string          `json:"name"`
+	Slope    int32           `json:"slope"`
+	Cr       decimal.Decimal `json:"cr"`
+	CourseID uuid.UUID       `json:"courseId"`
 }
 
 const deleteCourse = `-- name: DeleteCourse :exec
@@ -62,74 +62,85 @@ func (q *Queries) DeleteTee(ctx context.Context, id uuid.UUID) error {
 }
 
 const getCourse = `-- name: GetCourse :one
-WITH hole_data AS (
-  SELECT
-    c.id,
-    c.name,
-    c.par,
-    COALESCE(jsonb_agg(to_jsonb(h) ORDER BY h.nr ASC) FILTER (WHERE h.course_id IS NOT NULL), '[]') AS holes
-  FROM courses c
-  LEFT JOIN holes h ON h.course_id = c.id
-  GROUP BY c.id, c.name, c.par
-), tee_data AS (
-  SELECT
-    c.id,
-    COALESCE(jsonb_agg(to_jsonb(t)) FILTER (WHERE t.course_id IS NOT NULL), '[]') AS tees
-  FROM courses c
-  LEFT JOIN tees t ON t.course_id = c.id
-  GROUP BY c.id, c.name, c.par
+WITH tee_data AS (
+  SELECT 
+    t.course_id, 
+    COALESCE(jsonb_agg(to_jsonb(t)) FILTER (WHERE t.course_id IS NOT NULL), '[]') AS tee_agg 
+  FROM tees t 
+  GROUP BY t.course_id
+), hole_data AS (
+  SELECT 
+    h.course_id, 
+    COALESCE(jsonb_agg(to_jsonb(h) ORDER BY h.nr) FILTER (WHERE h.course_id IS NOT NULL), '[]') AS hole_agg 
+  FROM holes h 
+  GROUP BY h.course_id
 )
-SELECT hd.id, hd.name, hd.par, hd.holes, td.tees FROM hole_data hd JOIN tee_data td USING (id) WHERE id = $1::UUID
+SELECT
+  c.id,
+  c.name,
+  c.par,
+  t.tee_agg AS tees,
+  h.hole_agg AS holes
+FROM courses c
+LEFT JOIN tee_data t ON t.course_id = c.id
+LEFT JOIN hole_data h ON h.course_id = c.id
+WHERE c.id = $1
+GROUP BY c.id, t.tee_agg, h.hole_agg
 `
 
 type GetCourseRow struct {
 	ID    uuid.UUID     `json:"id"`
 	Name  string        `json:"name"`
 	Par   int32         `json:"par"`
-	Holes *dto.HoleList `json:"holes"`
 	Tees  *dto.TeeList  `json:"tees"`
+	Holes *dto.HoleList `json:"holes"`
 }
 
-func (q *Queries) GetCourse(ctx context.Context, dollar_1 uuid.UUID) (GetCourseRow, error) {
-	row := q.db.QueryRow(ctx, getCourse, dollar_1)
+func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (GetCourseRow, error) {
+	row := q.db.QueryRow(ctx, getCourse, id)
 	var i GetCourseRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Par,
-		&i.Holes,
 		&i.Tees,
+		&i.Holes,
 	)
 	return i, err
 }
 
 const getCourses = `-- name: GetCourses :many
-WITH hole_data AS (
-  SELECT
-    c.id,
-    c.name,
-    c.par,
-    COALESCE(jsonb_agg(to_jsonb(h) ORDER BY h.nr ASC) FILTER (WHERE h.course_id IS NOT NULL), '[]') AS holes
-  FROM courses c
-  LEFT JOIN holes h ON h.course_id = c.id
-  GROUP BY c.id, c.name, c.par
-), tee_data AS (
-  SELECT
-    c.id,
-    COALESCE(jsonb_agg(to_jsonb(t)) FILTER (WHERE t.course_id IS NOT NULL), '[]') AS tees
-  FROM courses c
-  LEFT JOIN tees t ON t.course_id = c.id
-  GROUP BY c.id, c.name, c.par
+WITH tee_data AS (
+  SELECT 
+    t.course_id, 
+    COALESCE(jsonb_agg(to_jsonb(t)) FILTER (WHERE t.course_id IS NOT NULL), '[]') AS tee_agg 
+  FROM tees t 
+  GROUP BY t.course_id
+), hole_data AS (
+  SELECT 
+    h.course_id, 
+    COALESCE(jsonb_agg(to_jsonb(h) ORDER BY h.nr) FILTER (WHERE h.course_id IS NOT NULL), '[]') AS hole_agg 
+  FROM holes h 
+  GROUP BY h.course_id
 )
-SELECT hd.id, hd.name, hd.par, hd.holes, td.tees FROM hole_data hd JOIN tee_data td USING (id)
+SELECT
+  c.id,
+  c.name,
+  c.par,
+  t.tee_agg AS tees,
+  h.hole_agg AS holes
+FROM courses c
+LEFT JOIN tee_data t ON t.course_id = c.id
+LEFT JOIN hole_data h ON h.course_id = c.id
+GROUP BY c.id, t.tee_agg, h.hole_agg
 `
 
 type GetCoursesRow struct {
 	ID    uuid.UUID     `json:"id"`
 	Name  string        `json:"name"`
 	Par   int32         `json:"par"`
-	Holes *dto.HoleList `json:"holes"`
 	Tees  *dto.TeeList  `json:"tees"`
+	Holes *dto.HoleList `json:"holes"`
 }
 
 func (q *Queries) GetCourses(ctx context.Context) ([]GetCoursesRow, error) {
@@ -145,8 +156,8 @@ func (q *Queries) GetCourses(ctx context.Context) ([]GetCoursesRow, error) {
 			&i.ID,
 			&i.Name,
 			&i.Par,
-			&i.Holes,
 			&i.Tees,
+			&i.Holes,
 		); err != nil {
 			return nil, err
 		}

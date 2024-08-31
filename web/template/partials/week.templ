@@ -11,9 +11,17 @@ templ WeekCard(week schema.GetWeeksRow, weekDates *utils.WeekDates) {
 		<div
 			class={ "text-5xl flex items-center justify-center border-b-2 pb-2 flex-col" , templ.KV("text-orange-600", weekDates.IsActive()) }
 		>
-			{ fmt.Sprintf("v.%d", week.Nr) }
+			if week.IsFinals.Bool {
+				Final!
+			} else {
+				{ fmt.Sprintf("v.%d", week.Nr) }
+			}
 			<div class="text-sm opacity-60 mt-1">
-				{ weekDates.Format() }
+				if week.IsFinals.Bool {
+					{ week.FinalsDate.Time.Format("2/1") }
+				} else {
+					{ weekDates.Format() }
+				}
 			</div>
 		</div>
 		<div class="flex flex-col pt-2">
@@ -98,20 +106,34 @@ templ EditWeekRow(week schema.GetWeekRow, courses []schema.GetCoursesRow, tees [
 
 templ WeekRow(week schema.GetWeeksRow, weekDates *utils.WeekDates) {
 	<tr class="tr group">
-		<td class="td">{ fmt.Sprint(week.Nr) }</td>
-		<td class={ "td", templ.KV("text-orange-600", weekDates.IsActive()), templ.KV("opacity-40", weekDates.IsPreviousWeek()) }>{ weekDates.Format() }</td>
+		<td class={ "td", templ.KV("font-bold", week.IsFinals.Bool) }>
+			if week.IsFinals.Bool {
+				Final!
+			} else {
+				{ fmt.Sprint(week.Nr) }
+			}
+		</td>
+		<td class={ "td", templ.KV("text-orange-600", weekDates.IsActive()), templ.KV("opacity-40", weekDates.IsPreviousWeek()) }>
+			if week.IsFinals.Bool {
+				{ week.FinalsDate.Time.Format("2/1") }
+			} else {
+				{ weekDates.Format() }
+			}
+		</td>
 		<td class="td">{ week.Course.Name }</td>
 		<td class="td">{ week.Tee.Name }</td>
 		<td class="td">
 			<div class="flex gap-3 ml-auto justify-end">
-				<button
-					class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
-					hx-get={ fmt.Sprintf("/admin/weeks/%s/edit", week.ID) }
-					hx-target="closest .group"
-					hx-swap="outerHTML"
-				>
-					Ändra	
-				</button>
+				if !week.IsFinals.Bool {
+					<button
+						class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
+						hx-get={ fmt.Sprintf("/admin/weeks/%s/edit", week.ID) }
+						hx-target="closest .group"
+						hx-swap="outerHTML"
+					>
+						Ändra	
+					</button>
+				}
 				<button
 					class="btn-link p-0 h-auto text-primary/60 hover:text-destructive"
 					hx-delete={ fmt.Sprintf("/api/weeks/%s", week.ID) }

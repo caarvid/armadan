@@ -1,0 +1,50 @@
+package views
+
+import "github.com/caarvid/armadan/web/template/partials"
+import "github.com/caarvid/armadan/internal/schema"
+import "fmt"
+
+templ Leaderboard(players []schema.GetLeaderboardRow) {
+	@document("Armadan") {
+		@partials.Header()
+		@partials.Content("content") {
+			<div class="flex flex-col gap-2 flex-1 lg:w-8/12 lg:flex-none mt-2">
+				@partials.Table("leaderboard") {
+					<thead class="thead">
+						<tr class="tr">
+							<th class="th w-4/6">Spelare</th>
+							<th class="th w-1/6 text-center">Rundor</th>
+							<th class="th w-1/6 text-center">Poäng</th>
+						</tr>
+					</thead>
+					<tbody class="tbody">
+						for _, player := range players {
+							<tr
+								data-open="false"
+								class={ "tr", templ.KV("text-foreground/30", player.NrOfRounds == 0) }
+								hx-get={ fmt.Sprintf("/leaderboard/%s", player.ID) }
+								hx-target="this"
+								hx-swap="afterend"
+								hx-trigger="show"
+								_="
+									on click 
+										if @data-open is 'false' then
+											trigger show
+											set @data-open to true
+										else
+											remove next <tr/>
+											set @data-open to false
+										end
+								"
+							>
+								<td class="td">{ fmt.Sprintf("%s %s", player.FirstName, player.LastName) }</td>
+								<td class="td text-center">{ fmt.Sprint(player.NrOfRounds) }</td>
+								<td class="td text-center">{ fmt.Sprint(player.Points) }</td>
+							</tr>
+						}
+					</tbody>
+				}
+			</div>
+		}
+	}
+}

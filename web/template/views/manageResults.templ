@@ -1,21 +1,109 @@
 package views
 
 import "github.com/caarvid/armadan/internal/schema"
+import "github.com/caarvid/armadan/web/template/partials"
 import "fmt"
+import "github.com/google/uuid"
 
-templ ManageResults(players []schema.GetPlayersRow) {
+templ resultRow(week schema.GetManageResultViewRow) {
+	<tr class={ "tr group", templ.KV("opacity-50", week.ResultID.Variant() == uuid.Reserved && !week.FirstUnpublished) }>
+		<td class="td">
+			if week.ResultID.Variant() != uuid.Reserved && !week.Published {
+				{ fmt.Sprintf("%d*", week.Nr) }
+			} else {
+				{ fmt.Sprintf("%d", week.Nr) }
+			}
+		</td>
+		<td class="td">{ week.CourseName.String }</td>
+		<td class="td">{ week.TeeName.String }</td>
+		<td class="td">
+			if week.Published {
+				{ fmt.Sprint(week.Participants) }
+			} else {
+				-
+			}
+		</td>
+		<td class="td">
+			if week.Published {
+				{ fmt.Sprint(week.Winners) }
+			} else {
+				-
+			}
+		</td>
+		<td class="td">
+			<div class="flex gap-3 ml-auto justify-end">
+				if week.Published || week.ResultID.Variant() != uuid.Reserved {
+					<button
+						class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
+						hx-get={ fmt.Sprintf("/admin/results/%s", week.ResultID) }
+						hx-swap="outerHTML"
+						hx-select="#admin-content"
+						hx-target="#admin-content"
+					>
+						Ändra	
+					</button>
+				} else if week.FirstUnpublished {
+					<button
+						class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
+						hx-get={ fmt.Sprintf("/admin/results/new/%s", week.ID) }
+						hx-swap="outerHTML"
+						hx-select="#admin-content"
+						hx-target="#admin-content"
+					>
+						Lägg till	
+					</button>
+				}
+			</div>
+		</td>
+	</tr>
+}
+
+templ EditResult(result schema.GetResultByIdRow, rounds []schema.GetRoundsByResultIdRow) {
+	@AdminLayout() {
+		@adminHeader() {
+			<h3
+				class="font-semibold leading-none tracking-tight text-2xl"
+			>
+				{ fmt.Sprintf("Resultat - v.%d", result.WeekNr) }
+			</h3>
+			<button
+				class="btn-default"
+				hx-get={ fmt.Sprintf("/admin/results/%s/round", result.ID) }
+				hx-target="body"
+				hx-swap="beforeend"
+			>
+				Lägg till runda
+			</button>
+		}
+		if len(rounds) > 0 {
+			@partials.RoundTable(rounds)
+		} else {
+			@partials.NoData("Rundorna kommer synas här")
+		}
+	}
+}
+
+templ ManageResults(weeks []schema.GetManageResultViewRow) {
 	@AdminLayout() {
 		@adminHeader() {
 			<h3 class="font-semibold leading-none tracking-tight text-2xl">Resultat</h3>
 		}
-		<div>
-			<select name="player" class="select">
-				<option disabled hidden selected value>Spelare</option>
-				for _, p := range players {
-					<option value={ p.ID.String() }>{ fmt.Sprintf("%s, %s", p.LastName, p.FirstName) }</option>
+		@partials.Table("results-table") {
+			<thead class="thead">
+				<tr class="tr">
+					<th class="th w-1/12">Vecka</th>
+					<th class="th w-1/4">Bana</th>
+					<th class="th w-1/6">Tee</th>
+					<th class="th w-1/6">Deltagare</th>
+					<th class="th w-1/6">Vinnare</th>
+					<th class="th"></th>
+				</tr>
+			</thead>
+			<tbody class="tbody">
+				for _, week := range weeks {
+					@resultRow(week)
 				}
-			</select>
-		</div>
-		<div id="form-container"></div>
+			</tbody>
+		}
 	}
 }

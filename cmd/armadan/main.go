@@ -5,14 +5,18 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/caarvid/armadan/internal/handlers"
 	m "github.com/caarvid/armadan/internal/middleware"
 	"github.com/caarvid/armadan/internal/routes"
 	"github.com/caarvid/armadan/internal/schema"
 	"github.com/caarvid/armadan/internal/validation"
+	"github.com/patrickmn/go-cache"
 
 	"github.com/go-playground/validator/v10"
+	pgxdecimal "github.com/jackc/pgx-shopspring-decimal"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -35,6 +39,12 @@ func createDatabasePool() (*pgxpool.Pool, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	dbConfig.AfterConnect = func(ctx context.Context, c *pgx.Conn) error {
+		pgxdecimal.Register(c.TypeMap())
+
+		return nil
 	}
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), dbConfig)
@@ -71,9 +81,10 @@ func start() error {
 	defer dbPool.Close()
 
 	app := initializeApp()
+	cache := cache.New(15*time.Minute, 10*time.Minute)
 
 	queries := schema.New(dbPool)
-	handlers := handlers.Init(queries, dbPool)
+	handlers := handlers.Init(queries, dbPool, cache)
 
 	routes.Register(app, handlers, queries)
 

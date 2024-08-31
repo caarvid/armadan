@@ -57,6 +57,53 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	return i, err
 }
 
+const getUserById = `-- name: GetUserById :one
+SELECT id, email, role FROM users WHERE id = $1
+`
+
+type GetUserByIdRow struct {
+	ID    uuid.UUID     `json:"id"`
+	Email string        `json:"email"`
+	Role  UsersRoleEnum `json:"role"`
+}
+
+func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error) {
+	row := q.db.QueryRow(ctx, getUserById, id)
+	var i GetUserByIdRow
+	err := row.Scan(&i.ID, &i.Email, &i.Role)
+	return i, err
+}
+
+const getUsers = `-- name: GetUsers :many
+SELECT id, email, role FROM users
+`
+
+type GetUsersRow struct {
+	ID    uuid.UUID     `json:"id"`
+	Email string        `json:"email"`
+	Role  UsersRoleEnum `json:"role"`
+}
+
+func (q *Queries) GetUsers(ctx context.Context) ([]GetUsersRow, error) {
+	rows, err := q.db.Query(ctx, getUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUsersRow
+	for rows.Next() {
+		var i GetUsersRow
+		if err := rows.Scan(&i.ID, &i.Email, &i.Role); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateUserEmail = `-- name: UpdateUserEmail :one
 UPDATE users SET email = $1 WHERE id = $2 RETURNING id, email, password, role
 `
@@ -89,6 +136,27 @@ type UpdateUserPasswordParams struct {
 
 func (q *Queries) UpdateUserPassword(ctx context.Context, arg *UpdateUserPasswordParams) (User, error) {
 	row := q.db.QueryRow(ctx, updateUserPassword, arg.Password, arg.ID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Password,
+		&i.Role,
+	)
+	return i, err
+}
+
+const updateUserRole = `-- name: UpdateUserRole :one
+UPDATE users SET role = $1 WHERE id = $2 RETURNING id, email, password, role
+`
+
+type UpdateUserRoleParams struct {
+	Role UsersRoleEnum `json:"role"`
+	ID   uuid.UUID     `json:"id"`
+}
+
+func (q *Queries) UpdateUserRole(ctx context.Context, arg *UpdateUserRoleParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserRole, arg.Role, arg.ID)
 	var i User
 	err := row.Scan(
 		&i.ID,

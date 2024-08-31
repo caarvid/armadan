@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shopspring/decimal"
 )
 
 type UsersRoleEnum string
@@ -78,11 +79,12 @@ type PasswordResetToken struct {
 }
 
 type Player struct {
-	ID        uuid.UUID `json:"id"`
-	FirstName string    `json:"firstName"`
-	LastName  string    `json:"lastName"`
-	Points    int32     `json:"points"`
-	UserID    uuid.UUID `json:"userId"`
+	ID        uuid.UUID       `json:"id"`
+	FirstName string          `json:"firstName"`
+	LastName  string          `json:"lastName"`
+	Points    int32           `json:"points"`
+	UserID    uuid.UUID       `json:"userId"`
+	Hcp       decimal.Decimal `json:"hcp"`
 }
 
 type Post struct {
@@ -91,6 +93,31 @@ type Post struct {
 	Body      string             `json:"body"`
 	Author    string             `json:"author"`
 	CreatedAt pgtype.Timestamptz `json:"createdAt"`
+}
+
+type Result struct {
+	ID        uuid.UUID `json:"id"`
+	WeekID    uuid.UUID `json:"weekId"`
+	Published bool      `json:"published"`
+}
+
+type Round struct {
+	ID       uuid.UUID       `json:"id"`
+	NetIn    int32           `json:"netIn"`
+	NetOut   int32           `json:"netOut"`
+	GrossIn  int32           `json:"grossIn"`
+	GrossOut int32           `json:"grossOut"`
+	OldHcp   decimal.Decimal `json:"oldHcp"`
+	NewHcp   decimal.Decimal `json:"newHcp"`
+	PlayerID uuid.UUID       `json:"playerId"`
+	ResultID uuid.UUID       `json:"resultId"`
+}
+
+type Score struct {
+	ID      uuid.UUID `json:"id"`
+	Strokes int32     `json:"strokes"`
+	HoleID  uuid.UUID `json:"holeId"`
+	RoundID uuid.UUID `json:"roundId"`
 }
 
 type Tee struct {
@@ -117,8 +144,17 @@ type UserSession struct {
 }
 
 type Week struct {
+	ID         uuid.UUID          `json:"id"`
+	Nr         int32              `json:"nr"`
+	CourseID   uuid.UUID          `json:"courseId"`
+	TeeID      uuid.UUID          `json:"teeId"`
+	FinalsDate pgtype.Timestamptz `json:"finalsDate"`
+	IsFinals   pgtype.Bool        `json:"isFinals"`
+}
+
+type Winner struct {
 	ID       uuid.UUID `json:"id"`
-	Nr       int32     `json:"nr"`
-	CourseID uuid.UUID `json:"courseId"`
-	TeeID    uuid.UUID `json:"teeId"`
+	Points   int32     `json:"points"`
+	ResultID uuid.UUID `json:"resultId"`
+	PlayerID uuid.UUID `json:"playerId"`
 }
