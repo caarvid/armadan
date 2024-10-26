@@ -1,12 +1,12 @@
 package views
 
-import "github.com/caarvid/armadan/internal/schema"
-import "github.com/caarvid/armadan/web/template/partials"
 import "fmt"
 import "github.com/google/uuid"
+import "github.com/caarvid/armadan/web/template/partials"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ resultRow(week schema.GetManageResultViewRow) {
-	<tr class={ "tr group", templ.KV("opacity-50", week.ResultID.Variant() == uuid.Reserved && !week.FirstUnpublished) }>
+templ resultRow(week armadan.ResultDetail) {
+	<tr class={ "tr group", templ.KV("opacity-50", week.ResultID.Variant() == uuid.Reserved && !week.IsFirstUnpublished) }>
 		<td class="td">
 			if week.ResultID.Variant() != uuid.Reserved && !week.Published {
 				{ fmt.Sprintf("%d*", week.Nr) }
@@ -14,8 +14,8 @@ templ resultRow(week schema.GetManageResultViewRow) {
 				{ fmt.Sprintf("%d", week.Nr) }
 			}
 		</td>
-		<td class="td">{ week.CourseName.String }</td>
-		<td class="td">{ week.TeeName.String }</td>
+		<td class="td">{ week.CourseName }</td>
+		<td class="td">{ week.TeeName }</td>
 		<td class="td">
 			if week.Published {
 				{ fmt.Sprint(week.Participants) }
@@ -42,10 +42,10 @@ templ resultRow(week schema.GetManageResultViewRow) {
 					>
 						Ändra	
 					</button>
-				} else if week.FirstUnpublished {
+				} else if week.IsFirstUnpublished {
 					<button
 						class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
-						hx-get={ fmt.Sprintf("/admin/results/new/%s", week.ID) }
+						hx-get={ fmt.Sprintf("/admin/results/week/%s/new", week.ID) }
 						hx-swap="outerHTML"
 						hx-select="#admin-content"
 						hx-target="#admin-content"
@@ -58,7 +58,7 @@ templ resultRow(week schema.GetManageResultViewRow) {
 	</tr>
 }
 
-templ EditResult(result schema.GetResultByIdRow, rounds []schema.GetRoundsByResultIdRow) {
+templ EditResult(result *armadan.Result, rounds []armadan.Round) {
 	@AdminLayout() {
 		@adminHeader() {
 			<h3
@@ -83,7 +83,7 @@ templ EditResult(result schema.GetResultByIdRow, rounds []schema.GetRoundsByResu
 	}
 }
 
-templ ManageResults(weeks []schema.GetManageResultViewRow) {
+templ ManageResults(weeks []armadan.ResultDetail) {
 	@AdminLayout() {
 		@adminHeader() {
 			<h3 class="font-semibold leading-none tracking-tight text-2xl">Resultat</h3>

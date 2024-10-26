@@ -1,9 +1,9 @@
 package views
 
-import "github.com/caarvid/armadan/internal/schema"
 import "github.com/caarvid/armadan/web/template/partials"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ ManageWeeks(weeks []schema.GetWeeksRow, courses []schema.GetCoursesRow) {
+templ ManageWeeks(weeks []armadan.Week, courses []armadan.Course) {
 	@AdminLayout() {
 		@adminHeader() {
 			<h3 class="font-semibold leading-none tracking-tight text-2xl">Schema</h3>

@@ -1,39 +1,38 @@
 package partials
 
-import "github.com/caarvid/armadan/internal/schema"
 import "fmt"
-import "github.com/caarvid/armadan/internal/utils"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ WeekCard(week schema.GetWeeksRow, weekDates *utils.WeekDates) {
+templ WeekCard(week armadan.Week) {
 	<div
-		class={ "flex px-3 py-2 group border rounded-l shadow flex-col relative" , templ.KV("opacity-40", weekDates.IsPreviousWeek()) }
+		class={ "flex px-3 py-2 group border rounded-l shadow flex-col relative" , templ.KV("opacity-40", week.IsPrevious()) }
 	>
 		<div
-			class={ "text-5xl flex items-center justify-center border-b-2 pb-2 flex-col" , templ.KV("text-orange-600", weekDates.IsActive()) }
+			class={ "text-5xl flex items-center justify-center border-b-2 pb-2 flex-col" , templ.KV("text-orange-600", week.IsCurrent()) }
 		>
-			if week.IsFinals.Bool {
+			if week.IsFinals {
 				Final!
 			} else {
 				{ fmt.Sprintf("v.%d", week.Nr) }
 			}
 			<div class="text-sm opacity-60 mt-1">
-				if week.IsFinals.Bool {
-					{ week.FinalsDate.Time.Format("2/1") }
+				if week.IsFinals {
+					{ week.FinalsDate.Format("2/1") }
 				} else {
-					{ weekDates.Format() }
+					{ week.Dates.String() }
 				}
 			</div>
 		</div>
 		<div class="flex flex-col pt-2">
 			<div class="text-lg font-semibold">
-				{ week.Course.Name }
+				{ week.CourseName }
 			</div>
-			<div class="text-sm opacity-60">{ fmt.Sprintf("Tee: %s", week.Tee.Name) }</div>
+			<div class="text-sm opacity-60">{ fmt.Sprintf("Tee: %s", week.TeeName) }</div>
 		</div>
 	</div>
 }
 
-templ EditWeekRow(week schema.GetWeekRow, courses []schema.GetCoursesRow, tees []schema.Tee) {
+templ EditWeekRow(week armadan.Week, courses []armadan.Course, tees []armadan.Tee) {
 	<tr
 		class="tr group"
 		hx-target="#week-list"
@@ -60,7 +59,7 @@ templ EditWeekRow(week schema.GetWeekRow, courses []schema.GetCoursesRow, tees [
 					for _, course := range courses {
 						<option
 							value={ course.ID.String() }
-							if course.ID==week.Course.Id {
+							if course.ID==week.CourseID {
 								selected="selected"
 							}
 						>
@@ -72,11 +71,11 @@ templ EditWeekRow(week schema.GetWeekRow, courses []schema.GetCoursesRow, tees [
 		</td>
 		<td class="td">
 			<div class="select-wrapper">
-				<select class="select" name="teeId" required value={ week.Tee.Id.String() }>
+				<select class="select" name="teeId" required value={ week.TeeID.String() }>
 					for _, tee := range tees {
 						<option
 							value={ tee.ID.String() }
-							if tee.ID==week.Tee.Id {
+							if tee.ID==week.TeeID {
 								selected="selected"
 							}
 						>{ tee.Name }</option>
@@ -104,27 +103,27 @@ templ EditWeekRow(week schema.GetWeekRow, courses []schema.GetCoursesRow, tees [
 	</tr>
 }
 
-templ WeekRow(week schema.GetWeeksRow, weekDates *utils.WeekDates) {
+templ WeekRow(week armadan.Week) {
 	<tr class="tr group">
-		<td class={ "td", templ.KV("font-bold", week.IsFinals.Bool) }>
-			if week.IsFinals.Bool {
+		<td class={ "td", templ.KV("font-bold", week.IsFinals) }>
+			if week.IsFinals {
 				Final!
 			} else {
 				{ fmt.Sprint(week.Nr) }
 			}
 		</td>
-		<td class={ "td", templ.KV("text-orange-600", weekDates.IsActive()), templ.KV("opacity-40", weekDates.IsPreviousWeek()) }>
-			if week.IsFinals.Bool {
-				{ week.FinalsDate.Time.Format("2/1") }
+		<td class={ "td", templ.KV("text-orange-600", week.IsCurrent()), templ.KV("opacity-40", week.IsPrevious()) }>
+			if week.IsFinals {
+				{ week.FinalsDate.Format("2/1") }
 			} else {
-				{ weekDates.Format() }
+				{ week.Dates.String() }
 			}
 		</td>
-		<td class="td">{ week.Course.Name }</td>
-		<td class="td">{ week.Tee.Name }</td>
+		<td class="td">{ week.CourseName }</td>
+		<td class="td">{ week.TeeName }</td>
 		<td class="td">
 			<div class="flex gap-3 ml-auto justify-end">
-				if !week.IsFinals.Bool {
+				if !week.IsFinals {
 					<button
 						class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
 						hx-get={ fmt.Sprintf("/admin/weeks/%s/edit", week.ID) }

@@ -1,42 +1,67 @@
 package validation
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
+	"github.com/google/uuid"
 )
 
-func ValidateRequest(c echo.Context, i interface{}) error {
-	if err := c.Bind(i); err != nil {
-		return err
-	}
-
-	if err := c.Validate(i); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-type CustomValidator struct {
+type customValidator struct {
 	validator *validator.Validate
-}
-
-func NewValidator(v *validator.Validate) *CustomValidator {
-	return &CustomValidator{
-		validator: v,
-	}
 }
 
 type errorMessage map[string]string
 type validationErrors []errorMessage
 
-func (cv *CustomValidator) Validate(i interface{}) error {
+func New() *customValidator {
+	return &customValidator{
+		validator: validator.New(validator.WithRequiredStructEnabled()),
+	}
+}
+
+func (cv *customValidator) ValidateIdParam(r *http.Request) (*uuid.UUID, error) {
+	v := r.PathValue("id")
+
+	if v == "" {
+		return nil, errors.New("could not find id param")
+	}
+
+	err := cv.validator.Var(v, "required,uuid4")
+
+	if err != nil {
+		return nil, err
+	}
+
+	val, err := uuid.Parse(v)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &val, nil
+}
+
+func (cv *customValidator) Validate(r *http.Request, i interface{}) error {
+	b, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	if err != nil {
+		return err
+	}
+
+	if err = json.Unmarshal(b, i); err != nil {
+		return err
+	}
+
 	if err := cv.validator.Struct(i); err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
-			return echo.NewHTTPError(http.StatusBadRequest, "invalid data")
+			return errors.New("invalid data")
+			// return echo.NewHTTPError(http.StatusBadRequest, "invalid data")
 		}
 
 		var vErr validationErrors
@@ -50,7 +75,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 			case "required":
 				e["message"] = "required field"
 			case "email":
-				e["message"] = "invalid email address"
+				e["message"] = "Ogiltig email"
 			default:
 				e["message"] = fmt.Sprintf("must satisfy '%s' '%v' criteria", err.Tag(), err.Param())
 			}
@@ -58,9 +83,10 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 			vErr = append(vErr, e)
 		}
 
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]validationErrors{
-			"errors": vErr,
-		})
+		return errors.New("validation failed")
+		// return echo.NewHTTPError(http.StatusBadRequest, map[string]validationErrors{
+		// 	"errors": vErr,
+		// })
 	}
 
 	return nil

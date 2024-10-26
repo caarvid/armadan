@@ -2,10 +2,10 @@
 SELECT * FROM users WHERE email = $1;
 
 -- name: GetUserById :one
-SELECT id, email, role FROM users WHERE id = $1;
+SELECT * FROM users WHERE id = $1;
 
 -- name: GetUsers :many
-SELECT id, email, role FROM users;
+SELECT * FROM users;
 
 -- name: CreateUser :one
 INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *;

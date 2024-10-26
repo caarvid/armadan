@@ -1,12 +1,12 @@
 package partials
 
-templ WrongCredentials() {
+templ LoginError(msg string) {
 	<div
 		id="login-error"
 		_="init set #password.value to ''"
 		class="relative w-full rounded-lg border px-4 py-2 text-sm border-destructive/50 text-destructive mb-3 bg-destructive-background"
 	>
-		Fel email eller lösenord
+		{ msg }
 	</div>
 }
 

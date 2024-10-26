@@ -1,47 +1,63 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 
-	"github.com/caarvid/armadan/internal/schema"
-	"github.com/caarvid/armadan/internal/utils"
-	"github.com/labstack/echo/v4"
+	"github.com/caarvid/armadan/internal/armadan"
+	"github.com/caarvid/armadan/internal/utils/route"
+	"github.com/caarvid/armadan/internal/utils/session"
+	"github.com/rs/zerolog"
 )
 
-func redirectToLogin(c echo.Context) error {
-	return c.Redirect(http.StatusFound, "/login")
+type middleware func(http.Handler) http.Handler
+
+var roleMap = map[armadan.Role]int8{
+	armadan.Role(armadan.UserRole):      1,
+	armadan.Role(armadan.ModeratorRole): 2,
+	armadan.Role(armadan.AdminRole):     3,
 }
 
-func redirectToHome(c echo.Context) error {
-	if c.Request().Header.Get("HX-Request") == "true" {
-		c.Response().Header().Add("HX-Redirect", "/")
-		return c.NoContent(http.StatusForbidden)
-	}
-
-	return c.Redirect(http.StatusFound, "/")
-}
-
-func Authorize(db *schema.Queries) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			sCookie, err := utils.GetSessionCookie(c)
+func Protected(
+	s armadan.SessionService,
+	role armadan.Role,
+	loginHandler http.Handler,
+) middleware {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			l := zerolog.Ctx(r.Context())
+			sCookie, err := session.GetCookie(r)
 
 			if err != nil {
-				return redirectToLogin(c)
+				loginHandler.ServeHTTP(w, r)
+				return
 			}
 
-			session, err := db.GetSessionByToken(c.Request().Context(), sCookie.Value)
+			session, err := s.GetByToken(r.Context(), sCookie.Value)
 
 			if err != nil || !session.IsValid() {
-				c.SetCookie(utils.ClearSessionCookie())
-				return redirectToLogin(c)
+				loginHandler.ServeHTTP(w, r)
+				return
 			}
 
-			c.Set("isLoggedIn", true)
-			c.Set("isModerator", utils.IsModerator(session.Role.UsersRoleEnum))
-			c.Set("isAdmin", utils.IsAdmin(session.Role.UsersRoleEnum))
+			l.UpdateContext(func(c zerolog.Context) zerolog.Context {
+				return c.Stringer("user_id", session.UserID)
+			})
 
-			return next(c)
-		}
+			if roleMap[session.Role] <= roleMap[role] {
+				l.Info().
+					Str("location", "middleware:authorize").
+					Str("user_role", string(session.Role)).
+					Str("required_role", string(role)).
+					Msg("unauthorized access attempt")
+				route.RedirectToHome(w, r)
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), "isLoggedIn", true)
+			ctx = context.WithValue(ctx, "role", session.Role)
+
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
 	}
 }

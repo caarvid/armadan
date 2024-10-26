@@ -1,9 +1,8 @@
 package partials
 
-import "github.com/caarvid/armadan/internal/schema"
-import "github.com/caarvid/armadan/internal/utils"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ WeekTable(weeks []schema.GetWeeksRow) {
+templ WeekTable(weeks []armadan.Week) {
 	@Table("week-list") {
 		<thead class="thead">
 			<tr class="tr">
@@ -16,16 +15,16 @@ templ WeekTable(weeks []schema.GetWeeksRow) {
 		</thead>
 		<tbody class="tbody">
 			for _, week := range weeks {
-				@WeekRow(week, utils.GetWeekDates(int(week.Nr)))
+				@WeekRow(week)
 			}
 		</tbody>
 	}
 }
 
-templ WeekList(weeks []schema.GetWeeksRow, isEditable bool) {
+templ WeekList(weeks []armadan.Week, isEditable bool) {
 	<div id="week-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 items-start">
 		for _, week := range weeks {
-			@WeekCard(week, utils.GetWeekDates(int(week.Nr)))
+			@WeekCard(week)
 		}
 	</div>
 }

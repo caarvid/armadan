@@ -1,7 +1,7 @@
 package views
 
-import "github.com/caarvid/armadan/internal/schema"
 import "github.com/caarvid/armadan/web/template/partials"
+import "github.com/caarvid/armadan/internal/armadan"
 
 templ CreatePost() {
 	@AdminLayout() {
@@ -79,7 +79,7 @@ templ CreatePost() {
 	}
 }
 
-templ ManagePosts(posts []schema.Post) {
+templ ManagePosts(posts []armadan.Post) {
 	@AdminLayout() {
 		@adminHeader() {
 			<h3 class="font-semibold leading-none tracking-tight text-2xl">Inlägg</h3>

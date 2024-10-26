@@ -1,11 +1,11 @@
 package partials
 
-import "github.com/caarvid/armadan/internal/schema"
 import "time"
 import "fmt"
 import "github.com/caarvid/armadan/internal/utils/markdown"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ PostCard(post schema.Post) {
+templ PostCard(post armadan.Post) {
 	<div class="rounded-l border bg-card text-card-foreground shadow p-3">
 		<h3 class="font-semibold leading-none tracking-tight mb-2 text-2xl">{ post.Title }</h3>
 		<div class="mb-3 flex flex-col gap-4">
@@ -13,12 +13,12 @@ templ PostCard(post schema.Post) {
 		</div>
 		<div class="flex justify-between opacity-50">
 			<div>{ post.Author }</div>
-			<div>{ post.CreatedAt.Time.Format("2006-01-02") }</div>
+			<div>{ post.CreatedAt.Format("2006-01-02") }</div>
 		</div>
 	</div>
 }
 
-templ PostList(posts []schema.Post) {
+templ PostList(posts []armadan.Post) {
 	@Table("post-list") {
 		<thead class="thead">
 			<tr class="tr">
@@ -36,16 +36,16 @@ templ PostList(posts []schema.Post) {
 	}
 }
 
-templ Post(post schema.Post) {
+templ Post(post armadan.Post) {
 	<tr class="tr group">
 		<td class="td">{ post.Title }</td>
 		<td class="td">{ post.Author }</td>
-		<td class="td">{ post.CreatedAt.Time.Format(time.DateTime) }</td>
+		<td class="td">{ post.CreatedAt.Format(time.DateTime) }</td>
 		<td class="td">
 			<div class="flex gap-3 ml-auto justify-end">
 				<button
 					class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
-					hx-get={ fmt.Sprintf("/admin/posts/edit/%s", post.ID) }
+					hx-get={ fmt.Sprintf("/admin/posts/%s/edit", post.ID) }
 					hx-target="body"
 					hx-swap="beforeend"
 				>
@@ -65,7 +65,7 @@ templ Post(post schema.Post) {
 	</tr>
 }
 
-templ EditPost(post schema.Post) {
+templ EditPost(post armadan.Post) {
 	@Modal("Uppdatera inlägg", true) {
 		<form
 			id="edit-post-form"

@@ -8,9 +8,8 @@ import (
 )
 
 func TestGetWeekDates(t *testing.T) {
-	firstOfJan := time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
-	v20 := GetWeekDates(firstOfJan, 20)
-	v30 := GetWeekDates(firstOfJan, 30)
+	v20 := GetWeekDates(20)
+	v30 := GetWeekDates(30)
 
 	assert.Equal(t, v20.start, time.Date(2024, time.May, 14, 0, 0, 0, 0, time.UTC))
 	assert.Equal(t, v20.end, time.Date(2024, time.May, 19, 0, 0, 0, 0, time.UTC))

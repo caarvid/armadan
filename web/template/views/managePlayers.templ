@@ -1,9 +1,9 @@
 package views
 
 import "github.com/caarvid/armadan/web/template/partials"
-import "github.com/caarvid/armadan/internal/schema"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ ManagePlayers(players []schema.GetPlayersRow) {
+templ ManagePlayers(players []armadan.Player) {
 	@AdminLayout() {
 		@adminHeader() {
 			<h3 class="font-semibold leading-none tracking-tight text-2xl">Spelare</h3>

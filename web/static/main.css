@@ -1494,6 +1494,11 @@ body {
   background-color: hsl(var(--primary) / 0.9);
 }
 
+.bg-red-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(220 38 38 / var(--tw-bg-opacity));
+}
+
 .bg-slate-700 {
   --tw-bg-opacity: 1;
   background-color: rgb(51 65 85 / var(--tw-bg-opacity));
@@ -1700,10 +1705,6 @@ body {
   text-underline-offset: 8px;
 }
 
-.opacity-0 {
-  opacity: 0;
-}
-
 .opacity-40 {
   opacity: 0.4;
 }
@@ -1794,10 +1795,6 @@ body {
   color: hsl(var(--muted-foreground));
 }
 
-.last\:mb-4:last-child {
-  margin-bottom: 1rem;
-}
-
 .hover\:bg-muted:hover {
   background-color: hsl(var(--muted));
 }
@@ -1809,10 +1806,6 @@ body {
 .hover\:bg-white:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
-}
-
-.hover\:text-card-foreground\/50:hover {
-  color: hsl(var(--card-foreground) / 0.5);
 }
 
 .hover\:text-destructive:hover {
@@ -1856,10 +1849,6 @@ body {
 
 .disabled\:opacity-50:disabled {
   opacity: 0.5;
-}
-
-.group:hover .group-hover\:opacity-100 {
-  opacity: 1;
 }
 
 .peer:disabled ~ .peer-disabled\:cursor-not-allowed {

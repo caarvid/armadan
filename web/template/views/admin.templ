@@ -2,6 +2,7 @@ package views
 
 import (
 	"github.com/caarvid/armadan/web/template/partials"
+	"github.com/caarvid/armadan/internal/utils/user"
 )
 
 type item struct {
@@ -66,7 +67,7 @@ templ adminSidebar() {
 				for _, i := range items {
 					@sidebarItem(i)
 				}
-				if ctx.Value("isAdmin").(bool) {
+				if user.IsAdmin(ctx) {
 					<div class="text-red-500 pb-8 border-t-2">
 						for _, i := range dangerZone {
 							@sidebarItem(i)

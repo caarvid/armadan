@@ -1,15 +1,15 @@
 package partials
 
-import "github.com/caarvid/armadan/internal/schema"
 import "fmt"
+import "github.com/caarvid/armadan/internal/armadan"
 
-var roles = [3]schema.UsersRoleEnum{
-	schema.UsersRoleEnumUser,
-	schema.UsersRoleEnumAdmin,
-	schema.UsersRoleEnumModerator,
+var roles = [3]armadan.Role{
+	armadan.UserRole,
+	armadan.AdminRole,
+	armadan.ModeratorRole,
 }
 
-templ EditUserRow(user schema.GetUserByIdRow) {
+templ EditUserRow(user armadan.User) {
 	<tr
 		class="tr group"
 		hx-swap="outerHTML"
@@ -53,7 +53,7 @@ templ EditUserRow(user schema.GetUserByIdRow) {
 	</tr>
 }
 
-templ UserRow(user schema.GetUsersRow) {
+templ UserRow(user armadan.User) {
 	<tr class="tr group">
 		<td class="td">{ user.Email }</td>
 		<td class="td">{ string(user.Role) }</td>
@@ -72,7 +72,7 @@ templ UserRow(user schema.GetUsersRow) {
 	</tr>
 }
 
-templ UserTable(users []schema.GetUsersRow) {
+templ UserTable(users []armadan.User) {
 	@Table("user-list") {
 		<thead class="thead">
 			<tr class="tr">

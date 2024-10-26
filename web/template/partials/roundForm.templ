@@ -1,7 +1,7 @@
 package partials
 
-import "github.com/caarvid/armadan/internal/schema"
 import "fmt"
+import "github.com/caarvid/armadan/internal/armadan"
 
 templ formCell(header string) {
 	<div>
@@ -16,7 +16,7 @@ templ formCell(header string) {
 	</div>
 }
 
-templ NewRoundForm(resultId string, course schema.GetCourseRow, player schema.GetPlayerRow) {
+templ NewRoundForm(resultId string, course *armadan.Course, player *armadan.Player) {
 	<form
 		id="new-round-form"
 		class="flex flex-col gap-2"
@@ -28,9 +28,9 @@ templ NewRoundForm(resultId string, course schema.GetCourseRow, player schema.Ge
 		<input type="hidden" value={ player.Hcp.String() } name="hcp" data-type="number"/>
 		<div class="grid grid-cols-11">
 			@formCell("Hål")
-			for _, hole := range (*course.Holes)[:9] {
+			for _, hole := range (course.Holes)[:9] {
 				@formCell(fmt.Sprint(hole.Nr)) {
-					<input type="hidden" value={ hole.Id.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
+					<input type="hidden" value={ hole.ID.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
 					<input type="hidden" value={ fmt.Sprint(hole.Index) } name={ fmt.Sprintf("scores.%d.index", hole.Nr-1) } data-type="number"/>
 					<input type="hidden" value={ fmt.Sprint(hole.Par) } name={ fmt.Sprintf("scores.%d.par", hole.Nr-1) } data-type="number"/>
 					<input
@@ -46,9 +46,9 @@ templ NewRoundForm(resultId string, course schema.GetCourseRow, player schema.Ge
 		</div>
 		<div class="grid grid-cols-11">
 			@formCell("Hål")
-			for _, hole := range (*course.Holes)[9:] {
+			for _, hole := range (course.Holes)[9:] {
 				@formCell(fmt.Sprint(hole.Nr)) {
-					<input type="hidden" value={ hole.Id.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
+					<input type="hidden" value={ hole.ID.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
 					<input type="hidden" value={ fmt.Sprint(hole.Index) } name={ fmt.Sprintf("scores.%d.index", hole.Nr-1) } data-type="number"/>
 					<input type="hidden" value={ fmt.Sprint(hole.Par) } name={ fmt.Sprintf("scores.%d.par", hole.Nr-1) } data-type="number"/>
 					<input
@@ -69,7 +69,7 @@ templ NewRoundForm(resultId string, course schema.GetCourseRow, player schema.Ge
 	</form>
 }
 
-templ NewRoundModal(resultId string, players []schema.GetPlayersRow) {
+templ NewRoundModal(resultId string, players []armadan.Player) {
 	@Modal("Ny runda", true) {
 		<div class="flex items-center gap-3">
 			<label for="players">Spelare:</label>

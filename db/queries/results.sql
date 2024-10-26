@@ -12,39 +12,32 @@ ORDER BY wk.nr ASC;
 
 -- name: GetManageResultView :many
 WITH result_data AS (
-  SELECT r.id, r.published, r.week_id FROM results r
-), course_data AS (
-  SELECT c.id, c.name FROM courses c
-), round_data AS (
-  SELECT r.id, r.result_id FROM rounds r
-), winner_data AS (
-  SELECT w.id, w.result_id FROM winners w
-), tee_data AS (
-  SELECT t.id, t.name FROM tees t
+  SELECT r.id, r.published, r.week_id 
+  FROM results r
+), participant_counts AS (
+  SELECT r.result_id, COUNT(r.id) AS participants
+  FROM rounds r
+  GROUP BY r.result_id
+), winner_counts AS (
+  SELECT w.result_id, COUNT(w.id) AS winners
+  FROM winners w
+  GROUP BY w.result_id
 )
-  SELECT 
-    w.id,
-    w.nr,
-    w.is_finals,
-    cd.name AS course_name,
-    td.name AS tee_name,
-    rd.id::UUID AS result_id,
-    COALESCE(rd.published, false) AS published,
-    COUNT(r.id) AS participants,
-    COUNT(wd.id) AS winners,
-    CASE 
-        WHEN rd.published = false OR rd.published IS NULL AND ROW_NUMBER() OVER (PARTITION BY rd.published ORDER BY w.nr ASC) = 1 
-        THEN true 
-        ELSE false 
-    END AS first_unpublished
-  FROM weeks w
-LEFT JOIN course_data cd ON cd.id = w.course_id
-LEFT JOIN result_data rd ON rd.week_id = w.id
-LEFT JOIN round_data r ON rd.id = r.result_id
-LEFT JOIN winner_data wd ON rd.id = wd.result_id
-LEFT JOIN tee_data td ON td.id = w.tee_id
-GROUP BY w.id, cd.name, rd.id, r.id, rd.published, wd.id, td.name
-ORDER BY w.nr ASC;
+SELECT 
+  wd.id,
+  wd.nr,
+  wd.is_finals,
+  wd.course_name,
+  wd.tee_name,
+  rd.id::UUID AS result_id,
+  COALESCE(rd.published, false) AS published,
+  COALESCE(pc.participants, 0) AS participants,
+  COALESCE(wc.winners, 0) AS winners
+FROM week_details wd
+LEFT JOIN result_data rd ON rd.week_id = wd.id
+LEFT JOIN participant_counts pc ON pc.result_id = rd.id
+LEFT JOIN winner_counts wc ON wc.result_id = rd.id
+ORDER BY wd.nr ASC;
 
 -- name: GetResultById :one
 WITH week_data AS (

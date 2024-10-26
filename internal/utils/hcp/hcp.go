@@ -1,6 +1,8 @@
 package hcp
 
-import "math"
+import (
+	"math"
+)
 
 func getHcpGroup(hcp float64) float64 {
 	switch {
@@ -32,5 +34,5 @@ func GetNewHcp(hcp float64, par, total int32) float64 {
 }
 
 func GetStrokes(hcp, cr float64, slope, par int) int {
-	return int(math.Min(math.Round(hcp*float64(slope/113)+(cr-float64(par))), 18.0))
+	return int(math.Min(math.Round(hcp*float64(slope)/113+(cr-float64(par))), 18.0))
 }

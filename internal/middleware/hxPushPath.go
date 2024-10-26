@@ -1,11 +1,14 @@
 package middleware
 
-import "github.com/labstack/echo/v4"
+import (
+	"fmt"
+	"net/http"
+)
 
-func HxPushPath(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Response().Header().Set("HX-Push-URL", c.Path())
+func HxPushPath(prefix string, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("HX-Push-URL", fmt.Sprintf("%s%s", prefix, r.URL.Path))
 
-		return next(c)
-	}
+		next.ServeHTTP(w, r)
+	})
 }
