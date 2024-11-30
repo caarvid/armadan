@@ -1,8 +1,8 @@
 package partials
 
-import "github.com/caarvid/armadan/internal/schema"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ WeekTeeSelect(tees []schema.Tee) {
+templ WeekTeeSelect(tees []armadan.Tee) {
 	<select name="teeId" class="select" id="tees" required>
 		<option hidden disabled selected value>Tee</option>
 		for _, tee := range tees {

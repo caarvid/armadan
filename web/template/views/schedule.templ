@@ -1,9 +1,9 @@
 package views
 
 import "github.com/caarvid/armadan/web/template/partials"
-import "github.com/caarvid/armadan/internal/schema"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ Schedule(weeks []schema.GetWeeksRow) {
+templ Schedule(weeks []armadan.Week) {
 	@document("Armadan") {
 		@partials.Header()
 		@partials.Content("content") {

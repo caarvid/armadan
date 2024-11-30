@@ -1,11 +1,11 @@
 package partials
 
-import "github.com/caarvid/armadan/internal/schema"
 import "strconv"
 import "github.com/caarvid/armadan/internal/utils"
 import "fmt"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ CourseRow(course schema.GetCoursesRow) {
+templ CourseRow(course armadan.Course) {
 	<tr class="tr group">
 		<td class="td">{ course.Name }</td>
 		<td class="td">{ strconv.Itoa(int(course.Par)) }</td>
@@ -14,7 +14,7 @@ templ CourseRow(course schema.GetCoursesRow) {
 			<div class="flex gap-3 text-sm ml-auto justify-end">
 				<button
 					class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
-					hx-get={ fmt.Sprintf("/admin/courses/edit/%s", course.ID) }
+					hx-get={ fmt.Sprintf("/admin/courses/%s/edit", course.ID) }
 					hx-target="body"
 					hx-swap="beforeend"
 				>
@@ -34,7 +34,7 @@ templ CourseRow(course schema.GetCoursesRow) {
 	</tr>
 }
 
-templ CourseList(courses []schema.GetCoursesRow) {
+templ CourseList(courses []armadan.Course) {
 	@Table("course-list") {
 		<thead class="thead">
 			<tr class="tr">

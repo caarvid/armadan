@@ -8,56 +8,24 @@ sql:
     gen:
       go:
         package: "schema"
-        out: "./internal/schema"
+        out: "./internal/database/schema"
         sql_package: "pgx/v5"
         emit_json_tags: true
+        emit_interface: true
         emit_params_struct_pointers: true
         json_tags_case_style: camel
         overrides:
-          - db_type: "numeric"
-            go_type: "github.com/shopspring/decimal.Decimal"
-          - column: "players.hcp"
-            go_type: "github.com/shopspring/decimal.Decimal"
-          - column: "rounds.new_hcp"
-            go_type: "github.com/shopspring/decimal.Decimal"
-          - column: "rounds.old_hcp"
-            go_type: "github.com/shopspring/decimal.Decimal"
-          - column: "tee_data.cr"
-            go_type: "github.com/shopspring/decimal.Decimal"
-          - column: "hole_data.hole_agg"
-            go_type:
-              import: "github.com/caarvid/armadan/internal/dto"
-              type: "HoleList"
-              pointer: true
-          - column: "tee_data.tee_agg"
-            go_type:
-              import: "github.com/caarvid/armadan/internal/dto"
-              type: "TeeList"
-              pointer: true
-          - column: "hole_data.holes"
-            go_type:
-              import: "github.com/caarvid/armadan/internal/dto"
-              type: "HoleList"
-              pointer: true
-          - column: "tee_data.tees"
-            go_type:
-              import: "github.com/caarvid/armadan/internal/dto"
-              type: "TeeList"
-              pointer: true
-          - column: "weeks.course"
-            go_type:
-              import: "github.com/caarvid/armadan/internal/dto"
-              type: "WeekCourseDTO"
-              pointer: true
-          - column: "week_tee_data.tee"
-            go_type:
-              import: "github.com/caarvid/armadan/internal/dto"
-              type: "WeekTee"
-              pointer: true
-          - column: "week_course_data.course"
-            go_type:
-              import: "github.com/caarvid/armadan/internal/dto"
-              type: "WeekCourse"
-              pointer: true
           - db_type: "uuid"
             go_type: "github.com/google/uuid.UUID"
+          - db_type: "uuid"
+            nullable: true
+            go_type: "github.com/google/uuid.UUID"
+          - db_type: "text"
+            go_type: "string"
+          - db_type: "text"
+            nullable: true
+            go_type: "string"
+          - db_type: "pg_catalog.bool"
+            go_type: "bool"
+          - db_type: "pg_catalog.numeric"
+            go_type: "github.com/shopspring/decimal.Decimal"

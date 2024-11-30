@@ -1,9 +1,9 @@
 package partials
 
-import "github.com/caarvid/armadan/internal/schema"
 import "fmt"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ RoundTable(rounds []schema.GetRoundsByResultIdRow) {
+templ RoundTable(rounds []armadan.Round) {
 	@Table("rounds-table") {
 		<thead class="thead">
 			<tr class="tr">
@@ -18,7 +18,7 @@ templ RoundTable(rounds []schema.GetRoundsByResultIdRow) {
 		<tbody class="tbody">
 			for _, round := range rounds {
 				<tr class="tr group">
-					<td class="td">{ fmt.Sprintf("%s %s", round.FirstName.String, round.LastName.String) }</td>
+					<td class="td">{ fmt.Sprintf("%s %s", round.FirstName, round.LastName) }</td>
 					<td class="td">
 						if round.NewHcp.Sub(round.OldHcp).String() == "0" {
 							-

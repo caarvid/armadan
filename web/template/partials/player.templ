@@ -1,7 +1,7 @@
 package partials
 
-import "github.com/caarvid/armadan/internal/schema"
 import "fmt"
+import "github.com/caarvid/armadan/internal/armadan"
 
 templ newPlayerGridRow() {
 	<div class="grid grid-cols-4 gap-4 items-center">
@@ -62,7 +62,7 @@ templ AddPlayer() {
 	}
 }
 
-templ EditPlayer(player schema.GetPlayerRow) {
+templ EditPlayer(player armadan.Player) {
 	<tr
 		class="tr hover:bg-white group"
 		hx-target="#player-list"
@@ -79,7 +79,7 @@ templ EditPlayer(player schema.GetPlayerRow) {
 			<input name="lastName" type="text" class="input" placeholder="Efternamn" required autocomplete="off" value={ player.LastName }/>
 		</td>
 		<td class="td">
-			<input name="email" type="email" class="input" placeholder="Email" required autocomplete="off" value={ player.Email.String }/>
+			<input name="email" type="email" class="input" placeholder="Email" required autocomplete="off" value={ player.Email }/>
 		</td>
 		<td class="td">
 			<input name="hcp" type="number" class="input" placeholder="HCP" required autocomplete="off" value={ player.Hcp.String() }/>
@@ -104,11 +104,11 @@ templ EditPlayer(player schema.GetPlayerRow) {
 	</tr>
 }
 
-templ Player(player schema.GetPlayersRow) {
+templ Player(player armadan.Player) {
 	<tr class="tr group">
 		<td class="td">{ player.FirstName }</td>
 		<td class="td">{ player.LastName }</td>
-		<td class="td">{ player.Email.String }</td>
+		<td class="td">{ player.Email }</td>
 		<td class="td">{ player.Hcp.String() }</td>
 		<td class="td">
 			<div class="flex gap-3 ml-auto justify-end">

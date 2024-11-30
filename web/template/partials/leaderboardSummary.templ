@@ -1,7 +1,7 @@
 package partials
 
-import "github.com/caarvid/armadan/internal/schema"
 import "fmt"
+import "github.com/caarvid/armadan/internal/armadan"
 
 templ weekBadge(nr, points int32) {
 	<div class="flex flex-col rounded-lg border text-center overflow-hidden">
@@ -16,7 +16,7 @@ templ weekBadge(nr, points int32) {
 	</div>
 }
 
-templ LeaderboardSummary(summary []schema.GetLeaderboardSummaryRow) {
+templ LeaderboardSummary(summary []armadan.LeaderSummary) {
 	<tr class="tr bg-muted shadow-inner hover:bg-muted">
 		<td class="td" colspan="9999">
 			<div class="grid gap-3 p-2 grid-cols-4 md:grid-cols-6 xl:grid-cols-8">

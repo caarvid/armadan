@@ -1,8 +1,8 @@
 package partials
 
-import "github.com/caarvid/armadan/internal/schema"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ PlayerList(players []schema.GetPlayersRow) {
+templ PlayerList(players []armadan.Player) {
 	@Table("player-list") {
 		<thead class="thead">
 			<tr class="tr">

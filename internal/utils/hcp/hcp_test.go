@@ -29,11 +29,11 @@ func TestGetNewHcp(t *testing.T) {
 }
 
 func TestGetStrokes(t *testing.T) {
-	assert.Equal(t, 3, GetStrokes(4.3, 129, 70.5, 72))
-	assert.Equal(t, -4, GetStrokes(-1.8, 129, 70.5, 72))
-	assert.Equal(t, 10, GetStrokes(9.7, 129, 70.5, 72))
-	assert.Equal(t, 18, GetStrokes(19.0, 129, 70.5, 72))
+	assert.Equal(t, 3, GetStrokes(4.3, 70.5, 129, 72))
+	assert.Equal(t, -4, GetStrokes(-1.8, 70.5, 129, 72))
+	assert.Equal(t, 10, GetStrokes(9.7, 70.5, 129, 72))
+	assert.Equal(t, 18, GetStrokes(19.0, 70.5, 129, 72))
 
-	assert.Equal(t, 9, GetStrokes(5.2, 137, 74.2, 72))
-	assert.Equal(t, 15, GetStrokes(10.5, 137, 74.2, 72))
+	assert.Equal(t, 9, GetStrokes(5.2, 74.2, 137, 72))
+	assert.Equal(t, 15, GetStrokes(10.5, 74.2, 137, 72))
 }

@@ -4,17 +4,17 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/caarvid/armadan/internal/dto"
+	"github.com/caarvid/armadan/internal/armadan"
 )
 
-func TeeNameList(tees *dto.TeeList) string {
+func TeeNameList(tees []armadan.Tee) string {
 	names := []string{}
 
-	slices.SortFunc(*tees, func(a dto.Tee, b dto.Tee) int {
+	slices.SortFunc(tees, func(a armadan.Tee, b armadan.Tee) int {
 		return int(a.Slope - b.Slope)
 	})
 
-	for _, tee := range *tees {
+	for _, tee := range tees {
 		names = append(names, tee.Name)
 	}
 

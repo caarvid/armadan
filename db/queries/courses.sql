@@ -1,54 +1,46 @@
 -- name: GetCourse :one
-WITH tee_data AS (
-  SELECT 
-    t.course_id, 
-    COALESCE(jsonb_agg(to_jsonb(t)) FILTER (WHERE t.course_id IS NOT NULL), '[]') AS tee_agg 
-  FROM tees t 
-  GROUP BY t.course_id
-), hole_data AS (
-  SELECT 
-    h.course_id, 
-    COALESCE(jsonb_agg(to_jsonb(h) ORDER BY h.nr) FILTER (WHERE h.course_id IS NOT NULL), '[]') AS hole_agg 
-  FROM holes h 
-  GROUP BY h.course_id
-)
 SELECT
   c.id,
   c.name,
   c.par,
-  t.tee_agg AS tees,
-  h.hole_agg AS holes
+  COALESCE(
+    (
+      SELECT jsonb_agg(to_jsonb(t))
+      FROM tees t 
+      WHERE t.course_id = c.id
+    ), '[]'
+  ) AS tees,
+  COALESCE(
+    (
+      SELECT jsonb_agg(to_jsonb(h) ORDER BY h.nr)
+      FROM holes h 
+      WHERE h.course_id = c.id
+  ), '[]'
+  ) AS holes
 FROM courses c
-LEFT JOIN tee_data t ON t.course_id = c.id
-LEFT JOIN hole_data h ON h.course_id = c.id
-WHERE c.id = $1
-GROUP BY c.id, t.tee_agg, h.hole_agg;
+WHERE c.id=$1;
 
 -- name: GetCourses :many
-WITH tee_data AS (
-  SELECT 
-    t.course_id, 
-    COALESCE(jsonb_agg(to_jsonb(t)) FILTER (WHERE t.course_id IS NOT NULL), '[]') AS tee_agg 
-  FROM tees t 
-  GROUP BY t.course_id
-), hole_data AS (
-  SELECT 
-    h.course_id, 
-    COALESCE(jsonb_agg(to_jsonb(h) ORDER BY h.nr) FILTER (WHERE h.course_id IS NOT NULL), '[]') AS hole_agg 
-  FROM holes h 
-  GROUP BY h.course_id
-)
 SELECT
   c.id,
   c.name,
   c.par,
-  t.tee_agg AS tees,
-  h.hole_agg AS holes
+  COALESCE(
+    (
+      SELECT jsonb_agg(to_jsonb(t))
+      FROM tees t 
+      WHERE t.course_id = c.id
+    ), '[]'
+  ) AS tees,
+  COALESCE(
+    (
+      SELECT jsonb_agg(to_jsonb(h) ORDER BY h.nr)
+      FROM holes h 
+      WHERE h.course_id = c.id
+  ), '[]'
+  ) AS holes
 FROM courses c
-LEFT JOIN tee_data t ON t.course_id = c.id
-LEFT JOIN hole_data h ON h.course_id = c.id
-GROUP BY c.id, t.tee_agg, h.hole_agg;
-
+GROUP BY c.id;
 
 -- name: CreateCourse :one
 INSERT INTO courses (name, par) VALUES ($1, $2) RETURNING *;

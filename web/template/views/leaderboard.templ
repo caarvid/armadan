@@ -1,10 +1,10 @@
 package views
 
 import "github.com/caarvid/armadan/web/template/partials"
-import "github.com/caarvid/armadan/internal/schema"
 import "fmt"
+import "github.com/caarvid/armadan/internal/armadan"
 
-templ Leaderboard(players []schema.GetLeaderboardRow) {
+templ Leaderboard(players []armadan.Leader) {
 	@document("Armadan") {
 		@partials.Header()
 		@partials.Content("content") {
@@ -37,7 +37,7 @@ templ Leaderboard(players []schema.GetLeaderboardRow) {
 										end
 								"
 							>
-								<td class="td">{ fmt.Sprintf("%s %s", player.FirstName, player.LastName) }</td>
+								<td class="td">{ player.Name }</td>
 								<td class="td text-center">{ fmt.Sprint(player.NrOfRounds) }</td>
 								<td class="td text-center">{ fmt.Sprint(player.Points) }</td>
 							</tr>
