@@ -2,5 +2,6 @@
   "dependencies": {
     "tailwindcss": "latest",
     "tailwindcss-animate": "^1.0.7"
-  }
+  },
+  "packageManager": "pnpm@8.6.2+sha1.343879a68ea9ba1427ee1392072c8ad68537c534"
 }

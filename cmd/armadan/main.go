@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -22,8 +23,6 @@ import (
 
 	"github.com/caarvid/armadan/internal/database/schema"
 	"github.com/caarvid/armadan/internal/validation"
-
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -34,23 +33,13 @@ var (
 	dbName     string
 	dbUser     string
 	dbPassword string
+	port       string
 )
 
 func run(
 	ctx context.Context,
 	args []string,
-	getEnv func(string) string,
 ) error {
-	f := flag.NewFlagSet("flags", flag.ExitOnError)
-
-	f.StringVar(&dbHost, "db_host", getEnv("DB_HOST"), "db host, defaults to env.DB_HOST")
-	f.StringVar(&dbPort, "db_port", getEnv("DB_PORT"), "db port, defaults to env.DB_PORT")
-	f.StringVar(&dbName, "db_name", getEnv("DB_NAME"), "db name, defaults to env.DB_NAME")
-	f.StringVar(&dbUser, "db_user", getEnv("DB_USER"), "db user, defaults to env.DB_USER")
-	f.StringVar(&dbPassword, "db_password", getEnv("DB_PASSWORD"), "db password, defaults to env.DB_PASSWORD")
-
-	f.Parse(args)
-
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
@@ -74,7 +63,7 @@ func run(
 	)
 
 	httpServer := http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%s", port),
 		Handler: srv,
 	}
 
@@ -120,21 +109,28 @@ var logLevelMap = map[string]zerolog.Level{
 	"OFF":   zerolog.Disabled,
 }
 
-func main() {
-	godotenv.Load()
-
+func init() {
 	flag.StringVar(&appEnv, "env", "development", "app environment")
 	flag.StringVar(&logLevel, "log_level", "INFO", "log level")
 
-	flag.Parse()
+	flag.StringVar(&dbHost, "db_host", os.Getenv("DB_HOST"), "db host, defaults to env.DB_HOST")
+	flag.StringVar(&dbPort, "db_port", os.Getenv("DB_PORT"), "db port, defaults to env.DB_PORT")
+	flag.StringVar(&dbName, "db_name", os.Getenv("DB_NAME"), "db name, defaults to env.DB_NAME")
+	flag.StringVar(&dbUser, "db_user", os.Getenv("DB_USER"), "db user, defaults to env.DB_USER")
+	flag.StringVar(&dbPassword, "db_password", os.Getenv("DB_PASSWORD"), "db password, defaults to env.DB_PASSWORD")
+	flag.StringVar(&port, "port", os.Getenv("PORT"), "port, defaults to env.PORT")
 
+	flag.Parse()
+}
+
+func main() {
 	assert.OneOf(appEnv, []string{"development", "production", "test"}, "env must be one of [development, production, test]")
 	assert.OneOf(logLevel, []string{"DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF"}, "log_level must be one of [DEBUG, INFO, WARN, ERROR, FATAL, OFF]")
 
 	ctx := context.Background()
 	log.Logger = logger.Create(logLevelMap[logLevel], appEnv == "development")
 
-	if err := run(ctx, os.Args, os.Getenv); err != nil {
+	if err := run(ctx, os.Args); err != nil {
 		log.Fatal().Err(err).Msg("an unexpected error occurred")
 	}
 }

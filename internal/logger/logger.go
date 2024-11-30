@@ -14,7 +14,6 @@ func Create(logLevel zerolog.Level, isDev bool) zerolog.Logger {
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	zerolog.TimeFieldFormat = time.RFC3339Nano
 
-	var gitRevision string
 	var output io.Writer = os.Stderr
 
 	if isDev {
@@ -29,22 +28,12 @@ func Create(logLevel zerolog.Level, isDev bool) zerolog.Logger {
 		}
 	}
 
-	buildInfo, ok := debug.ReadBuildInfo()
-
-	if ok {
-		for _, v := range buildInfo.Settings {
-			if v.Key == "vcs.revision" {
-				gitRevision = v.Value
-				break
-			}
-		}
-	}
+	buildInfo, _ := debug.ReadBuildInfo()
 
 	return zerolog.New(output).
 		Level(logLevel).
 		With().
 		Timestamp().
-		Str("git_revision", gitRevision).
 		Str("go_version", buildInfo.GoVersion).
 		Logger()
 }

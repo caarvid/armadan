@@ -1,4 +1,6 @@
 node_modules
 tmp
+dist
 .env
 *_templ.go
+*_templ.txt
