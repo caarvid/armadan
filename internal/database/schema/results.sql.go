@@ -29,14 +29,14 @@ INSERT INTO rounds (player_id, result_id, net_in, net_out, gross_in, gross_out, 
 `
 
 type CreateRoundParams struct {
-	PlayerID uuid.UUID      `json:"playerId"`
-	ResultID uuid.UUID      `json:"resultId"`
-	NetIn    int32          `json:"netIn"`
-	NetOut   int32          `json:"netOut"`
-	GrossIn  int32          `json:"grossIn"`
-	GrossOut int32          `json:"grossOut"`
-	NewHcp   pgtype.Numeric `json:"newHcp"`
-	OldHcp   pgtype.Numeric `json:"oldHcp"`
+	PlayerID uuid.UUID       `json:"playerId"`
+	ResultID uuid.UUID       `json:"resultId"`
+	NetIn    int32           `json:"netIn"`
+	NetOut   int32           `json:"netOut"`
+	GrossIn  int32           `json:"grossIn"`
+	GrossOut int32           `json:"grossOut"`
+	NewHcp   decimal.Decimal `json:"newHcp"`
+	OldHcp   decimal.Decimal `json:"oldHcp"`
 }
 
 func (q *Queries) CreateRound(ctx context.Context, arg *CreateRoundParams) (Round, error) {

@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shopspring/decimal"
 )
 
@@ -18,10 +17,10 @@ INSERT INTO players (first_name, last_name, hcp, user_id) VALUES ($1, $2, $3, $4
 `
 
 type CreatePlayerParams struct {
-	FirstName string         `json:"firstName"`
-	LastName  string         `json:"lastName"`
-	Hcp       pgtype.Numeric `json:"hcp"`
-	UserID    uuid.UUID      `json:"userId"`
+	FirstName string          `json:"firstName"`
+	LastName  string          `json:"lastName"`
+	Hcp       decimal.Decimal `json:"hcp"`
+	UserID    uuid.UUID       `json:"userId"`
 }
 
 func (q *Queries) CreatePlayer(ctx context.Context, arg *CreatePlayerParams) (Player, error) {
@@ -191,10 +190,10 @@ UPDATE players SET first_name = $1, last_name = $2, hcp = $3 WHERE id = $4 RETUR
 `
 
 type UpdatePlayerParams struct {
-	FirstName string         `json:"firstName"`
-	LastName  string         `json:"lastName"`
-	Hcp       pgtype.Numeric `json:"hcp"`
-	ID        uuid.UUID      `json:"id"`
+	FirstName string          `json:"firstName"`
+	LastName  string          `json:"lastName"`
+	Hcp       decimal.Decimal `json:"hcp"`
+	ID        uuid.UUID       `json:"id"`
 }
 
 func (q *Queries) UpdatePlayer(ctx context.Context, arg *UpdatePlayerParams) (Player, error) {

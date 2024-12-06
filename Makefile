@@ -78,7 +78,7 @@ build/templ:
 
 .PHONY: build/sql
 build/sql: 
-	@sqlc generate
+	@sqlc generate --file ./sqlc.ci.yaml
 
 .PHONY: build
 build: clean build/css build/templ build/sql 
