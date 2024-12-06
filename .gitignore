@@ -2,5 +2,6 @@ node_modules
 tmp
 dist
 .env
+web/static/main.css
 *_templ.go
 *_templ.txt

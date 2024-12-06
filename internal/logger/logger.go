@@ -34,6 +34,7 @@ func Create(logLevel zerolog.Level, isDev bool) zerolog.Logger {
 		Level(logLevel).
 		With().
 		Timestamp().
+		Str("build_version", os.Getenv("BUILD_VERSION")).
 		Str("go_version", buildInfo.GoVersion).
 		Logger()
 }

@@ -3,16 +3,32 @@ ifneq (,$(wildcard ./.env))
 	export
 endif
 
-cmd-exists-%:
-	@hash $(*) > /dev/null 2>&1 || (echo "ERROR: '$(*)' must be installed and available in your $PATH"; exit 1)
+GIT_VERSION ?= $(shell git describe --abbrev=8 --tags --always --dirty)
+SERVICE_NAME ?= armadan
 
-dev-templ:
+export BUILD_VERSION := $(GIT_VERSION)
+
+.PHONY: clean
+clean:
+	@rm -rf ./tmp ./dist
+
+.PHONE: install
+install:
+	@npm ci
+	@go install github.com/a-h/templ/cmd/templ@lates
+	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+
+## DEV ##
+.PHONY: dev/templ
+dev/templ:
 	@templ generate --watch --proxy="http://localhost:$(PORT)" --open-browser=false
 
-dev-css:
+.PHONY: dev/css
+dev/css:
 	@npx tailwindcss -i ./web/css/style.css -o ./web/static/main.css --minify --watch
 
-dev-sql:
+.PHONY: dev/sql
+dev/sql:
 	@go run github.com/air-verse/air@v1.61.1 \
 		--build.cmd "sqlc generate" \
 		--build.bin "true" \
@@ -22,7 +38,8 @@ dev-sql:
 		--build.include_ext "sql" \
 		--log.silent "true"
 
-dev-sync:
+.PHONY: dev/sync
+dev/sync:
 	@go run github.com/air-verse/air@v1.61.1 \
 		--build.cmd "templ generate --notify-proxy" \
 		--build.bin "true" \
@@ -32,7 +49,8 @@ dev-sync:
 		--build.include_ext "js,css" \
 		--log.silent "true"
 
-dev-server:
+.PHONY: dev/server
+dev/server:
 	@go run github.com/air-verse/air@v1.61.1 \
 		--build.cmd "go build -o ./tmp/bin/main ./cmd/armadan/main.go" \
 		--build.bin "./tmp/bin/main" \
@@ -45,38 +63,56 @@ dev-server:
 		--misc.clean_on_exit "true" \
 		--log.silent "true"
 
+.PHONY: dev
 dev:
-	make -j5 dev-templ dev-css dev-sql dev-sync dev-server 
+	make -j5 dev/templ dev/css dev/sql dev/sync dev/server 
 
-css: 
+### BUILD ###
+.PHONY: build/css
+build/css: 
 	@npx tailwindcss -i ./web/css/style.css -o ./web/static/main.css --minify
 
-gen-templ: cmd-exists-templ
+.PHONY: build/templ
+build/templ:  
 	@templ generate
 
-gen-sql: cmd-exists-sqlc
+.PHONY: build/sql
+build/sql: 
 	@sqlc generate
 
-build-app:
+.PHONY: build
+build: clean build/css build/templ build/sql 
 	@GOOS=linux GOARCH=amd64 go build -o ./dist/armadan ./cmd/armadan/main.go	
 
-build: clean css gen-templ gen-sql build-app
+### DOCKER ###
+.PHONY: docker/build
+docker/build: build
+	@docker build \
+		--build-arg BUILD_VERSION=$(GIT_VERSION) \
+		-f ./Dockerfile \
+		-t $(SERVICE_NAME) .
+	@docker tag $(SERVICE_NAME):latest $(SERVICE_NAME):$(GIT_VERSION)
 
-new-migration: cmd-exists-goose
+### MIGRATIONS ###
+.PHONY: migrate/new
+migrate/new:
 	@goose -dir ./db/migrations create $(name) sql
 
-migrate-up: cmd-exists-goose
+.PHONY: migrate/up
+migrate/up:
 	@goose -dir ./db/migrations postgres "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}" up
 
-migrate-down: cmd-exists-goose
+.PHONY: migrate/down
+migrate/down:
 	@goose -dir ./db/migrations postgres "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}" down
 
-db-start: cmd-exists-docker
-	docker compose --file ./docker/db.yml --env-file ./.env up --detach
+### DATABASE ###
+.PHONY: db/start
+db/start: 
+	@docker compose --file ./docker/db.yml --env-file ./.env up --detach
 
-db-stop: cmd-exists-docker
-	docker compose --file ./docker/db.yml --env-file ./.env down 
+.PHONY: db/stop
+db/stop: 
+	@docker compose --file ./docker/db.yml --env-file ./.env down 
 
-clean:
-	@rm -rf ./tmp ./dist
 
