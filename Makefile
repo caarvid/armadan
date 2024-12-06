@@ -14,9 +14,8 @@ clean:
 
 .PHONE: install
 install:
+	@go get ./...
 	@npm ci
-	@go install github.com/a-h/templ/cmd/templ@latest
-	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
 ## DEV ##
 .PHONY: dev/templ
@@ -78,10 +77,10 @@ build/templ:
 
 .PHONY: build/sql
 build/sql: 
-	@sqlc generate --file ./sqlc.ci.yaml
+	@sqlc generate 
 
 .PHONY: build
-build: clean build/css build/templ build/sql 
+build: clean build/css build/templ build/sql
 	@GOOS=linux GOARCH=amd64 go build -o ./dist/armadan ./cmd/armadan/main.go	
 
 ### DOCKER ###
@@ -92,6 +91,11 @@ docker/build: build
 		-f ./Dockerfile \
 		-t $(SERVICE_NAME) .
 	@docker tag $(SERVICE_NAME):latest $(SERVICE_NAME):$(GIT_VERSION)
+
+### CI/CD ###
+.PHONY: ci/build
+ci/build: clean install
+	@GOOS=linux GOARCH=amd64 go build -o ./dist/armadan ./cmd/armadan/main.go	
 
 ### MIGRATIONS ###
 .PHONY: migrate/new

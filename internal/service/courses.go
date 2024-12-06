@@ -7,7 +7,6 @@ import (
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/patrickmn/go-cache"
 )
@@ -154,15 +153,9 @@ func (cs *courses) Create(ctx context.Context, data *armadan.Course) (*armadan.C
 
 		for _, newTee := range data.Tees {
 			newTees = append(newTees, &schema.CreateTeesParams{
-				Name:  newTee.Name,
-				Slope: newTee.Slope,
-				Cr: pgtype.Numeric{
-					Int:              newTee.Cr.BigInt(),
-					Exp:              newTee.Cr.Exponent(),
-					NaN:              false,
-					Valid:            true,
-					InfinityModifier: pgtype.Finite,
-				},
+				Name:     newTee.Name,
+				Slope:    newTee.Slope,
+				Cr:       newTee.Cr,
 				CourseID: course.ID,
 			})
 		}
@@ -223,19 +216,11 @@ func (cs *courses) Update(ctx context.Context, data *armadan.Course) (*armadan.C
 		emptyId := uuid.UUID{}
 
 		for _, t := range data.Tees {
-			cr := pgtype.Numeric{
-				Valid:            true,
-				NaN:              false,
-				InfinityModifier: pgtype.Finite,
-				Int:              t.Cr.BigInt(),
-				Exp:              t.Cr.Exponent(),
-			}
-
 			if t.ID.String() == emptyId.String() {
 				tees = append(tees, &schema.CreateTeesParams{
 					Name:     t.Name,
 					Slope:    t.Slope,
-					Cr:       cr,
+					Cr:       t.Cr,
 					CourseID: course.ID,
 				})
 			} else {
@@ -243,7 +228,7 @@ func (cs *courses) Update(ctx context.Context, data *armadan.Course) (*armadan.C
 					ID:    t.ID,
 					Name:  t.Name,
 					Slope: t.Slope,
-					Cr:    cr,
+					Cr:    t.Cr,
 				})
 			}
 		}

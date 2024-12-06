@@ -71,24 +71,24 @@ SELECT
       FROM tees t 
       WHERE t.course_id = c.id
     ), '[]'
-  ) AS tees,
+  )::jsonb AS tees,
   COALESCE(
     (
       SELECT jsonb_agg(to_jsonb(h) ORDER BY h.nr)
       FROM holes h 
       WHERE h.course_id = c.id
   ), '[]'
-  ) AS holes
+  )::jsonb AS holes
 FROM courses c
 WHERE c.id=$1
 `
 
 type GetCourseRow struct {
-	ID    uuid.UUID   `json:"id"`
-	Name  string      `json:"name"`
-	Par   int32       `json:"par"`
-	Tees  interface{} `json:"tees"`
-	Holes interface{} `json:"holes"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Par   int32     `json:"par"`
+	Tees  []byte    `json:"tees"`
+	Holes []byte    `json:"holes"`
 }
 
 func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (GetCourseRow, error) {
@@ -115,24 +115,24 @@ SELECT
       FROM tees t 
       WHERE t.course_id = c.id
     ), '[]'
-  ) AS tees,
+  )::jsonb AS tees,
   COALESCE(
     (
       SELECT jsonb_agg(to_jsonb(h) ORDER BY h.nr)
       FROM holes h 
       WHERE h.course_id = c.id
   ), '[]'
-  ) AS holes
+  )::jsonb AS holes
 FROM courses c
 GROUP BY c.id
 `
 
 type GetCoursesRow struct {
-	ID    uuid.UUID   `json:"id"`
-	Name  string      `json:"name"`
-	Par   int32       `json:"par"`
-	Tees  interface{} `json:"tees"`
-	Holes interface{} `json:"holes"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Par   int32     `json:"par"`
+	Tees  []byte    `json:"tees"`
+	Holes []byte    `json:"holes"`
 }
 
 func (q *Queries) GetCourses(ctx context.Context) ([]GetCoursesRow, error) {

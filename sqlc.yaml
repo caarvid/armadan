@@ -3,8 +3,6 @@ sql:
   - engine: "postgresql"
     queries: "./db/queries/"
     schema: "./db/migrations/"
-    database:
-      uri: "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
     gen:
       go:
         package: "schema"
