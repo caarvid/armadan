@@ -9,7 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/shopspring/decimal"
 )
 
 const createCourse = `-- name: CreateCourse :one
@@ -36,10 +36,10 @@ type CreateHolesParams struct {
 }
 
 type CreateTeesParams struct {
-	Name     string         `json:"name"`
-	Slope    int32          `json:"slope"`
-	Cr       pgtype.Numeric `json:"cr"`
-	CourseID uuid.UUID      `json:"courseId"`
+	Name     string          `json:"name"`
+	Slope    int32           `json:"slope"`
+	Cr       decimal.Decimal `json:"cr"`
+	CourseID uuid.UUID       `json:"courseId"`
 }
 
 const deleteCourse = `-- name: DeleteCourse :exec
@@ -84,11 +84,11 @@ WHERE c.id=$1
 `
 
 type GetCourseRow struct {
-	ID    uuid.UUID `json:"id"`
-	Name  string    `json:"name"`
-	Par   int32     `json:"par"`
-	Tees  []byte    `json:"tees"`
-	Holes []byte    `json:"holes"`
+	ID    uuid.UUID   `json:"id"`
+	Name  string      `json:"name"`
+	Par   int32       `json:"par"`
+	Tees  interface{} `json:"tees"`
+	Holes interface{} `json:"holes"`
 }
 
 func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (GetCourseRow, error) {
@@ -128,11 +128,11 @@ GROUP BY c.id
 `
 
 type GetCoursesRow struct {
-	ID    uuid.UUID `json:"id"`
-	Name  string    `json:"name"`
-	Par   int32     `json:"par"`
-	Tees  []byte    `json:"tees"`
-	Holes []byte    `json:"holes"`
+	ID    uuid.UUID   `json:"id"`
+	Name  string      `json:"name"`
+	Par   int32       `json:"par"`
+	Tees  interface{} `json:"tees"`
+	Holes interface{} `json:"holes"`
 }
 
 func (q *Queries) GetCourses(ctx context.Context) ([]GetCoursesRow, error) {
