@@ -9,14 +9,14 @@ SELECT
       FROM tees t 
       WHERE t.course_id = c.id
     ), '[]'
-  ) AS tees,
+  )::jsonb AS tees,
   COALESCE(
     (
       SELECT jsonb_agg(to_jsonb(h) ORDER BY h.nr)
       FROM holes h 
       WHERE h.course_id = c.id
   ), '[]'
-  ) AS holes
+  )::jsonb AS holes
 FROM courses c
 WHERE c.id=$1;
 
@@ -31,14 +31,14 @@ SELECT
       FROM tees t 
       WHERE t.course_id = c.id
     ), '[]'
-  ) AS tees,
+  )::jsonb AS tees,
   COALESCE(
     (
       SELECT jsonb_agg(to_jsonb(h) ORDER BY h.nr)
       FROM holes h 
       WHERE h.course_id = c.id
   ), '[]'
-  ) AS holes
+  )::jsonb AS holes
 FROM courses c
 GROUP BY c.id;
 

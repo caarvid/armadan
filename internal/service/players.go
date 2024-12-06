@@ -7,7 +7,6 @@ import (
 	"github.com/caarvid/armadan/internal/database/schema"
 	"github.com/caarvid/armadan/internal/utils"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.step.sm/crypto/randutil"
 )
@@ -103,13 +102,7 @@ func (ps *players) Create(ctx context.Context, data *armadan.Player) (*armadan.P
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
 		UserID:    user.ID,
-		Hcp: pgtype.Numeric{
-			Int:              data.Hcp.BigInt(),
-			Exp:              data.Hcp.Exponent(),
-			InfinityModifier: pgtype.Finite,
-			NaN:              false,
-			Valid:            true,
-		},
+		Hcp:       data.Hcp,
 	})
 
 	if err != nil {
@@ -143,13 +136,7 @@ func (ps *players) Update(ctx context.Context, data *armadan.Player) (*armadan.P
 		ID:        data.ID,
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
-		Hcp: pgtype.Numeric{
-			Int:              data.Hcp.BigInt(),
-			Exp:              data.Hcp.Exponent(),
-			InfinityModifier: pgtype.Finite,
-			NaN:              false,
-			Valid:            true,
-		},
+		Hcp:       data.Hcp,
 	})
 
 	if err != nil {

@@ -156,8 +156,8 @@ func (rs *results) CreateRound(
 	newRound, err := qtx.CreateRound(ctx, &schema.CreateRoundParams{
 		PlayerID: round.PlayerID,
 		ResultID: result.ID,
-		NewHcp:   schema.DecimalToNumeric(newHcp),
-		OldHcp:   schema.DecimalToNumeric(round.Hcp),
+		NewHcp:   newHcp,
+		OldHcp:   round.Hcp,
 		NetIn:    roundSummary.NetIn,
 		NetOut:   roundSummary.NetOut,
 		GrossIn:  roundSummary.GrossIn,
