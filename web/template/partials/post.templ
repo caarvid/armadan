@@ -6,7 +6,7 @@ import "github.com/caarvid/armadan/internal/utils/markdown"
 import "github.com/caarvid/armadan/internal/armadan"
 
 templ PostCard(post armadan.Post) {
-	<div class="rounded-l border bg-card text-card-foreground shadow-sm p-3">
+	<div class="rounded-l border bg-card text-card-foreground shadow-sm p-3 border-border/40">
 		<h3 class="font-semibold leading-none tracking-tight mb-2 text-2xl">{ post.Title }</h3>
 		<div class="mb-3 flex flex-col gap-4">
 			@templ.Raw(string(markdown.MdToHtml([]byte(post.Body))))

@@ -34,7 +34,7 @@ func PostCard(post armadan.Post) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"rounded-l border bg-card text-card-foreground shadow-sm p-3\"><h3 class=\"font-semibold leading-none tracking-tight mb-2 text-2xl\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"rounded-l border bg-card text-card-foreground shadow-sm p-3 border-border/40\"><h3 class=\"font-semibold leading-none tracking-tight mb-2 text-2xl\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

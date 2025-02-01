@@ -32,7 +32,7 @@ func WeekCard(week armadan.Week) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var2 = []any{"flex px-3 py-2 group border rounded-l shadow-sm flex-col relative", templ.KV("opacity-40", week.IsPrevious())}
+		var templ_7745c5c3_Var2 = []any{"flex px-3 py-2 group border border-border/50 rounded-l shadow-sm flex-col relative", templ.KV("opacity-40", week.IsPrevious())}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -54,7 +54,7 @@ func WeekCard(week armadan.Week) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 = []any{"text-5xl flex items-center justify-center border-b-2 pb-2 flex-col", templ.KV("text-orange-600", week.IsCurrent())}
+		var templ_7745c5c3_Var4 = []any{"text-5xl flex items-center justify-center border-b pb-2 flex-col", templ.KV("text-orange-600", week.IsCurrent())}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
