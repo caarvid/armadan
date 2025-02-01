@@ -5,7 +5,7 @@ import "github.com/caarvid/armadan/internal/armadan"
 
 templ WeekCard(week armadan.Week) {
 	<div
-		class={ "flex px-3 py-2 group border rounded-l shadow flex-col relative" , templ.KV("opacity-40", week.IsPrevious()) }
+		class={ "flex px-3 py-2 group border rounded-l shadow-sm flex-col relative" , templ.KV("opacity-40", week.IsPrevious()) }
 	>
 		<div
 			class={ "text-5xl flex items-center justify-center border-b-2 pb-2 flex-col" , templ.KV("text-orange-600", week.IsCurrent()) }
