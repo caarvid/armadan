@@ -148,7 +148,7 @@ func adminSidebar() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<aside class=\"relative flex min-w-0 shrink-0 grow-0 basis-48 border-r-2\"><div class=\"flex pt-6 flex-col w-full\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<aside class=\"relative flex min-w-0 shrink-0 grow-0 basis-48 border-r\"><div class=\"flex pt-6 flex-col w-full\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -175,7 +175,7 @@ func adminSidebar() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if user.IsAdmin(ctx) {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"text-red-500 pb-8 border-t-2\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"text-red-500 pb-8 border-t-1\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

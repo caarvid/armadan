@@ -167,7 +167,7 @@ func Header() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var6 = []any{"relative h-16 px-3 md:px-8 flex items-center shadow-md",
+		var templ_7745c5c3_Var6 = []any{"relative h-14 px-3 md:px-8 flex items-center border",
 			templ.KV("justify-between", user.IsLoggedIn(ctx)),
 			templ.KV("justify-center", !user.IsLoggedIn(ctx))}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)

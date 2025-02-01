@@ -141,7 +141,7 @@
 }
 
 @utility tbody {
-  @apply [&_tr:last-child]:border-0;
+  @apply [&_tr:last-child]:border-0 border-border [&_tr]:border-border/40;
 }
 
 @utility tr {
