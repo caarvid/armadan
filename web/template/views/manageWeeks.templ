@@ -17,12 +17,12 @@ templ ManageWeeks(weeks []armadan.Week, courses []armadan.Course) {
 				hx-ext="json-form"
 				_="on htmx:afterRequest(detail) if detail.successful and target is me then reset() me then hide #finals-date"
 			>
-				<input min="1" max="52" name="nr" type="number" class="input flex-grow" placeholder="Vecka" required/>
+				<input min="1" max="52" name="nr" type="number" class="input grow" placeholder="Vecka" required/>
 				<input
 					id="finals-date"
 					name="finalsDate"
 					type="date"
-					class="input flex-grow flex-auto w-auto flex-shrink-0"
+					class="input grow flex-auto w-auto shrink-0"
 					style="display: none;"
 				/>
 				<div class="select-wrapper">

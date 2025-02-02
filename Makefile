@@ -24,7 +24,7 @@ dev/templ:
 
 .PHONY: dev/css
 dev/css:
-	@npx tailwindcss -i ./web/css/style.css -o ./web/static/main.css --minify --watch
+	@npx @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify --watch
 
 .PHONY: dev/sql
 dev/sql:
