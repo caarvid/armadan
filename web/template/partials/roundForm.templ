@@ -1,7 +1,11 @@
 package partials
 
 import "fmt"
-import "github.com/caarvid/armadan/internal/armadan"
+import (
+	"github.com/caarvid/armadan/internal/armadan"
+	courseUtils "github.com/caarvid/armadan/internal/utils/course"
+	"github.com/google/uuid"
+)
 
 templ formCell(header string) {
 	<div>
@@ -16,79 +20,161 @@ templ formCell(header string) {
 	</div>
 }
 
-templ NewRoundForm(resultId string, course *armadan.Course, player *armadan.Player) {
+templ RoundForm(resultId string, strokes int, course *armadan.Course, player *armadan.Player) {
+	<div class="text-sm py-2 pl-4 flex gap-4 text-gray-500 font-medium uppercase">
+		<span class="">
+			{ fmt.Sprintf("HCP: %s", player.Hcp) }
+		</span>
+		<span>
+			{ fmt.Sprintf("Slag: %d", strokes) }
+		</span>
+	</div>
 	<form
 		id="new-round-form"
-		class="flex flex-col gap-2"
+		class="flex flex-col gap-5"
 		hx-post={ fmt.Sprintf("/api/results/%s/round", resultId) }
 		hx-ext="json-form"
+		hx-target="#rounds-table"
+		hx-swap="innerHTML"
 	>
 		<input type="hidden" value={ course.ID.String() } name="courseId"/>
 		<input type="hidden" value={ player.ID.String() } name="playerId"/>
 		<input type="hidden" value={ player.Hcp.String() } name="hcp" data-type="number"/>
-		<div class="grid grid-cols-11">
-			@formCell("Hål")
-			for _, hole := range (course.Holes)[:9] {
-				@formCell(fmt.Sprint(hole.Nr)) {
-					<input type="hidden" value={ hole.ID.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
-					<input type="hidden" value={ fmt.Sprint(hole.Index) } name={ fmt.Sprintf("scores.%d.index", hole.Nr-1) } data-type="number"/>
-					<input type="hidden" value={ fmt.Sprint(hole.Par) } name={ fmt.Sprintf("scores.%d.par", hole.Nr-1) } data-type="number"/>
-					<input
-						type="number"
-						name={ fmt.Sprintf("scores.%d.strokes", hole.Nr-1) }
-						class="input-number text-center shadow-none"
-						min="1"
-						max="10"
-					/>
+		@Table("round-form") {
+			<thead class="thead [&_th]:h-7">
+				<tr class="tr bg-muted/80 hover:bg-muted/80">
+					<th class="th text-center">Hål</th>
+					<th class="th text-center">Par</th>
+					<th class="th text-center border-r">Index</th>
+					<th class="th text-center w-[25%]">Slag</th>
+				</tr>
+			</thead>
+			<tbody
+				data-strokes={ fmt.Sprint(strokes) }
+				class="tbody [&_td]:py-1"
+				_="
+					on input
+					set out to 0
+					set in to 0
+					for i in (<input /> in me)
+						set nr to the (@hole-nr of i) as an Int
+						if nr is not null then
+							set val to (i.value) as an SafeInt
+							if nr is less than 10 then
+								set out to out + val
+							else
+								set in to in + val
+							end
+						end
+					end
+					put out into #round-out
+					put in into #round-in
+					put out into #round-out-end
+					put out + in into #round-total
+					put Math.max((out + in) - @data-strokes, 0) into #net-total
+				"
+			>
+				for _, hole := range (course.Holes)[:9] {
+					<tr class={ "tr [&_td:last-child]:p-0", templ.KV("border-border!", hole.Nr == 9) }>
+						<input type="hidden" value={ hole.ID.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
+						<input type="hidden" value={ fmt.Sprint(hole.Index) } name={ fmt.Sprintf("scores.%d.index", hole.Nr-1) } data-type="number"/>
+						<input type="hidden" value={ fmt.Sprint(hole.Par) } name={ fmt.Sprintf("scores.%d.par", hole.Nr-1) } data-type="number"/>
+						<td class="td text-center">{ fmt.Sprintf("%d", hole.Nr) }</td>
+						<td class="td text-center">{ fmt.Sprintf("%d", hole.Par) }</td>
+						<td class="td text-center border-r">{ fmt.Sprintf("%d", hole.Index) }</td>
+						<td class="td">
+							<input
+								type="number"
+								max="10"
+								min="1"
+								hole-nr={ fmt.Sprint(hole.Nr) }
+								name={ fmt.Sprintf("scores.%d.strokes", hole.Nr-1) }
+								class="input-number border-0 h-auto text-center focus-visible:ring-border shadow-transparent"
+								autocomplete="off"
+							/>
+						</td>
+					</tr>
 				}
-			}
-			@formCell("Ut")
-		</div>
-		<div class="grid grid-cols-11">
-			@formCell("Hål")
-			for _, hole := range (course.Holes)[9:] {
-				@formCell(fmt.Sprint(hole.Nr)) {
-					<input type="hidden" value={ hole.ID.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
-					<input type="hidden" value={ fmt.Sprint(hole.Index) } name={ fmt.Sprintf("scores.%d.index", hole.Nr-1) } data-type="number"/>
-					<input type="hidden" value={ fmt.Sprint(hole.Par) } name={ fmt.Sprintf("scores.%d.par", hole.Nr-1) } data-type="number"/>
-					<input
-						type="number"
-						name={ fmt.Sprintf("scores.%d.strokes", hole.Nr-1) }
-						class="input-number text-center shadow-none"
-						min="1"
-						max="10"
-					/>
+				<tr class="tr bg-muted/80 hover:bg-muted/80 font-medium text-muted-foreground border-border!">
+					<td class="td text-center">UT</td>
+					<td class="td text-center">{ fmt.Sprint(courseUtils.GetParInfo(course).Out) }</td>
+					<td class="td text-center border-r">-</td>
+					<td id="round-out" class="td text-center">0</td>
+				</tr>
+				for _, hole := range (course.Holes)[9:] {
+					<tr class={ "tr [&_td:last-child]:p-0", templ.KV("border-border!", hole.Nr == 18) }>
+						<input type="hidden" value={ hole.ID.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
+						<input type="hidden" value={ fmt.Sprint(hole.Index) } name={ fmt.Sprintf("scores.%d.index", hole.Nr-1) } data-type="number"/>
+						<input type="hidden" value={ fmt.Sprint(hole.Par) } name={ fmt.Sprintf("scores.%d.par", hole.Nr-1) } data-type="number"/>
+						<td class="td text-center">{ fmt.Sprintf("%d", hole.Nr) }</td>
+						<td class="td text-center">{ fmt.Sprintf("%d", hole.Par) }</td>
+						<td class="td text-center border-r">{ fmt.Sprintf("%d", hole.Index) }</td>
+						<td class="td">
+							<input
+								type="number"
+								max="10"
+								min="1"
+								hole-nr={ fmt.Sprint(hole.Nr) }
+								name={ fmt.Sprintf("scores.%d.strokes", hole.Nr-1) }
+								class="input-number border-0 h-auto text-center focus-visible:ring-border shadow-transparent"
+								autocomplete="off"
+							/>
+						</td>
+					</tr>
 				}
-			}
-			@formCell("In")
-		</div>
-		<div class="flex justify-end mt-2 gap-2">
-			<button type="button" class="btn-secondary" _="on click trigger closeModal">Avbryt</button>
-			<button type="submit" class="btn-default">Lägg till</button>
-		</div>
+				<tr class="tr bg-muted/80 hover:bg-muted/80 font-medium border-b-0 text-muted-foreground">
+					<td class="td text-center">IN</td>
+					<td class="td text-center">{ fmt.Sprint(courseUtils.GetParInfo(course).In) }</td>
+					<td class="td text-center border-r">-</td>
+					<td id="round-in" class="td text-center">0</td>
+				</tr>
+				<tr class="tr bg-muted/80 hover:bg-muted/80 font-medium border-b border-border! text-muted-foreground">
+					<td class="td text-center">UT</td>
+					<td class="td text-center">{ fmt.Sprint(courseUtils.GetParInfo(course).Out) }</td>
+					<td class="td text-center border-r">-</td>
+					<td id="round-out-end" class="td text-center">0</td>
+				</tr>
+				<tr class="tr bg-muted/80 hover:bg-muted/80 font-medium text-muted-foreground">
+					<td class="td text-center">TOTAL</td>
+					<td class="td text-center">{ fmt.Sprint(course.Par) }</td>
+					<td class="td text-center border-r">-</td>
+					<td id="round-total" class="td text-center">0</td>
+				</tr>
+				<tr class="tr bg-muted/80 hover:bg-muted/80 font-medium text-muted-foreground">
+					<td class="td text-center">NETTO</td>
+					<td class="td text-center">-</td>
+					<td class="td text-center border-r">-</td>
+					<td id="net-total" class="td text-center">0</td>
+				</tr>
+			</tbody>
+		}
+		<button type="submit" class="btn-default">Lägg till</button>
 	</form>
 }
 
-templ NewRoundModal(resultId string, players []armadan.Player) {
-	@Modal("Ny runda", true) {
-		<div class="flex items-center gap-3">
-			<label for="players">Spelare:</label>
-			<div class="select-wrapper">
-				<select
-					id="players"
-					name="playerId"
-					class="select"
-					hx-get={ fmt.Sprintf("/admin/results/%s/form", resultId) }
-					hx-target="#form-wrapper"
-					hx-select="#new-round-form"
-				>
-					<option hidden disabled selected value></option>
-					for _, player := range players {
-						<option value={ player.ID.String() }>{ fmt.Sprintf("%s %s", player.FirstName, player.LastName) }</option>
-					}
-				</select>
-			</div>
+templ PlayerDropdown(resultId uuid.UUID, players []armadan.Player) {
+	<div id="player-dropdown" class="select-wrapper" hx-swap-oob="outerHTML">
+		<select
+			id="players"
+			name="playerId"
+			class="select text-gray-400"
+			hx-get={ fmt.Sprintf("/admin/results/%s/form", resultId) }
+			hx-target="#form-wrapper"
+			_="on change if my.value is not null then remove .text-gray-400 from me"
+		>
+			<option hidden disabled selected value>Spelare</option>
+			for _, player := range players {
+				<option value={ player.ID.String() }>{ fmt.Sprintf("%s %s", player.FirstName, player.LastName) }</option>
+			}
+		</select>
+	</div>
+}
+
+templ NewRoundPanel(result *armadan.Result, players []armadan.Player) {
+	<aside id="round-form-panel" class="relative flex min-w-0 shrink-0 grow-0 w-sm border-l" hx-swap-oob="outerHTML">
+		<div class="flex flex-col w-full pl-4">
+			@PlayerDropdown(result.ID, players)
+			<div id="form-wrapper"></div>
 		</div>
-		<div id="form-wrapper"></div>
-	}
+	</aside>
 }

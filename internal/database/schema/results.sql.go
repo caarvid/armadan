@@ -206,6 +206,43 @@ func (q *Queries) GetManageResultView(ctx context.Context) ([]GetManageResultVie
 	return items, nil
 }
 
+const getRemainingPlayersByResultId = `-- name: GetRemainingPlayersByResultId :many
+SELECT p.id, p.first_name, p.last_name, p.points, p.user_id, p.hcp
+FROM players p
+LEFT JOIN rounds r 
+  ON r.player_id = p.id 
+  AND r.result_id = $1
+WHERE r.player_id IS NULL
+ORDER BY p.last_name ASC, p.first_name ASC
+`
+
+func (q *Queries) GetRemainingPlayersByResultId(ctx context.Context, resultID uuid.UUID) ([]Player, error) {
+	rows, err := q.db.Query(ctx, getRemainingPlayersByResultId, resultID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Player
+	for rows.Next() {
+		var i Player
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.Points,
+			&i.UserID,
+			&i.Hcp,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getResultById = `-- name: GetResultById :one
 WITH week_data AS (
   SELECT w.id, w.nr, w.course_id, w.tee_id FROM weeks w

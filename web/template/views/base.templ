@@ -13,7 +13,13 @@ templ document(title string) {
 			<script src="/public/scripts/editor-utils.js" defer></script>
 			<link rel="stylesheet" href="/public/main.css"/>
 			<script>
+				htmx.config.allowNestedOobSwaps = false;
 				htmx.config.responseHandling.unshift({ code: "422", swap: true });
+				_hyperscript.config.conversions["SafeInt"] = function(val) {
+					var nr = Number(val);
+
+					return nr === NaN ? 0 : nr;
+				}
 			</script>
 		</head>
 		<body class="overflow-y-hidden">
@@ -22,7 +28,7 @@ templ document(title string) {
 			</section>
 			<div
 				id="toast-list"
-				class="absolute flex flex-col bottom-8 right-6 gap-3"
+				class="absolute flex flex-col top-2 left-[50%] translate-x-[-50%] gap-3"
 			></div>
 		</body>
 	</html>

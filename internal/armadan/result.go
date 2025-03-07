@@ -17,6 +17,7 @@ type ResultService interface {
 	Leaderboard(context.Context) ([]Leader, error)
 	LeaderboardSummary(context.Context, uuid.UUID) ([]LeaderSummary, error)
 	ManagementView(context.Context) ([]ResultDetail, error)
+	GetRemainingPlayers(context.Context, uuid.UUID) ([]Player, error)
 }
 
 type Round struct {

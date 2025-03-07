@@ -24,8 +24,8 @@ func New() *customValidator {
 	}
 }
 
-func (cv *customValidator) ValidateIdParam(r *http.Request) (*uuid.UUID, error) {
-	v := r.PathValue("id")
+func (cv *customValidator) ValidateIdParam(r *http.Request, name string) (*uuid.UUID, error) {
+	v := r.PathValue(name)
 
 	if v == "" {
 		return nil, errors.New("could not find id param")

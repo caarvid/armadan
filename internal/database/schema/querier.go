@@ -42,6 +42,7 @@ type Querier interface {
 	GetPlayers(ctx context.Context) ([]GetPlayersRow, error)
 	GetPost(ctx context.Context, id uuid.UUID) (Post, error)
 	GetPosts(ctx context.Context) ([]Post, error)
+	GetRemainingPlayersByResultId(ctx context.Context, resultID uuid.UUID) ([]Player, error)
 	GetResultById(ctx context.Context, id uuid.UUID) (GetResultByIdRow, error)
 	GetRoundsByResultId(ctx context.Context, resultID uuid.UUID) ([]GetRoundsByResultIdRow, error)
 	GetSessionByToken(ctx context.Context, token string) (GetSessionByTokenRow, error)

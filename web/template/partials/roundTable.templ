@@ -3,43 +3,57 @@ package partials
 import "fmt"
 import "github.com/caarvid/armadan/internal/armadan"
 
+var diffClas = map[int]string{
+	0:  "text-gray-300",
+	1:  "text-red-300",
+	-1: "text-blue-300",
+}
+
+func getHcpDiff(r armadan.Round) string {
+	if r.NewHcp.Cmp(r.OldHcp) == 0 {
+		return "-"
+	}
+
+	diff, _ := r.NewHcp.Sub(r.OldHcp).Float64()
+
+	return fmt.Sprintf("%+.1f", diff)
+}
+
+func getDiffClass(r armadan.Round) string {
+	sign := r.NewHcp.Sub(r.OldHcp).Sign()
+
+	return diffClas[sign]
+}
+
 templ RoundTable(rounds []armadan.Round) {
 	@Table("rounds-table") {
 		<thead class="thead">
 			<tr class="tr">
-				<th class="th">Spelare</th>
-				<th class="th">HCP Diff.</th>
-				<th class="th">Ny HCP</th>
-				<th class="th">Brutto</th>
-				<th class="th">Netto</th>
-				<th class="th"></th>
+				<th class="th w-[20%]">Spelare</th>
+				<th class="th w-[10%]">HCP</th>
+				<th class="th w-[10%]">Ny HCP</th>
+				<th class="th w-[10%]">Brutto</th>
+				<th class="th w-[10%]">Netto</th>
+				<th class="th w-[10%]"></th>
 			</tr>
 		</thead>
 		<tbody class="tbody">
 			for _, round := range rounds {
 				<tr class="tr group">
 					<td class="td">{ fmt.Sprintf("%s %s", round.FirstName, round.LastName) }</td>
+					<td class="td">{ fmt.Sprintf("%s", round.OldHcp) }</td>
 					<td class="td">
-						if round.NewHcp.Sub(round.OldHcp).String() == "0" {
-							-
-						} else {
-							{ fmt.Sprintf("%s", round.NewHcp.Sub(round.OldHcp)) }
-						}
+						<span class="inline-block min-w-7">{ fmt.Sprintf("%s", round.NewHcp) }</span>
+						<span class={ "inline-block w-8 text-center", getDiffClass(round) }>{ fmt.Sprintf("%s", getHcpDiff(round)) }</span>
 					</td>
-					<td class="td">{ fmt.Sprintf("%s", round.NewHcp) }</td>
 					<td class="td">{ fmt.Sprint(round.GrossTotal) }</td>
 					<td class="td">{ fmt.Sprint(round.NetTotal) }</td>
 					<td class="td">
-						<div class="flex gap-3 ml-auto justify-end">
-							<button
-								class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
-							>
-								Ändra	
-							</button>
+						<div class="flex gap-3 text-sm ml-auto justify-end">
 							<button
 								class="btn-link p-0 h-auto text-primary/60 hover:text-destructive"
-								hx-delete={ fmt.Sprintf("/api/results/round/%s", round.ID) }
-								hx-confirm="Ta bort runda?"
+								hx-delete={ fmt.Sprintf("/api/results/%s/round/%s", round.ResultID, round.ID) }
+								hx-confirm={ fmt.Sprintf("Ta bort rundan?") }
 								hx-target="closest .group"
 								hx-swap="delete"
 							>

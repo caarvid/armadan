@@ -24,7 +24,7 @@ dev/templ:
 
 .PHONY: dev/css
 dev/css:
-	@npx @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify --watch
+	@npx --yes @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify --watch
 
 .PHONY: dev/sql
 dev/sql:
@@ -82,6 +82,10 @@ build/sql:
 .PHONY: build
 build: clean build/css build/templ build/sql
 	@GOOS=linux GOARCH=amd64 go build -o ./dist/armadan ./cmd/armadan/main.go	
+
+.PHONY: build/usertool
+build/usertool: 
+	@go build -o ./dist/usertool ./cmd/usertool/main.go	
 
 ### DOCKER ###
 .PHONY: docker/build

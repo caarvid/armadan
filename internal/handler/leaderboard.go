@@ -9,7 +9,7 @@ import (
 
 func GetLeaderboardSummary(rs armadan.ResultService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}

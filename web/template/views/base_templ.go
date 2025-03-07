@@ -42,7 +42,7 @@ func document(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/public/assets/favicon.svg\"><script src=\"/public/scripts/hyperscript.js\"></script><script src=\"/public/scripts/htmx.min.js\"></script><script src=\"/public/scripts/json-form.js\" defer></script><script src=\"/public/scripts/editor-utils.js\" defer></script><link rel=\"stylesheet\" href=\"/public/main.css\"><script>\n\t\t\t\thtmx.config.responseHandling.unshift({ code: \"422\", swap: true });\n\t\t\t</script></head><body class=\"overflow-y-hidden\"><section class=\"overflow-y-hidden flex flex-auto flex-col min-h-screen max-h-screen\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/public/assets/favicon.svg\"><script src=\"/public/scripts/hyperscript.js\"></script><script src=\"/public/scripts/htmx.min.js\"></script><script src=\"/public/scripts/json-form.js\" defer></script><script src=\"/public/scripts/editor-utils.js\" defer></script><link rel=\"stylesheet\" href=\"/public/main.css\"><script>\n\t\t\t\thtmx.config.allowNestedOobSwaps = false;\n\t\t\t\thtmx.config.responseHandling.unshift({ code: \"422\", swap: true });\n\t\t\t\t_hyperscript.config.conversions[\"SafeInt\"] = function(val) {\n\t\t\t\t\tvar nr = Number(val);\n\n\t\t\t\t\treturn nr === NaN ? 0 : nr;\n\t\t\t\t}\n\t\t\t</script></head><body class=\"overflow-y-hidden\"><section class=\"overflow-y-hidden flex flex-auto flex-col min-h-screen max-h-screen\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +50,7 @@ func document(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</section><div id=\"toast-list\" class=\"absolute flex flex-col bottom-8 right-6 gap-3\"></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</section><div id=\"toast-list\" class=\"absolute flex flex-col top-2 left-[50%] translate-x-[-50%] gap-3\"></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

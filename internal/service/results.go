@@ -84,6 +84,15 @@ func (rs *results) GetRounds(ctx context.Context, id uuid.UUID) ([]armadan.Round
 	}), nil
 }
 
+func (rs *results) GetRemainingPlayers(ctx context.Context, id uuid.UUID) ([]armadan.Player, error) {
+	players, err := rs.db.GetRemainingPlayersByResultId(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return armadan.MapEntities(players, toPlayer), nil
+}
+
 func (rs *results) Create(ctx context.Context, weekId uuid.UUID) (*armadan.Result, error) {
 	result, err := rs.db.CreateResult(ctx, weekId)
 

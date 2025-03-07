@@ -29,7 +29,7 @@ func SuccessToast(text string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"toast-list\" hx-swap-oob=\"afterbegin\"><div class=\"toast z-60 flex items-center gap-3 py-2 px-5 bg-green-600 text-primary-foreground rounded shadow-md\" _=\"init wait for closeToast or 4s then add .removing then wait for animationend then remove me\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"toast-list\" hx-swap-oob=\"innerHTML\"><div class=\"toast z-60 flex items-center gap-3 py-2 px-5 bg-green-600 text-primary-foreground rounded shadow-md\" _=\"init wait for closeToast or 4s then add .removing then wait for animationend then remove me\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

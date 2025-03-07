@@ -32,7 +32,7 @@ func NewPlayer() http.Handler {
 
 func EditPlayer(ps armadan.PlayerService, v armadan.Validator) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -48,7 +48,7 @@ func EditPlayer(ps armadan.PlayerService, v armadan.Validator) http.HandlerFunc 
 
 func CancelEditPlayer(ps armadan.PlayerService, v armadan.Validator) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 
 		if err != nil {
 			return
@@ -110,7 +110,7 @@ func UpdatePlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -147,7 +147,7 @@ func UpdatePlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 
 func DeletePlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}

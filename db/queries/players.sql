@@ -18,7 +18,7 @@ SELECT
   p.hcp,
   u.email,
   u.id::UUID AS user_id
-FROM players p LEFT JOIN users u ON u.id = p.user_id ORDER BY p.last_name ASC;
+FROM players p LEFT JOIN users u ON u.id = p.user_id ORDER BY p.last_name ASC, p.first_name ASC;
 
 -- name: GetLeaderboard :many
 SELECT

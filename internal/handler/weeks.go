@@ -101,7 +101,7 @@ func InsertWeek(ws armadan.WeekService, v armadan.Validator) http.Handler {
 
 func EditWeek(ws armadan.WeekService, cs armadan.CourseService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -128,7 +128,7 @@ func EditWeek(ws armadan.WeekService, cs armadan.CourseService, v armadan.Valida
 
 func CancelEditWeek(ws armadan.WeekService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -150,7 +150,7 @@ func UpdateWeek(ws armadan.WeekService, v armadan.Validator) http.Handler {
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -185,7 +185,7 @@ func UpdateWeek(ws armadan.WeekService, v armadan.Validator) http.Handler {
 
 func DeleteWeek(ws armadan.WeekService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}

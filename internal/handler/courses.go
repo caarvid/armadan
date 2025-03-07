@@ -45,7 +45,7 @@ func RemoveEmptyTeeForm() http.Handler {
 
 func RemoveTee(cs armadan.CourseService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -60,7 +60,7 @@ func RemoveTee(cs armadan.CourseService, v armadan.Validator) http.Handler {
 
 func EditCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -165,7 +165,7 @@ func UpdateCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -224,7 +224,7 @@ func UpdateCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 
 func DeleteCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}

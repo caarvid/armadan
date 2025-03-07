@@ -7,7 +7,7 @@ import (
 )
 
 type Validator interface {
-	ValidateIdParam(*http.Request) (*uuid.UUID, error)
+	ValidateIdParam(*http.Request, string) (*uuid.UUID, error)
 	Validate(*http.Request, interface{}) error
 }
 

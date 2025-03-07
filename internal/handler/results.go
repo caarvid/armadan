@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/caarvid/armadan/internal/armadan"
+	"github.com/caarvid/armadan/internal/utils/hcp"
 	"github.com/caarvid/armadan/internal/utils/response"
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/web/template/views"
@@ -28,7 +29,7 @@ func ManageResultsView(rs armadan.ResultService) http.Handler {
 
 func EditResultView(rs armadan.ResultService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -43,23 +44,12 @@ func EditResultView(rs armadan.ResultService, v armadan.Validator) http.Handler 
 			return
 		}
 
-		views.EditResult(result, rounds).Render(r.Context(), w)
-	})
-}
-
-func NewRound(ps armadan.PlayerService, v armadan.Validator) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		players, err := rs.GetRemainingPlayers(r.Context(), *id)
 		if err != nil {
 			return
 		}
 
-		players, err := ps.All(r.Context())
-		if err != nil {
-			return
-		}
-
-		partials.NewRoundModal(id.String(), players).Render(r.Context(), w)
+		views.EditResult(result, rounds, players).Render(r.Context(), w)
 	})
 }
 
@@ -70,7 +60,7 @@ func NewRoundForm(
 	v armadan.Validator,
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -98,13 +88,15 @@ func NewRoundForm(
 			return
 		}
 
-		partials.NewRoundForm(id.String(), course, player).Render(r.Context(), w)
+		strokes := hcp.GetStrokes(player.Hcp.InexactFloat64(), result.Cr.InexactFloat64(), int(result.Slope), int(course.Par))
+
+		partials.RoundForm(id.String(), strokes, course, player).Render(r.Context(), w)
 	})
 }
 
-func AddNewResult(rs armadan.ResultService, v armadan.Validator) http.Handler {
+func AddNewResult(rs armadan.ResultService, ps armadan.PlayerService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -126,12 +118,20 @@ func AddNewResult(rs armadan.ResultService, v armadan.Validator) http.Handler {
 			return
 		}
 
+		players, err := ps.All(r.Context())
+		if err != nil {
+			return
+		}
+
 		w.Header().Add("HX-Push-URL", fmt.Sprintf("/admin/results/%s", newResult.ID))
-		views.EditResult(result, rounds).Render(r.Context(), w)
+		views.EditResult(result, rounds, players).Render(r.Context(), w)
 	})
 }
 
-func InsertRound(rs armadan.ResultService, v armadan.Validator) http.Handler {
+func InsertRound(
+	rs armadan.ResultService,
+	v armadan.Validator,
+) http.Handler {
 	type score struct {
 		HoleID  uuid.UUID `json:"holeId" validate:"required,uuid4"`
 		Strokes int32     `json:"strokes" validate:"required,gte=1,lte=10"`
@@ -140,14 +140,13 @@ func InsertRound(rs armadan.ResultService, v armadan.Validator) http.Handler {
 	}
 
 	type newRoundData struct {
-		ID       uuid.UUID       `param:"id" validate:"required,uuid4"`
 		PlayerID uuid.UUID       `json:"playerId" validate:"required,uuid4"`
 		HCP      decimal.Decimal `json:"hcp"`
 		Scores   []score         `json:"scores" validate:"required,len=18,dive"`
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -178,13 +177,24 @@ func InsertRound(rs armadan.ResultService, v armadan.Validator) http.Handler {
 			return
 		}
 
+		result, err := rs.Get(r.Context(), *id)
+		if err != nil {
+			return
+		}
+
 		rounds, err := rs.GetRounds(r.Context(), *id)
+		if err != nil {
+			return
+		}
+
+		players, err := rs.GetRemainingPlayers(r.Context(), *id)
 		if err != nil {
 			return
 		}
 
 		response.
 			New(w, r, partials.RoundTable(rounds)).
+			WithPartial(partials.NewRoundPanel(result, players)).
 			WithSuccess("Runda tillagd").
 			HTML()
 	})
@@ -192,7 +202,7 @@ func InsertRound(rs armadan.ResultService, v armadan.Validator) http.Handler {
 
 func DeleteResult(rs armadan.ResultService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -215,7 +225,12 @@ func DeleteResult(rs armadan.ResultService, v armadan.Validator) http.Handler {
 
 func DeleteRound(rs armadan.ResultService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
+		if err != nil {
+			return
+		}
+
+		resultId, err := v.ValidateIdParam(r, "resultId")
 		if err != nil {
 			return
 		}
@@ -224,6 +239,14 @@ func DeleteRound(rs armadan.ResultService, v armadan.Validator) http.Handler {
 			return
 		}
 
-		partials.SuccessToast("Runda borttagen").Render(r.Context(), w)
+		players, err := rs.GetRemainingPlayers(r.Context(), *resultId)
+		if err != nil {
+			return
+		}
+
+		response.
+			New(w, r, partials.PlayerDropdown(*resultId, players)).
+			WithSuccess("Runda borttagen").
+			HTML()
 	})
 }

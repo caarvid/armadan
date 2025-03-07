@@ -37,8 +37,8 @@ templ resultRow(week armadan.ResultDetail) {
 						class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
 						hx-get={ fmt.Sprintf("/admin/results/%s", week.ResultID) }
 						hx-swap="outerHTML"
-						hx-select="#admin-content"
-						hx-target="#admin-content"
+						hx-select="#content"
+						hx-target="#content"
 					>
 						Ändra	
 					</button>
@@ -58,27 +58,25 @@ templ resultRow(week armadan.ResultDetail) {
 	</tr>
 }
 
-templ EditResult(result *armadan.Result, rounds []armadan.Round) {
-	@AdminLayout() {
-		@adminHeader() {
-			<h3
-				class="font-semibold leading-none tracking-tight text-2xl"
-			>
-				{ fmt.Sprintf("Resultat - v.%d", result.WeekNr) }
-			</h3>
-			<button
-				class="btn-default"
-				hx-get={ fmt.Sprintf("/admin/results/%s/round", result.ID) }
-				hx-target="body"
-				hx-swap="beforeend"
-			>
-				Lägg till runda
-			</button>
-		}
-		if len(rounds) > 0 {
-			@partials.RoundTable(rounds)
-		} else {
-			@partials.NoData("Rundorna kommer synas här")
+templ EditResult(result *armadan.Result, rounds []armadan.Round, players []armadan.Player) {
+	@document("Armadan") {
+		@partials.Header()
+		@partials.Content("content") {
+			<section class="overflow-y-hidden flex flex-auto max-h-screen min-h-0">
+				@partials.Content("admin-content") {
+					<div class="relative flex flex-col flex-1 px-5">
+						@adminHeader() {
+							<h3
+								class="font-semibold leading-none tracking-tight text-2xl"
+							>
+								{ fmt.Sprintf("Resultat - v.%d", result.WeekNr) }
+							</h3>
+						}
+						@partials.RoundTable(rounds)
+					</div>
+					@partials.NewRoundPanel(result, players)
+				}
+			</section>
 		}
 	}
 }

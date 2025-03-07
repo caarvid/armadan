@@ -72,6 +72,15 @@ LEFT JOIN player_data p ON p.id = r.player_id
 WHERE r.result_id = $1
 ORDER BY net_total ASC;
 
+-- name: GetRemainingPlayersByResultId :many
+SELECT p.*
+FROM players p
+LEFT JOIN rounds r 
+  ON r.player_id = p.id 
+  AND r.result_id = $1
+WHERE r.player_id IS NULL
+ORDER BY p.last_name ASC, p.first_name ASC;
+
 -- name: CreateResult :one 
 INSERT INTO results (week_id) VALUES ($1) RETURNING *;
 
