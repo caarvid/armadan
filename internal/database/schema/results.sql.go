@@ -7,110 +7,162 @@ package schema
 
 import (
 	"context"
-
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/shopspring/decimal"
+	"database/sql"
 )
 
-const createResult = `-- name: CreateResult :one
-INSERT INTO results (week_id) VALUES ($1) RETURNING id, week_id, published
+const createHcpChange = `-- name: CreateHcpChange :one
+INSERT INTO hcp_changes (old_hcp, new_hcp, round_id) VALUES (?, ?, ?) RETURNING id, new_hcp, old_hcp, round_id
 `
 
-func (q *Queries) CreateResult(ctx context.Context, weekID uuid.UUID) (Result, error) {
-	row := q.db.QueryRow(ctx, createResult, weekID)
+type CreateHcpChangeParams struct {
+	OldHcp  float64 `json:"oldHcp"`
+	NewHcp  float64 `json:"newHcp"`
+	RoundID string  `json:"roundId"`
+}
+
+func (q *Queries) CreateHcpChange(ctx context.Context, arg *CreateHcpChangeParams) (HcpChange, error) {
+	row := q.queryRow(ctx, q.createHcpChangeStmt, createHcpChange, arg.OldHcp, arg.NewHcp, arg.RoundID)
+	var i HcpChange
+	err := row.Scan(
+		&i.ID,
+		&i.NewHcp,
+		&i.OldHcp,
+		&i.RoundID,
+	)
+	return i, err
+}
+
+const createResult = `-- name: CreateResult :one
+INSERT INTO results (id, week_id) VALUES (?, ?) RETURNING id, is_published, week_id
+`
+
+type CreateResultParams struct {
+	ID     string `json:"id"`
+	WeekID string `json:"weekId"`
+}
+
+func (q *Queries) CreateResult(ctx context.Context, arg *CreateResultParams) (Result, error) {
+	row := q.queryRow(ctx, q.createResultStmt, createResult, arg.ID, arg.WeekID)
 	var i Result
-	err := row.Scan(&i.ID, &i.WeekID, &i.Published)
+	err := row.Scan(&i.ID, &i.IsPublished, &i.WeekID)
 	return i, err
 }
 
 const createRound = `-- name: CreateRound :one
-INSERT INTO rounds (player_id, result_id, net_in, net_out, gross_in, gross_out, new_hcp, old_hcp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, net_in, net_out, gross_in, gross_out, old_hcp, new_hcp, player_id, result_id
+INSERT INTO rounds (id, player_id, result_id) VALUES (?, ?, ?) RETURNING id, player_id, result_id
 `
 
 type CreateRoundParams struct {
-	PlayerID uuid.UUID       `json:"playerId"`
-	ResultID uuid.UUID       `json:"resultId"`
-	NetIn    int32           `json:"netIn"`
-	NetOut   int32           `json:"netOut"`
-	GrossIn  int32           `json:"grossIn"`
-	GrossOut int32           `json:"grossOut"`
-	NewHcp   decimal.Decimal `json:"newHcp"`
-	OldHcp   decimal.Decimal `json:"oldHcp"`
+	ID       string `json:"id"`
+	PlayerID string `json:"playerId"`
+	ResultID string `json:"resultId"`
 }
 
 func (q *Queries) CreateRound(ctx context.Context, arg *CreateRoundParams) (Round, error) {
-	row := q.db.QueryRow(ctx, createRound,
-		arg.PlayerID,
-		arg.ResultID,
+	row := q.queryRow(ctx, q.createRoundStmt, createRound, arg.ID, arg.PlayerID, arg.ResultID)
+	var i Round
+	err := row.Scan(&i.ID, &i.PlayerID, &i.ResultID)
+	return i, err
+}
+
+const createRoundDetail = `-- name: CreateRoundDetail :one
+INSERT INTO round_details (net_in, net_out, gross_in, gross_out, round_id) VALUES (?, ?, ?, ?, ?) RETURNING id, net_in, net_out, net_total, gross_in, gross_out, gross_total, round_id
+`
+
+type CreateRoundDetailParams struct {
+	NetIn    int64  `json:"netIn"`
+	NetOut   int64  `json:"netOut"`
+	GrossIn  int64  `json:"grossIn"`
+	GrossOut int64  `json:"grossOut"`
+	RoundID  string `json:"roundId"`
+}
+
+func (q *Queries) CreateRoundDetail(ctx context.Context, arg *CreateRoundDetailParams) (RoundDetail, error) {
+	row := q.queryRow(ctx, q.createRoundDetailStmt, createRoundDetail,
 		arg.NetIn,
 		arg.NetOut,
 		arg.GrossIn,
 		arg.GrossOut,
-		arg.NewHcp,
-		arg.OldHcp,
+		arg.RoundID,
 	)
-	var i Round
+	var i RoundDetail
 	err := row.Scan(
 		&i.ID,
 		&i.NetIn,
 		&i.NetOut,
+		&i.NetTotal,
 		&i.GrossIn,
 		&i.GrossOut,
-		&i.OldHcp,
-		&i.NewHcp,
-		&i.PlayerID,
-		&i.ResultID,
+		&i.GrossTotal,
+		&i.RoundID,
 	)
 	return i, err
 }
 
+const createScores = `-- name: CreateScores :one
+INSERT INTO scores (round_id, hole_id, strokes) VALUES (?, ?, ?) RETURNING id, strokes, hole_id, round_id
+`
+
 type CreateScoresParams struct {
-	RoundID uuid.UUID `json:"roundId"`
-	HoleID  uuid.UUID `json:"holeId"`
-	Strokes int32     `json:"strokes"`
+	RoundID string `json:"roundId"`
+	HoleID  string `json:"holeId"`
+	Strokes int64  `json:"strokes"`
+}
+
+func (q *Queries) CreateScores(ctx context.Context, arg *CreateScoresParams) (Score, error) {
+	row := q.queryRow(ctx, q.createScoresStmt, createScores, arg.RoundID, arg.HoleID, arg.Strokes)
+	var i Score
+	err := row.Scan(
+		&i.ID,
+		&i.Strokes,
+		&i.HoleID,
+		&i.RoundID,
+	)
+	return i, err
 }
 
 const deleteResult = `-- name: DeleteResult :exec
-DELETE FROM results WHERE id = $1
+DELETE FROM results WHERE id = ?
 `
 
-func (q *Queries) DeleteResult(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteResult, id)
+func (q *Queries) DeleteResult(ctx context.Context, id string) error {
+	_, err := q.exec(ctx, q.deleteResultStmt, deleteResult, id)
 	return err
 }
 
 const deleteRound = `-- name: DeleteRound :exec
-DELETE FROM rounds WHERE id = $1
+DELETE FROM rounds WHERE id = ?
 `
 
-func (q *Queries) DeleteRound(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteRound, id)
+func (q *Queries) DeleteRound(ctx context.Context, id string) error {
+	_, err := q.exec(ctx, q.deleteRoundStmt, deleteRound, id)
 	return err
 }
 
 const getLeaderboardSummary = `-- name: GetLeaderboardSummary :many
-WITH winner_data AS (
-  SELECT w.id, w.points, w.player_id, w.result_id FROM winners w
-), result_data AS (
-  SELECT r.id, r.week_id, r.published FROM results r
-)
-SELECT wk.id, wk.nr, COALESCE(wd.points, 0) AS points, COALESCE(rd.published, false) as has_results FROM weeks wk
-LEFT JOIN result_data rd ON rd.week_id = wk.id 
-LEFT JOIN winner_data wd ON rd.id = wd.result_id AND wd.player_id = $1::UUID 
-GROUP BY wk.id, wd.points, rd.published
-ORDER BY wk.nr ASC
+SELECT
+  weeks.id, weeks.nr, weeks.is_finals, weeks.finals_date, weeks.course_id, weeks.tee_id,
+  coalesce(w.points, 0) AS points,
+  coalesce(r.is_published, FALSE) AS has_results
+FROM weeks
+JOIN results r ON r.week_id = weeks.id
+JOIN winners w ON w.week_id = weeks.id AND w.player_id = ?
+ORDER BY weeks.nr
 `
 
 type GetLeaderboardSummaryRow struct {
-	ID         uuid.UUID `json:"id"`
-	Nr         int32     `json:"nr"`
-	Points     int32     `json:"points"`
-	HasResults bool      `json:"hasResults"`
+	ID         string         `json:"id"`
+	Nr         int64          `json:"nr"`
+	IsFinals   int64          `json:"isFinals"`
+	FinalsDate sql.NullString `json:"finalsDate"`
+	CourseID   string         `json:"courseId"`
+	TeeID      string         `json:"teeId"`
+	Points     int64          `json:"points"`
+	HasResults int64          `json:"hasResults"`
 }
 
-func (q *Queries) GetLeaderboardSummary(ctx context.Context, dollar_1 uuid.UUID) ([]GetLeaderboardSummaryRow, error) {
-	rows, err := q.db.Query(ctx, getLeaderboardSummary, dollar_1)
+func (q *Queries) GetLeaderboardSummary(ctx context.Context, playerID string) ([]GetLeaderboardSummaryRow, error) {
+	rows, err := q.query(ctx, q.getLeaderboardSummaryStmt, getLeaderboardSummary, playerID)
 	if err != nil {
 		return nil, err
 	}
@@ -121,12 +173,19 @@ func (q *Queries) GetLeaderboardSummary(ctx context.Context, dollar_1 uuid.UUID)
 		if err := rows.Scan(
 			&i.ID,
 			&i.Nr,
+			&i.IsFinals,
+			&i.FinalsDate,
+			&i.CourseID,
+			&i.TeeID,
 			&i.Points,
 			&i.HasResults,
 		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -135,49 +194,38 @@ func (q *Queries) GetLeaderboardSummary(ctx context.Context, dollar_1 uuid.UUID)
 }
 
 const getManageResultView = `-- name: GetManageResultView :many
-WITH result_data AS (
-  SELECT r.id, r.published, r.week_id 
-  FROM results r
-), participant_counts AS (
-  SELECT r.result_id, COUNT(r.id) AS participants
-  FROM rounds r
-  GROUP BY r.result_id
-), winner_counts AS (
-  SELECT w.result_id, COUNT(w.id) AS winners
-  FROM winners w
-  GROUP BY w.result_id
-)
-SELECT 
-  wd.id,
-  wd.nr,
-  wd.is_finals,
-  wd.course_name,
-  wd.tee_name,
-  rd.id::UUID AS result_id,
-  COALESCE(rd.published, false) AS published,
-  COALESCE(pc.participants, 0) AS participants,
-  COALESCE(wc.winners, 0) AS winners
-FROM week_details wd
-LEFT JOIN result_data rd ON rd.week_id = wd.id
-LEFT JOIN participant_counts pc ON pc.result_id = rd.id
-LEFT JOIN winner_counts wc ON wc.result_id = rd.id
-ORDER BY wd.nr ASC
+SELECT
+  w.id,
+  w.nr,
+  w.is_finals,
+  w.course_name,
+  w.tee_name,
+  r.id AS result_id,
+  coalesce(r.is_published, FALSE) as is_published,
+  coalesce(count(r.id), 0) AS participants,
+  coalesce(count(win.id), 0) as winners
+FROM week_details w
+LEFT JOIN results r ON r.week_id = w.id
+LEFT JOIN rounds rd ON rd.result_id = r.id
+LEFT JOIN winners win ON win.week_id = w.id
+GROUP BY w.id, r.id
+ORDER BY w.nr ASC
 `
 
 type GetManageResultViewRow struct {
-	ID           uuid.UUID   `json:"id"`
-	Nr           int32       `json:"nr"`
-	IsFinals     pgtype.Bool `json:"isFinals"`
-	CourseName   string      `json:"courseName"`
-	TeeName      string      `json:"teeName"`
-	ResultID     uuid.UUID   `json:"resultId"`
-	Published    bool        `json:"published"`
-	Participants int64       `json:"participants"`
-	Winners      int64       `json:"winners"`
+	ID           string         `json:"id"`
+	Nr           int64          `json:"nr"`
+	IsFinals     int64          `json:"isFinals"`
+	CourseName   string         `json:"courseName"`
+	TeeName      string         `json:"teeName"`
+	ResultID     sql.NullString `json:"resultId"`
+	IsPublished  int64          `json:"isPublished"`
+	Participants interface{}    `json:"participants"`
+	Winners      interface{}    `json:"winners"`
 }
 
 func (q *Queries) GetManageResultView(ctx context.Context) ([]GetManageResultViewRow, error) {
-	rows, err := q.db.Query(ctx, getManageResultView)
+	rows, err := q.query(ctx, q.getManageResultViewStmt, getManageResultView)
 	if err != nil {
 		return nil, err
 	}
@@ -192,13 +240,16 @@ func (q *Queries) GetManageResultView(ctx context.Context) ([]GetManageResultVie
 			&i.CourseName,
 			&i.TeeName,
 			&i.ResultID,
-			&i.Published,
+			&i.IsPublished,
 			&i.Participants,
 			&i.Winners,
 		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -207,17 +258,16 @@ func (q *Queries) GetManageResultView(ctx context.Context) ([]GetManageResultVie
 }
 
 const getRemainingPlayersByResultId = `-- name: GetRemainingPlayersByResultId :many
-SELECT p.id, p.first_name, p.last_name, p.points, p.user_id, p.hcp
+SELECT 
+  p.id, p.first_name, p.last_name, p.hcp, p.user_id
 FROM players p
-LEFT JOIN rounds r 
-  ON r.player_id = p.id 
-  AND r.result_id = $1
+LEFT JOIN rounds r ON r.player_id = p.id AND r.result_id = ?
 WHERE r.player_id IS NULL
 ORDER BY p.last_name ASC, p.first_name ASC
 `
 
-func (q *Queries) GetRemainingPlayersByResultId(ctx context.Context, resultID uuid.UUID) ([]Player, error) {
-	rows, err := q.db.Query(ctx, getRemainingPlayersByResultId, resultID)
+func (q *Queries) GetRemainingPlayersByResultId(ctx context.Context, resultID string) ([]Player, error) {
+	rows, err := q.query(ctx, q.getRemainingPlayersByResultIdStmt, getRemainingPlayersByResultId, resultID)
 	if err != nil {
 		return nil, err
 	}
@@ -229,13 +279,15 @@ func (q *Queries) GetRemainingPlayersByResultId(ctx context.Context, resultID uu
 			&i.ID,
 			&i.FirstName,
 			&i.LastName,
-			&i.Points,
-			&i.UserID,
 			&i.Hcp,
+			&i.UserID,
 		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -244,80 +296,74 @@ func (q *Queries) GetRemainingPlayersByResultId(ctx context.Context, resultID uu
 }
 
 const getResultById = `-- name: GetResultById :one
-WITH week_data AS (
-  SELECT w.id, w.nr, w.course_id, w.tee_id FROM weeks w
-), tee_data AS (
-  SELECT t.id, t.slope, t.cr FROM tees t
-)
 SELECT
-  r.id,
-  td.slope,
-  td.cr,
-  wd.nr::integer as week_nr,
-  wd.course_id::UUID as course_id
+  r.id, r.is_published, r.week_id,
+  w.nr as week_nr,
+  w.course_id,
+  t.slope,
+  t.cr
 FROM results r
-LEFT JOIN week_data wd ON wd.id = r.week_id
-LEFT JOIN tee_data td ON td.id = wd.tee_id
-WHERE r.id = $1
+JOIN weeks w ON w.id = r.week_id
+JOIN tees t ON t.id = w.tee_id
+WHERE r.id = ?
 `
 
 type GetResultByIdRow struct {
-	ID       uuid.UUID      `json:"id"`
-	Slope    pgtype.Int4    `json:"slope"`
-	Cr       pgtype.Numeric `json:"cr"`
-	WeekNr   int32          `json:"weekNr"`
-	CourseID uuid.UUID      `json:"courseId"`
+	ID          string  `json:"id"`
+	IsPublished int64   `json:"isPublished"`
+	WeekID      string  `json:"weekId"`
+	WeekNr      int64   `json:"weekNr"`
+	CourseID    string  `json:"courseId"`
+	Slope       int64   `json:"slope"`
+	Cr          float64 `json:"cr"`
 }
 
-func (q *Queries) GetResultById(ctx context.Context, id uuid.UUID) (GetResultByIdRow, error) {
-	row := q.db.QueryRow(ctx, getResultById, id)
+func (q *Queries) GetResultById(ctx context.Context, id string) (GetResultByIdRow, error) {
+	row := q.queryRow(ctx, q.getResultByIdStmt, getResultById, id)
 	var i GetResultByIdRow
 	err := row.Scan(
 		&i.ID,
-		&i.Slope,
-		&i.Cr,
+		&i.IsPublished,
+		&i.WeekID,
 		&i.WeekNr,
 		&i.CourseID,
+		&i.Slope,
+		&i.Cr,
 	)
 	return i, err
 }
 
 const getRoundsByResultId = `-- name: GetRoundsByResultId :many
-WITH player_data AS (
-  SELECT p.id, p.first_name, p.last_name, p.hcp FROM players p
-)
-SELECT 
-  r.id, r.net_in, r.net_out, r.gross_in, r.gross_out, r.old_hcp, r.new_hcp, r.player_id, r.result_id, 
-  r.net_in + r.net_out AS net_total,
-  r.gross_in + r.gross_out AS gross_total,
-  p.first_name, 
-  p.last_name, 
+SELECT
+  r.id, r.player_id, r.result_id, r.net_in, r.net_out, r.net_total, r.gross_in, r.gross_out, r.gross_total, r.old_hcp, r.new_hcp,
+  p.first_name,
+  p.last_name,
   p.hcp
-FROM rounds r
-LEFT JOIN player_data p ON p.id = r.player_id
-WHERE r.result_id = $1
-ORDER BY net_total ASC
+FROM full_rounds r
+JOIN players p ON p.id = r.player_id
+WHERE r.result_id = ?
+ORDER BY r.net_total ASC
 `
 
 type GetRoundsByResultIdRow struct {
-	ID         uuid.UUID       `json:"id"`
-	NetIn      int32           `json:"netIn"`
-	NetOut     int32           `json:"netOut"`
-	GrossIn    int32           `json:"grossIn"`
-	GrossOut   int32           `json:"grossOut"`
-	OldHcp     decimal.Decimal `json:"oldHcp"`
-	NewHcp     decimal.Decimal `json:"newHcp"`
-	PlayerID   uuid.UUID       `json:"playerId"`
-	ResultID   uuid.UUID       `json:"resultId"`
-	NetTotal   int32           `json:"netTotal"`
-	GrossTotal int32           `json:"grossTotal"`
-	FirstName  string          `json:"firstName"`
-	LastName   string          `json:"lastName"`
-	Hcp        pgtype.Numeric  `json:"hcp"`
+	ID         string        `json:"id"`
+	PlayerID   string        `json:"playerId"`
+	ResultID   string        `json:"resultId"`
+	NetIn      int64         `json:"netIn"`
+	NetOut     int64         `json:"netOut"`
+	NetTotal   sql.NullInt64 `json:"netTotal"`
+	GrossIn    int64         `json:"grossIn"`
+	GrossOut   int64         `json:"grossOut"`
+	GrossTotal sql.NullInt64 `json:"grossTotal"`
+	OldHcp     float64       `json:"oldHcp"`
+	NewHcp     float64       `json:"newHcp"`
+	FirstName  string        `json:"firstName"`
+	LastName   string        `json:"lastName"`
+	Hcp        float64       `json:"hcp"`
 }
 
-func (q *Queries) GetRoundsByResultId(ctx context.Context, resultID uuid.UUID) ([]GetRoundsByResultIdRow, error) {
-	rows, err := q.db.Query(ctx, getRoundsByResultId, resultID)
+func (q *Queries) GetRoundsByResultId(ctx context.Context, resultID string) ([]GetRoundsByResultIdRow, error) {
+	rows, err := q.query(ctx, q.getRoundsByResultIdStmt, getRoundsByResultId, resultID)
 	if err != nil {
 		return nil, err
 	}
@@ -327,16 +373,16 @@ func (q *Queries) GetRoundsByResultId(ctx context.Context, resultID uuid.UUID) (
 		var i GetRoundsByResultIdRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.NetIn,
-			&i.NetOut,
-			&i.GrossIn,
-			&i.GrossOut,
-			&i.OldHcp,
-			&i.NewHcp,
 			&i.PlayerID,
 			&i.ResultID,
+			&i.NetIn,
+			&i.NetOut,
 			&i.NetTotal,
+			&i.GrossIn,
+			&i.GrossOut,
 			&i.GrossTotal,
+			&i.OldHcp,
+			&i.NewHcp,
 			&i.FirstName,
 			&i.LastName,
 			&i.Hcp,
@@ -344,6 +390,9 @@ func (q *Queries) GetRoundsByResultId(ctx context.Context, resultID uuid.UUID) (
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

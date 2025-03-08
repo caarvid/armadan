@@ -1,67 +1,33 @@
 -- name: GetCourse :one
-SELECT
-  c.id,
-  c.name,
-  c.par,
-  COALESCE(
-    (
-      SELECT jsonb_agg(to_jsonb(t))
-      FROM tees t 
-      WHERE t.course_id = c.id
-    ), '[]'
-  )::jsonb AS tees,
-  COALESCE(
-    (
-      SELECT jsonb_agg(to_jsonb(h) ORDER BY h.nr)
-      FROM holes h 
-      WHERE h.course_id = c.id
-  ), '[]'
-  )::jsonb AS holes
-FROM courses c
-WHERE c.id=$1;
+SELECT * FROM course_details c WHERE c.id = ?;
 
 -- name: GetCourses :many
-SELECT
-  c.id,
-  c.name,
-  c.par,
-  COALESCE(
-    (
-      SELECT jsonb_agg(to_jsonb(t))
-      FROM tees t 
-      WHERE t.course_id = c.id
-    ), '[]'
-  )::jsonb AS tees,
-  COALESCE(
-    (
-      SELECT jsonb_agg(to_jsonb(h) ORDER BY h.nr)
-      FROM holes h 
-      WHERE h.course_id = c.id
-  ), '[]'
-  )::jsonb AS holes
-FROM courses c
-GROUP BY c.id;
+SELECT * FROM course_details c;
 
 -- name: CreateCourse :one
-INSERT INTO courses (name, par) VALUES ($1, $2) RETURNING *;
+INSERT INTO courses (id, name, par) VALUES (?, ?, ?) RETURNING *;
 
 -- name: DeleteCourse :exec
-DELETE FROM courses WHERE id = $1;
+DELETE FROM courses WHERE id = ?;
 
 -- name: UpdateCourse :one
-UPDATE courses SET name = $1, par = $2 WHERE id = $3 RETURNING *;
+UPDATE courses SET name = ?, par = ? WHERE id = ? RETURNING *;
 
--- name: CreateHoles :copyfrom
-INSERT INTO holes (nr, par, index, course_id) VALUES ($1, $2, $3, $4);
+-- name: CreateHoles :one
+INSERT INTO holes (id, nr, par, stroke_index, course_id) VALUES (?, ?, ?, ?, ?) RETURNING *;
 
--- name: UpdateHoles :batchexec
-UPDATE holes SET nr = $1, par = $2, index = $3 WHERE id = $4;
+-- name: UpdateHoles :exec
+UPDATE holes SET nr = ?, par = ?, stroke_index = ? WHERE id = ?;
 
--- name: CreateTees :copyfrom
-INSERT INTO tees (name, slope, cr, course_id) values ($1, $2, $3, $4);
+-- name: CreateTees :one
+INSERT INTO tees (id, name, slope, cr, course_id) VALUES (?, ?, ?, ?, ?) RETURNING *;
 
--- name: UpdateTees :batchexec
-UPDATE tees SET name = $1, slope = $2, cr = $3 WHERE id = $4;
+-- name: UpdateTees :exec
+UPDATE tees SET name = ?, slope = ?, cr = ? WHERE id = ?;
+
+-- name: GetTeesByCourse :many
+SELECT * FROM tees WHERE course_id = ?;
 
 -- name: DeleteTee :exec
-DELETE FROM tees WHERE id = $1;
+DELETE FROM tees WHERE id = ?;
+

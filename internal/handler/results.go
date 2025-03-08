@@ -9,8 +9,6 @@ import (
 	"github.com/caarvid/armadan/internal/utils/response"
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/web/template/views"
-	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 // TODO: Error handling!
@@ -34,17 +32,17 @@ func EditResultView(rs armadan.ResultService, v armadan.Validator) http.Handler 
 			return
 		}
 
-		result, err := rs.Get(r.Context(), *id)
+		result, err := rs.Get(r.Context(), id)
 		if err != nil {
 			return
 		}
 
-		rounds, err := rs.GetRounds(r.Context(), *id)
+		rounds, err := rs.GetRounds(r.Context(), id)
 		if err != nil {
 			return
 		}
 
-		players, err := rs.GetRemainingPlayers(r.Context(), *id)
+		players, err := rs.GetRemainingPlayers(r.Context(), id)
 		if err != nil {
 			return
 		}
@@ -65,10 +63,7 @@ func NewRoundForm(
 			return
 		}
 
-		playerId, err := uuid.Parse(r.URL.Query().Get("playerId"))
-		if err != nil {
-			return
-		}
+		playerId := r.URL.Query().Get("playerId")
 
 		var (
 			result *armadan.Result
@@ -76,7 +71,7 @@ func NewRoundForm(
 			player *armadan.Player
 		)
 
-		if result, err = rs.Get(r.Context(), *id); err != nil {
+		if result, err = rs.Get(r.Context(), id); err != nil {
 			return
 		}
 
@@ -88,9 +83,9 @@ func NewRoundForm(
 			return
 		}
 
-		strokes := hcp.GetStrokes(player.Hcp.InexactFloat64(), result.Cr.InexactFloat64(), int(result.Slope), int(course.Par))
+		strokes := hcp.GetStrokes(player.Hcp, result.Cr, int(result.Slope), int(course.Par))
 
-		partials.RoundForm(id.String(), strokes, course, player).Render(r.Context(), w)
+		partials.RoundForm(id, strokes, course, player).Render(r.Context(), w)
 	})
 }
 
@@ -103,7 +98,7 @@ func AddNewResult(rs armadan.ResultService, ps armadan.PlayerService, v armadan.
 
 		fmt.Println(id)
 
-		newResult, err := rs.Create(r.Context(), *id)
+		newResult, err := rs.Create(r.Context(), id)
 		if err != nil {
 			return
 		}
@@ -133,16 +128,16 @@ func InsertRound(
 	v armadan.Validator,
 ) http.Handler {
 	type score struct {
-		HoleID  uuid.UUID `json:"holeId" validate:"required,uuid4"`
-		Strokes int32     `json:"strokes" validate:"required,gte=1,lte=10"`
-		Index   int32     `json:"index"`
-		Par     int32     `json:"par"`
+		HoleID  string `json:"holeId" validate:"required,uuid4"`
+		Strokes int64  `json:"strokes" validate:"required,gte=1,lte=10"`
+		Index   int64  `json:"index"`
+		Par     int64  `json:"par"`
 	}
 
 	type newRoundData struct {
-		PlayerID uuid.UUID       `json:"playerId" validate:"required,uuid4"`
-		HCP      decimal.Decimal `json:"hcp"`
-		Scores   []score         `json:"scores" validate:"required,len=18,dive"`
+		PlayerID string  `json:"playerId" validate:"required,uuid4"`
+		HCP      float64 `json:"hcp"`
+		Scores   []score `json:"scores" validate:"required,len=18,dive"`
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -170,24 +165,24 @@ func InsertRound(
 		err = rs.CreateRound(r.Context(), &armadan.Round{
 			Hcp:      round.HCP,
 			PlayerID: round.PlayerID,
-			ResultID: *id,
+			ResultID: id,
 		}, scores)
 
 		if err != nil {
 			return
 		}
 
-		result, err := rs.Get(r.Context(), *id)
+		result, err := rs.Get(r.Context(), id)
 		if err != nil {
 			return
 		}
 
-		rounds, err := rs.GetRounds(r.Context(), *id)
+		rounds, err := rs.GetRounds(r.Context(), id)
 		if err != nil {
 			return
 		}
 
-		players, err := rs.GetRemainingPlayers(r.Context(), *id)
+		players, err := rs.GetRemainingPlayers(r.Context(), id)
 		if err != nil {
 			return
 		}
@@ -207,7 +202,7 @@ func DeleteResult(rs armadan.ResultService, v armadan.Validator) http.Handler {
 			return
 		}
 
-		if err = rs.Delete(r.Context(), *id); err != nil {
+		if err = rs.Delete(r.Context(), id); err != nil {
 			return
 		}
 
@@ -235,17 +230,17 @@ func DeleteRound(rs armadan.ResultService, v armadan.Validator) http.Handler {
 			return
 		}
 
-		if err = rs.DeleteRound(r.Context(), *id); err != nil {
+		if err = rs.DeleteRound(r.Context(), id); err != nil {
 			return
 		}
 
-		players, err := rs.GetRemainingPlayers(r.Context(), *resultId)
+		players, err := rs.GetRemainingPlayers(r.Context(), resultId)
 		if err != nil {
 			return
 		}
 
 		response.
-			New(w, r, partials.PlayerDropdown(*resultId, players)).
+			New(w, r, partials.PlayerDropdown(resultId, players)).
 			WithSuccess("Runda borttagen").
 			HTML()
 	})

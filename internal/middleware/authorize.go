@@ -41,7 +41,7 @@ func Protected(
 			}
 
 			l.UpdateContext(func(c zerolog.Context) zerolog.Context {
-				return c.Stringer("user_id", session.UserID)
+				return c.Str("user_id", session.UserID)
 			})
 
 			if roleMap[session.Role] <= roleMap[role] {

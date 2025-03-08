@@ -10,17 +10,24 @@ var diffClas = map[int]string{
 }
 
 func getHcpDiff(r armadan.Round) string {
-	if r.NewHcp.Cmp(r.OldHcp) == 0 {
+	if r.NewHcp == r.OldHcp {
 		return "-"
 	}
 
-	diff, _ := r.NewHcp.Sub(r.OldHcp).Float64()
+	diff := r.NewHcp - r.OldHcp
 
 	return fmt.Sprintf("%+.1f", diff)
 }
 
 func getDiffClass(r armadan.Round) string {
-	sign := r.NewHcp.Sub(r.OldHcp).Sign()
+	sign := 0
+	diff := r.NewHcp - r.OldHcp
+
+	if diff > 0 {
+		sign = 1
+	} else if diff < 0 {
+		diff = -1
+	}
 
 	return diffClas[sign]
 }

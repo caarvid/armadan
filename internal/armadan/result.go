@@ -2,66 +2,63 @@ package armadan
 
 import (
 	"context"
-
-	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 type ResultService interface {
-	Get(context.Context, uuid.UUID) (*Result, error)
-	GetRounds(context.Context, uuid.UUID) ([]Round, error)
-	Create(context.Context, uuid.UUID) (*Result, error)
+	Get(context.Context, string) (*Result, error)
+	GetRounds(context.Context, string) ([]Round, error)
+	Create(context.Context, string) (*Result, error)
 	CreateRound(context.Context, *Round, []Score) error
-	Delete(context.Context, uuid.UUID) error
-	DeleteRound(context.Context, uuid.UUID) error
+	Delete(context.Context, string) error
+	DeleteRound(context.Context, string) error
 	Leaderboard(context.Context) ([]Leader, error)
-	LeaderboardSummary(context.Context, uuid.UUID) ([]LeaderSummary, error)
+	LeaderboardSummary(context.Context, string) ([]LeaderSummary, error)
 	ManagementView(context.Context) ([]ResultDetail, error)
-	GetRemainingPlayers(context.Context, uuid.UUID) ([]Player, error)
+	GetRemainingPlayers(context.Context, string) ([]Player, error)
 }
 
 type Round struct {
-	ID         uuid.UUID
-	NetIn      int32
-	NetOut     int32
-	NetTotal   int32
-	GrossIn    int32
-	GrossOut   int32
-	GrossTotal int32
-	OldHcp     decimal.Decimal
-	NewHcp     decimal.Decimal
-	PlayerID   uuid.UUID
-	ResultID   uuid.UUID
+	ID         string
+	NetIn      int64
+	NetOut     int64
+	NetTotal   int64
+	GrossIn    int64
+	GrossOut   int64
+	GrossTotal int64
+	OldHcp     float64
+	NewHcp     float64
+	PlayerID   string
+	ResultID   string
 	FirstName  string
 	LastName   string
-	Hcp        decimal.Decimal
+	Hcp        float64
 }
 
 type Score struct {
-	ID      uuid.UUID
-	HoleID  uuid.UUID
-	Strokes int32
-	Index   int32
-	Par     int32
+	ID      string
+	HoleID  string
+	Strokes int64
+	Index   int64
+	Par     int64
 }
 
 type Result struct {
-	ID        uuid.UUID
-	Slope     int32
-	Cr        decimal.Decimal
-	WeekNr    int32
-	CourseID  uuid.UUID
-	WeekID    uuid.UUID
+	ID        string
+	Slope     int64
+	Cr        float64
+	WeekNr    int64
+	CourseID  string
+	WeekID    string
 	Published bool
 }
 
 type ResultDetail struct {
-	ID                 uuid.UUID
-	Nr                 int32
+	ID                 string
+	Nr                 int64
 	IsFinals           bool
 	CourseName         string
 	TeeName            string
-	ResultID           uuid.UUID
+	ResultID           string
 	Published          bool
 	Participants       int64
 	Winners            int64
@@ -69,15 +66,15 @@ type ResultDetail struct {
 }
 
 type Leader struct {
-	ID         uuid.UUID
+	ID         string
 	Name       string
-	Points     int32
-	NrOfRounds int32
+	Points     int64
+	NrOfRounds int64
 }
 
 type LeaderSummary struct {
-	ID         uuid.UUID
-	Nr         int32
-	Points     int32
+	ID         string
+	Nr         int64
+	Points     int64
 	HasResults bool
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/caarvid/armadan/internal/utils/response"
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/web/template/views"
-	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 )
 
@@ -40,11 +39,7 @@ func ManageWeeksView(ws armadan.WeekService, cs armadan.CourseService) http.Hand
 
 func CourseTees(cs armadan.CourseService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := uuid.Parse(r.URL.Query().Get("courseId"))
-		if err != nil {
-			return
-		}
-
+		id := r.URL.Query().Get("courseId")
 		tees, err := cs.GetTees(r.Context(), id)
 
 		if err != nil {
@@ -57,11 +52,11 @@ func CourseTees(cs armadan.CourseService, v armadan.Validator) http.Handler {
 
 func InsertWeek(ws armadan.WeekService, v armadan.Validator) http.Handler {
 	type insertWeekData struct {
-		Nr         int32     `json:"nr" validate:"required"`
-		FinalsDate string    `json:"finalsDate" validate:"required_with=IsFinalWeek"`
-		CourseID   uuid.UUID `json:"courseId" validate:"required,uuid4"`
-		TeeID      uuid.UUID `json:"teeId" validate:"required,uuid4"`
-		IsFinals   bool      `json:"isFinalsWeek"`
+		Nr         int64  `json:"nr" validate:"required"`
+		FinalsDate string `json:"finalsDate" validate:"required_with=IsFinalWeek"`
+		CourseID   string `json:"courseId" validate:"required,uuid4"`
+		TeeID      string `json:"teeId" validate:"required,uuid4"`
+		IsFinals   bool   `json:"isFinalsWeek"`
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -110,7 +105,7 @@ func EditWeek(ws armadan.WeekService, cs armadan.CourseService, v armadan.Valida
 		var courses []armadan.Course
 		var tees []armadan.Tee
 
-		if week, err = ws.Get(r.Context(), *id); err != nil {
+		if week, err = ws.Get(r.Context(), id); err != nil {
 			return
 		}
 
@@ -133,7 +128,7 @@ func CancelEditWeek(ws armadan.WeekService, v armadan.Validator) http.Handler {
 			return
 		}
 
-		week, err := ws.Get(r.Context(), *id)
+		week, err := ws.Get(r.Context(), id)
 		if err != nil {
 			return
 		}
@@ -144,9 +139,9 @@ func CancelEditWeek(ws armadan.WeekService, v armadan.Validator) http.Handler {
 
 func UpdateWeek(ws armadan.WeekService, v armadan.Validator) http.Handler {
 	type updateWeekData struct {
-		Nr       int32     `json:"nr" validate:"required"`
-		CourseID uuid.UUID `json:"courseId" validate:"required,uuid4"`
-		TeeID    uuid.UUID `json:"teeId" validate:"required,uuid4"`
+		Nr       int64  `json:"nr" validate:"required"`
+		CourseID string `json:"courseId" validate:"required,uuid4"`
+		TeeID    string `json:"teeId" validate:"required,uuid4"`
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -161,7 +156,7 @@ func UpdateWeek(ws armadan.WeekService, v armadan.Validator) http.Handler {
 		}
 
 		_, err = ws.Update(r.Context(), &armadan.Week{
-			ID:       *id,
+			ID:       id,
 			Nr:       data.Nr,
 			CourseID: data.CourseID,
 			TeeID:    data.TeeID,
@@ -190,7 +185,7 @@ func DeleteWeek(ws armadan.WeekService, v armadan.Validator) http.Handler {
 			return
 		}
 
-		if err = ws.Delete(r.Context(), *id); err != nil {
+		if err = ws.Delete(r.Context(), id); err != nil {
 			return
 		}
 

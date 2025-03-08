@@ -5,167 +5,160 @@
 package schema
 
 import (
-	"database/sql/driver"
-	"fmt"
-
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/shopspring/decimal"
+	"database/sql"
 )
-
-type UsersRoleEnum string
-
-const (
-	UsersRoleEnumUser      UsersRoleEnum = "user"
-	UsersRoleEnumAdmin     UsersRoleEnum = "admin"
-	UsersRoleEnumModerator UsersRoleEnum = "moderator"
-)
-
-func (e *UsersRoleEnum) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = UsersRoleEnum(s)
-	case string:
-		*e = UsersRoleEnum(s)
-	default:
-		return fmt.Errorf("unsupported scan type for UsersRoleEnum: %T", src)
-	}
-	return nil
-}
-
-type NullUsersRoleEnum struct {
-	UsersRoleEnum UsersRoleEnum `json:"usersRoleEnum"`
-	Valid         bool          `json:"valid"` // Valid is true if UsersRoleEnum is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullUsersRoleEnum) Scan(value interface{}) error {
-	if value == nil {
-		ns.UsersRoleEnum, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.UsersRoleEnum.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullUsersRoleEnum) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.UsersRoleEnum), nil
-}
 
 type Course struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
-	Par  int32     `json:"par"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Par  int64  `json:"par"`
+}
+
+type CourseDetail struct {
+	ID    string         `json:"id"`
+	Name  string         `json:"name"`
+	Par   int64          `json:"par"`
+	Holes sql.NullString `json:"holes"`
+	Tees  sql.NullString `json:"tees"`
+}
+
+type FullRound struct {
+	ID         string        `json:"id"`
+	PlayerID   string        `json:"playerId"`
+	ResultID   string        `json:"resultId"`
+	NetIn      int64         `json:"netIn"`
+	NetOut     int64         `json:"netOut"`
+	NetTotal   sql.NullInt64 `json:"netTotal"`
+	GrossIn    int64         `json:"grossIn"`
+	GrossOut   int64         `json:"grossOut"`
+	GrossTotal sql.NullInt64 `json:"grossTotal"`
+	OldHcp     float64       `json:"oldHcp"`
+	NewHcp     float64       `json:"newHcp"`
+}
+
+type HcpChange struct {
+	ID      int64   `json:"id"`
+	NewHcp  float64 `json:"newHcp"`
+	OldHcp  float64 `json:"oldHcp"`
+	RoundID string  `json:"roundId"`
 }
 
 type Hole struct {
-	ID       uuid.UUID `json:"id"`
-	Nr       int32     `json:"nr"`
-	Par      int32     `json:"par"`
-	Index    int32     `json:"index"`
-	CourseID uuid.UUID `json:"courseId"`
+	ID          string `json:"id"`
+	Nr          int64  `json:"nr"`
+	Par         int64  `json:"par"`
+	StrokeIndex int64  `json:"strokeIndex"`
+	CourseID    string `json:"courseId"`
 }
 
 type PasswordResetToken struct {
-	ID        uuid.UUID          `json:"id"`
-	UserID    uuid.UUID          `json:"userId"`
-	Hash      string             `json:"hash"`
-	ExpiresAt pgtype.Timestamptz `json:"expiresAt"`
-	IsValid   bool               `json:"isValid"`
+	ID        int64  `json:"id"`
+	Token     string `json:"token"`
+	ExpiresAt string `json:"expiresAt"`
+	UserID    string `json:"userId"`
 }
 
 type Player struct {
-	ID        uuid.UUID       `json:"id"`
-	FirstName string          `json:"firstName"`
-	LastName  string          `json:"lastName"`
-	Points    int32           `json:"points"`
-	UserID    uuid.UUID       `json:"userId"`
-	Hcp       decimal.Decimal `json:"hcp"`
+	ID        string  `json:"id"`
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+	Hcp       float64 `json:"hcp"`
+	UserID    string  `json:"userId"`
+}
+
+type PlayersWithPoint struct {
+	ID        string  `json:"id"`
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+	Hcp       float64 `json:"hcp"`
+	UserID    string  `json:"userId"`
+	Email     string  `json:"email"`
+	Points    int64   `json:"points"`
 }
 
 type Post struct {
-	ID        uuid.UUID          `json:"id"`
-	Title     string             `json:"title"`
-	Body      string             `json:"body"`
-	Author    string             `json:"author"`
-	CreatedAt pgtype.Timestamptz `json:"createdAt"`
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	Body      string `json:"body"`
+	Author    string `json:"author"`
+	CreatedAt string `json:"createdAt"`
 }
 
 type Result struct {
-	ID        uuid.UUID `json:"id"`
-	WeekID    uuid.UUID `json:"weekId"`
-	Published bool      `json:"published"`
+	ID          string `json:"id"`
+	IsPublished int64  `json:"isPublished"`
+	WeekID      string `json:"weekId"`
 }
 
 type Round struct {
-	ID       uuid.UUID       `json:"id"`
-	NetIn    int32           `json:"netIn"`
-	NetOut   int32           `json:"netOut"`
-	GrossIn  int32           `json:"grossIn"`
-	GrossOut int32           `json:"grossOut"`
-	OldHcp   decimal.Decimal `json:"oldHcp"`
-	NewHcp   decimal.Decimal `json:"newHcp"`
-	PlayerID uuid.UUID       `json:"playerId"`
-	ResultID uuid.UUID       `json:"resultId"`
+	ID       string `json:"id"`
+	PlayerID string `json:"playerId"`
+	ResultID string `json:"resultId"`
+}
+
+type RoundDetail struct {
+	ID         int64         `json:"id"`
+	NetIn      int64         `json:"netIn"`
+	NetOut     int64         `json:"netOut"`
+	NetTotal   sql.NullInt64 `json:"netTotal"`
+	GrossIn    int64         `json:"grossIn"`
+	GrossOut   int64         `json:"grossOut"`
+	GrossTotal sql.NullInt64 `json:"grossTotal"`
+	RoundID    string        `json:"roundId"`
 }
 
 type Score struct {
-	ID      uuid.UUID `json:"id"`
-	Strokes int32     `json:"strokes"`
-	HoleID  uuid.UUID `json:"holeId"`
-	RoundID uuid.UUID `json:"roundId"`
+	ID      int64  `json:"id"`
+	Strokes int64  `json:"strokes"`
+	HoleID  string `json:"holeId"`
+	RoundID string `json:"roundId"`
+}
+
+type Session struct {
+	ID        int64  `json:"id"`
+	Token     string `json:"token"`
+	ExpiresAt string `json:"expiresAt"`
+	UserID    string `json:"userId"`
 }
 
 type Tee struct {
-	ID       uuid.UUID       `json:"id"`
-	Name     string          `json:"name"`
-	Slope    int32           `json:"slope"`
-	Cr       decimal.Decimal `json:"cr"`
-	CourseID uuid.UUID       `json:"courseId"`
+	ID       string  `json:"id"`
+	Name     string  `json:"name"`
+	Slope    int64   `json:"slope"`
+	Cr       float64 `json:"cr"`
+	CourseID string  `json:"courseId"`
 }
 
 type User struct {
-	ID       uuid.UUID     `json:"id"`
-	Email    string        `json:"email"`
-	Password string        `json:"password"`
-	Role     UsersRoleEnum `json:"role"`
-}
-
-type UserSession struct {
-	ID        uuid.UUID          `json:"id"`
-	UserID    uuid.UUID          `json:"userId"`
-	ExpiresAt pgtype.Timestamptz `json:"expiresAt"`
-	IsActive  bool               `json:"isActive"`
-	Token     string             `json:"token"`
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	UserRole string `json:"userRole"`
 }
 
 type Week struct {
-	ID         uuid.UUID          `json:"id"`
-	Nr         int32              `json:"nr"`
-	CourseID   uuid.UUID          `json:"courseId"`
-	TeeID      uuid.UUID          `json:"teeId"`
-	FinalsDate pgtype.Timestamptz `json:"finalsDate"`
-	IsFinals   pgtype.Bool        `json:"isFinals"`
+	ID         string         `json:"id"`
+	Nr         int64          `json:"nr"`
+	IsFinals   int64          `json:"isFinals"`
+	FinalsDate sql.NullString `json:"finalsDate"`
+	CourseID   string         `json:"courseId"`
+	TeeID      string         `json:"teeId"`
 }
 
 type WeekDetail struct {
-	ID         uuid.UUID          `json:"id"`
-	Nr         int32              `json:"nr"`
-	FinalsDate pgtype.Timestamptz `json:"finalsDate"`
-	IsFinals   pgtype.Bool        `json:"isFinals"`
-	CourseID   uuid.UUID          `json:"courseId"`
-	CourseName string             `json:"courseName"`
-	TeeID      uuid.UUID          `json:"teeId"`
-	TeeName    string             `json:"teeName"`
+	ID         string         `json:"id"`
+	Nr         int64          `json:"nr"`
+	FinalsDate sql.NullString `json:"finalsDate"`
+	IsFinals   int64          `json:"isFinals"`
+	CourseID   string         `json:"courseId"`
+	CourseName string         `json:"courseName"`
+	TeeID      string         `json:"teeId"`
+	TeeName    string         `json:"teeName"`
 }
 
 type Winner struct {
-	ID       uuid.UUID `json:"id"`
-	Points   int32     `json:"points"`
-	ResultID uuid.UUID `json:"resultId"`
-	PlayerID uuid.UUID `json:"playerId"`
+	ID       string `json:"id"`
+	Points   int64  `json:"points"`
+	WeekID   string `json:"weekId"`
+	PlayerID string `json:"playerId"`
 }

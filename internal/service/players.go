@@ -2,28 +2,17 @@ package service
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
 	"github.com/caarvid/armadan/internal/utils"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"go.step.sm/crypto/randutil"
 )
 
 func toPlayer(entity any) *armadan.Player {
 	switch p := entity.(type) {
-	case schema.GetPlayerRow:
-		return &armadan.Player{
-			ID:        p.ID,
-			FirstName: p.FirstName,
-			LastName:  p.LastName,
-			Points:    p.Points,
-			UserID:    p.UserID,
-			Email:     p.Email,
-			Hcp:       p.Hcp,
-		}
-	case schema.GetPlayersRow:
+	case schema.PlayersWithPoint:
 		return &armadan.Player{
 			ID:        p.ID,
 			FirstName: p.FirstName,
@@ -38,7 +27,6 @@ func toPlayer(entity any) *armadan.Player {
 			ID:        p.ID,
 			FirstName: p.FirstName,
 			LastName:  p.LastName,
-			Points:    p.Points,
 			UserID:    p.UserID,
 			Hcp:       p.Hcp,
 		}
@@ -48,19 +36,21 @@ func toPlayer(entity any) *armadan.Player {
 }
 
 type players struct {
-	db   schema.Querier
-	pool *pgxpool.Pool
+	dbReader schema.Querier
+	dbWriter schema.Querier
+	pool     *sql.DB
 }
 
-func NewPlayerService(db schema.Querier, pool *pgxpool.Pool) *players {
+func NewPlayerService(reader, writer schema.Querier, pool *sql.DB) *players {
 	return &players{
-		db:   db,
-		pool: pool,
+		dbReader: reader,
+		dbWriter: writer,
+		pool:     pool,
 	}
 }
 
 func (ps *players) All(ctx context.Context) ([]armadan.Player, error) {
-	p, err := ps.db.GetPlayers(ctx)
+	p, err := ps.dbReader.GetPlayers(ctx)
 
 	if err != nil {
 		return nil, err
@@ -69,8 +59,8 @@ func (ps *players) All(ctx context.Context) ([]armadan.Player, error) {
 	return armadan.MapEntities(p, toPlayer), nil
 }
 
-func (ps *players) Get(ctx context.Context, id uuid.UUID) (*armadan.Player, error) {
-	p, err := ps.db.GetPlayer(ctx, id)
+func (ps *players) Get(ctx context.Context, id string) (*armadan.Player, error) {
+	p, err := ps.dbReader.GetPlayer(ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -90,15 +80,16 @@ func (ps *players) Create(ctx context.Context, data *armadan.Player) (*armadan.P
 		return nil, err
 	}
 
-	tx, err := ps.pool.Begin(ctx)
+	tx, err := ps.pool.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	defer tx.Rollback(ctx)
+	defer tx.Rollback()
 	qtx := schema.New(tx)
 
 	user, err := qtx.CreateUser(ctx, &schema.CreateUserParams{
+		ID:       armadan.GetId(),
 		Email:    data.Email,
 		Password: hash.Encode(),
 	})
@@ -108,6 +99,7 @@ func (ps *players) Create(ctx context.Context, data *armadan.Player) (*armadan.P
 	}
 
 	player, err := qtx.CreatePlayer(ctx, &schema.CreatePlayerParams{
+		ID:        armadan.GetId(),
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
 		UserID:    user.ID,
@@ -118,7 +110,7 @@ func (ps *players) Create(ctx context.Context, data *armadan.Player) (*armadan.P
 		return nil, err
 	}
 
-	if err = tx.Commit(ctx); err != nil {
+	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
 
@@ -133,12 +125,12 @@ func (ps *players) Create(ctx context.Context, data *armadan.Player) (*armadan.P
 }
 
 func (ps *players) Update(ctx context.Context, data *armadan.Player) (*armadan.Player, error) {
-	tx, err := ps.pool.Begin(ctx)
+	tx, err := ps.pool.Begin()
 	if err != nil {
 		return nil, err
 	}
 
-	defer tx.Rollback(ctx)
+	defer tx.Rollback()
 	qtx := schema.New(tx)
 
 	player, err := qtx.UpdatePlayer(ctx, &schema.UpdatePlayerParams{
@@ -161,7 +153,7 @@ func (ps *players) Update(ctx context.Context, data *armadan.Player) (*armadan.P
 		return nil, err
 	}
 
-	if err = tx.Commit(ctx); err != nil {
+	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
 
@@ -175,6 +167,6 @@ func (ps *players) Update(ctx context.Context, data *armadan.Player) (*armadan.P
 	}, nil
 }
 
-func (ps *players) Delete(ctx context.Context, id uuid.UUID) error {
-	return ps.db.DeletePlayer(ctx, id)
+func (ps *players) Delete(ctx context.Context, id string) error {
+	return ps.dbWriter.DeletePlayer(ctx, id)
 }

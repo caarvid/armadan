@@ -45,7 +45,7 @@ func EditPost(ps armadan.PostService, v armadan.Validator) http.Handler {
 			return
 		}
 
-		post, err := ps.Get(r.Context(), *id)
+		post, err := ps.Get(r.Context(), id)
 
 		if err != nil {
 			http.Error(w, "", http.StatusInternalServerError)
@@ -128,7 +128,7 @@ func UpdatePost(ps armadan.PostService, v armadan.Validator) http.Handler {
 		}
 
 		_, err = ps.Update(r.Context(), &armadan.Post{
-			ID:     *id,
+			ID:     id,
 			Title:  data.Title,
 			Body:   data.Body,
 			Author: data.Author,
@@ -157,7 +157,7 @@ func DeletePost(ps armadan.PostService, v armadan.Validator) http.Handler {
 			return
 		}
 
-		err = ps.Delete(r.Context(), *id)
+		err = ps.Delete(r.Context(), id)
 		if err != nil {
 			return
 		}

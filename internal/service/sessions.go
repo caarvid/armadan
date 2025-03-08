@@ -7,7 +7,6 @@ import (
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func toSession(data any) *armadan.Session {
@@ -16,18 +15,16 @@ func toSession(data any) *armadan.Session {
 		return &armadan.Session{
 			ID:        s.ID,
 			UserID:    s.UserID,
-			ExpiresAt: s.ExpiresAt.Time,
-			Active:    s.IsActive,
+			ExpiresAt: armadan.ParseTime(s.ExpiresAt),
 			Token:     s.Token,
 			Email:     s.Email,
-			Role:      armadan.Role(s.Role.UsersRoleEnum),
+			Role:      armadan.Role(s.UserRole),
 		}
-	case schema.UserSession:
+	case schema.Session:
 		return &armadan.Session{
 			ID:        s.ID,
 			UserID:    s.UserID,
-			ExpiresAt: s.ExpiresAt.Time,
-			Active:    s.IsActive,
+			ExpiresAt: armadan.ParseTime(s.ExpiresAt),
 			Token:     s.Token,
 		}
 	}
@@ -36,17 +33,19 @@ func toSession(data any) *armadan.Session {
 }
 
 type sessions struct {
-	db schema.Querier
+	dbReader schema.Querier
+	dbWriter schema.Querier
 }
 
-func NewSessionService(db schema.Querier) *sessions {
+func NewSessionService(reader, writer schema.Querier) *sessions {
 	return &sessions{
-		db: db,
+		dbReader: reader,
+		dbWriter: writer,
 	}
 }
 
 func (s *sessions) GetByToken(ctx context.Context, token string) (*armadan.Session, error) {
-	session, err := s.db.GetSessionByToken(ctx, token)
+	session, err := s.dbReader.GetSessionByToken(ctx, token)
 
 	if err != nil {
 		return nil, err
@@ -55,18 +54,17 @@ func (s *sessions) GetByToken(ctx context.Context, token string) (*armadan.Sessi
 	return toSession(session), nil
 }
 
-func getExpiration(keepLoggedIn bool) pgtype.Timestamptz {
+func getExpiration(keepLoggedIn bool) string {
 	if keepLoggedIn {
-		return pgtype.Timestamptz{Time: time.Now().Add(30 * 24 * time.Hour), Valid: true}
+		return time.Now().Add(30 * 24 * time.Hour).Format("2006-01-02 15:04:05")
 	}
 
-	return pgtype.Timestamptz{Time: time.Now().Add(1 * time.Hour), Valid: true}
+	return time.Now().Add(1 * time.Hour).Format("2006-01-02 15:04:05")
 }
 
-func (s *sessions) Create(ctx context.Context, id uuid.UUID, keepLoggedIn bool) (*armadan.Session, error) {
-	session, err := s.db.CreateSession(ctx, &schema.CreateSessionParams{
+func (s *sessions) Create(ctx context.Context, id string, keepLoggedIn bool) (*armadan.Session, error) {
+	session, err := s.dbWriter.CreateSession(ctx, &schema.CreateSessionParams{
 		UserID:    id,
-		IsActive:  true,
 		Token:     uuid.NewString(),
 		ExpiresAt: getExpiration(keepLoggedIn),
 	})
@@ -79,5 +77,5 @@ func (s *sessions) Create(ctx context.Context, id uuid.UUID, keepLoggedIn bool) 
 }
 
 func (s *sessions) DeleteByToken(ctx context.Context, token string) error {
-	return s.db.DeleteSession(ctx, token)
+	return s.dbWriter.DeleteSession(ctx, token)
 }

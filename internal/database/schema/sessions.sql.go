@@ -7,82 +7,68 @@ package schema
 
 import (
 	"context"
-
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createSession = `-- name: CreateSession :one
-INSERT INTO user_sessions (token, user_id, expires_at, is_active) VALUES ($1, $2, $3, $4) RETURNING id, user_id, expires_at, is_active, token
+INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?) RETURNING id, token, expires_at, user_id
 `
 
 type CreateSessionParams struct {
-	Token     string             `json:"token"`
-	UserID    uuid.UUID          `json:"userId"`
-	ExpiresAt pgtype.Timestamptz `json:"expiresAt"`
-	IsActive  bool               `json:"isActive"`
+	Token     string `json:"token"`
+	UserID    string `json:"userId"`
+	ExpiresAt string `json:"expiresAt"`
 }
 
-func (q *Queries) CreateSession(ctx context.Context, arg *CreateSessionParams) (UserSession, error) {
-	row := q.db.QueryRow(ctx, createSession,
-		arg.Token,
-		arg.UserID,
-		arg.ExpiresAt,
-		arg.IsActive,
-	)
-	var i UserSession
+func (q *Queries) CreateSession(ctx context.Context, arg *CreateSessionParams) (Session, error) {
+	row := q.queryRow(ctx, q.createSessionStmt, createSession, arg.Token, arg.UserID, arg.ExpiresAt)
+	var i Session
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
-		&i.ExpiresAt,
-		&i.IsActive,
 		&i.Token,
+		&i.ExpiresAt,
+		&i.UserID,
 	)
 	return i, err
 }
 
 const deleteSession = `-- name: DeleteSession :exec
-DELETE FROM user_sessions WHERE token = $1
+DELETE FROM sessions WHERE token = ?
 `
 
 func (q *Queries) DeleteSession(ctx context.Context, token string) error {
-	_, err := q.db.Exec(ctx, deleteSession, token)
+	_, err := q.exec(ctx, q.deleteSessionStmt, deleteSession, token)
 	return err
 }
 
 const getSessionByToken = `-- name: GetSessionByToken :one
 SELECT 
-  us.id,
-  us.user_id,
-  us.is_active,
-  us.expires_at,
-  us.token,
-  u.role,
-  u.email
-FROM user_sessions us LEFT JOIN users u ON u.id = us.user_id WHERE token = $1
+  s.id, s.token, s.expires_at, s.user_id,
+  u.email,
+  u.user_role
+FROM sessions s 
+JOIN users u ON u.id = s.user_id 
+WHERE token = ?
 `
 
 type GetSessionByTokenRow struct {
-	ID        uuid.UUID          `json:"id"`
-	UserID    uuid.UUID          `json:"userId"`
-	IsActive  bool               `json:"isActive"`
-	ExpiresAt pgtype.Timestamptz `json:"expiresAt"`
-	Token     string             `json:"token"`
-	Role      NullUsersRoleEnum  `json:"role"`
-	Email     string             `json:"email"`
+	ID        int64  `json:"id"`
+	Token     string `json:"token"`
+	ExpiresAt string `json:"expiresAt"`
+	UserID    string `json:"userId"`
+	Email     string `json:"email"`
+	UserRole  string `json:"userRole"`
 }
 
 func (q *Queries) GetSessionByToken(ctx context.Context, token string) (GetSessionByTokenRow, error) {
-	row := q.db.QueryRow(ctx, getSessionByToken, token)
+	row := q.queryRow(ctx, q.getSessionByTokenStmt, getSessionByToken, token)
 	var i GetSessionByTokenRow
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
-		&i.IsActive,
-		&i.ExpiresAt,
 		&i.Token,
-		&i.Role,
+		&i.ExpiresAt,
+		&i.UserID,
 		&i.Email,
+		&i.UserRole,
 	)
 	return i, err
 }

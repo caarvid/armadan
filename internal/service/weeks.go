@@ -2,11 +2,10 @@ package service
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/patrickmn/go-cache"
 )
 
@@ -18,8 +17,8 @@ func toWeek(ws any) *armadan.Week {
 		return &armadan.Week{
 			ID:         w.ID,
 			Nr:         w.Nr,
-			FinalsDate: w.FinalsDate.Time,
-			IsFinals:   w.IsFinals.Bool,
+			FinalsDate: armadan.ParseTime(w.FinalsDate.String),
+			IsFinals:   w.IsFinals == 1,
 			CourseID:   w.CourseID,
 			CourseName: w.CourseName,
 			TeeID:      w.TeeID,
@@ -30,8 +29,8 @@ func toWeek(ws any) *armadan.Week {
 		return &armadan.Week{
 			ID:         w.ID,
 			Nr:         w.Nr,
-			FinalsDate: w.FinalsDate.Time,
-			IsFinals:   w.IsFinals.Bool,
+			FinalsDate: armadan.ParseTime(w.FinalsDate.String),
+			IsFinals:   w.IsFinals == 1,
 			CourseID:   w.CourseID,
 			TeeID:      w.TeeID,
 			Dates:      armadan.GetWeekDates(int(w.Nr)),
@@ -42,14 +41,16 @@ func toWeek(ws any) *armadan.Week {
 }
 
 type weeks struct {
-	db    schema.Querier
-	cache *cache.Cache
+	dbReader schema.Querier
+	dbWriter schema.Querier
+	cache    *cache.Cache
 }
 
-func NewWeekService(db schema.Querier, cache *cache.Cache) *weeks {
+func NewWeekService(reader schema.Querier, writer schema.Querier, cache *cache.Cache) *weeks {
 	return &weeks{
-		db:    db,
-		cache: cache,
+		dbReader: reader,
+		dbWriter: writer,
+		cache:    cache,
 	}
 }
 
@@ -58,7 +59,7 @@ func (s *weeks) All(ctx context.Context) ([]armadan.Week, error) {
 		return cachedWeeks.([]armadan.Week), nil
 	}
 
-	weeks, err := s.db.GetWeeks(ctx)
+	weeks, err := s.dbReader.GetWeeks(ctx)
 
 	if err != nil {
 		return nil, err
@@ -71,8 +72,8 @@ func (s *weeks) All(ctx context.Context) ([]armadan.Week, error) {
 	return mappedWeeks, nil
 }
 
-func (s *weeks) Get(ctx context.Context, id uuid.UUID) (*armadan.Week, error) {
-	week, err := s.db.GetWeek(ctx, id)
+func (s *weeks) Get(ctx context.Context, id string) (*armadan.Week, error) {
+	week, err := s.dbReader.GetWeek(ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -82,10 +83,11 @@ func (s *weeks) Get(ctx context.Context, id uuid.UUID) (*armadan.Week, error) {
 }
 
 func (s *weeks) Create(ctx context.Context, data *armadan.Week) (*armadan.Week, error) {
-	week, err := s.db.CreateWeek(ctx, &schema.CreateWeekParams{
+	week, err := s.dbWriter.CreateWeek(ctx, &schema.CreateWeekParams{
+		ID:         armadan.GetId(),
 		Nr:         data.Nr,
-		IsFinals:   pgtype.Bool{Bool: data.IsFinals, Valid: true},
-		FinalsDate: pgtype.Timestamptz{Time: data.FinalsDate, Valid: true},
+		IsFinals:   armadan.ToSqlBool(data.IsFinals),
+		FinalsDate: sql.NullString{String: data.FinalsDate.Format(armadan.DEFAULT_TIME_FORMAT), Valid: true},
 		CourseID:   data.CourseID,
 		TeeID:      data.TeeID,
 	})
@@ -100,7 +102,7 @@ func (s *weeks) Create(ctx context.Context, data *armadan.Week) (*armadan.Week, 
 }
 
 func (s *weeks) Update(ctx context.Context, data *armadan.Week) (*armadan.Week, error) {
-	week, err := s.db.UpdateWeek(ctx, &schema.UpdateWeekParams{
+	week, err := s.dbWriter.UpdateWeek(ctx, &schema.UpdateWeekParams{
 		ID:       data.ID,
 		Nr:       data.Nr,
 		CourseID: data.CourseID,
@@ -116,8 +118,8 @@ func (s *weeks) Update(ctx context.Context, data *armadan.Week) (*armadan.Week, 
 	return toWeek(week), nil
 }
 
-func (s *weeks) Delete(ctx context.Context, id uuid.UUID) error {
-	if err := s.db.DeletePost(ctx, id); err != nil {
+func (s *weeks) Delete(ctx context.Context, id string) error {
+	if err := s.dbWriter.DeletePost(ctx, id); err != nil {
 		return err
 	}
 

@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE OR REPLACE VIEW week_details AS
+CREATE VIEW IF NOT EXISTS week_details AS
 SELECT
   w.id,
   w.nr,
@@ -11,8 +11,8 @@ SELECT
   t.id as tee_id,
   t.name as tee_name
 FROM weeks w
-LEFT JOIN courses c ON c.id = w.course_id
-LEFT JOIN tees t ON t.id = w.tee_id
+JOIN courses c ON c.id = w.course_id
+JOIN tees t ON t.id = w.tee_id
 GROUP BY w.id, c.id, c.name, t.id, t.name;
 -- +goose StatementEnd
 
@@ -20,3 +20,4 @@ GROUP BY w.id, c.id, c.name, t.id, t.name;
 -- +goose StatementBegin
 DROP VIEW IF EXISTS week_details;
 -- +goose StatementEnd
+

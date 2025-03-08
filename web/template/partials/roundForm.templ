@@ -4,7 +4,6 @@ import "fmt"
 import (
 	"github.com/caarvid/armadan/internal/armadan"
 	courseUtils "github.com/caarvid/armadan/internal/utils/course"
-	"github.com/google/uuid"
 )
 
 templ formCell(header string) {
@@ -23,7 +22,7 @@ templ formCell(header string) {
 templ RoundForm(resultId string, strokes int, course *armadan.Course, player *armadan.Player) {
 	<div class="text-sm py-2 pl-4 flex gap-4 text-gray-500 font-medium uppercase">
 		<span class="">
-			{ fmt.Sprintf("HCP: %s", player.Hcp) }
+			{ fmt.Sprintf("HCP: %2.1f", player.Hcp) }
 		</span>
 		<span>
 			{ fmt.Sprintf("Slag: %d", strokes) }
@@ -37,9 +36,9 @@ templ RoundForm(resultId string, strokes int, course *armadan.Course, player *ar
 		hx-target="#rounds-table"
 		hx-swap="innerHTML"
 	>
-		<input type="hidden" value={ course.ID.String() } name="courseId"/>
-		<input type="hidden" value={ player.ID.String() } name="playerId"/>
-		<input type="hidden" value={ player.Hcp.String() } name="hcp" data-type="number"/>
+		<input type="hidden" value={ course.ID } name="courseId"/>
+		<input type="hidden" value={ player.ID } name="playerId"/>
+		<input type="hidden" value={ fmt.Sprintf("%2.1f", player.Hcp) } name="hcp" data-type="number"/>
 		@Table("round-form") {
 			<thead class="thead [&_th]:h-7">
 				<tr class="tr bg-muted/80 hover:bg-muted/80">
@@ -76,7 +75,7 @@ templ RoundForm(resultId string, strokes int, course *armadan.Course, player *ar
 			>
 				for _, hole := range (course.Holes)[:9] {
 					<tr class={ "tr [&_td:last-child]:p-0", templ.KV("border-border!", hole.Nr == 9) }>
-						<input type="hidden" value={ hole.ID.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
+						<input type="hidden" value={ hole.ID } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
 						<input type="hidden" value={ fmt.Sprint(hole.Index) } name={ fmt.Sprintf("scores.%d.index", hole.Nr-1) } data-type="number"/>
 						<input type="hidden" value={ fmt.Sprint(hole.Par) } name={ fmt.Sprintf("scores.%d.par", hole.Nr-1) } data-type="number"/>
 						<td class="td text-center">{ fmt.Sprintf("%d", hole.Nr) }</td>
@@ -103,7 +102,7 @@ templ RoundForm(resultId string, strokes int, course *armadan.Course, player *ar
 				</tr>
 				for _, hole := range (course.Holes)[9:] {
 					<tr class={ "tr [&_td:last-child]:p-0", templ.KV("border-border!", hole.Nr == 18) }>
-						<input type="hidden" value={ hole.ID.String() } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
+						<input type="hidden" value={ hole.ID } name={ fmt.Sprintf("scores.%d.holeId", hole.Nr-1) }/>
 						<input type="hidden" value={ fmt.Sprint(hole.Index) } name={ fmt.Sprintf("scores.%d.index", hole.Nr-1) } data-type="number"/>
 						<input type="hidden" value={ fmt.Sprint(hole.Par) } name={ fmt.Sprintf("scores.%d.par", hole.Nr-1) } data-type="number"/>
 						<td class="td text-center">{ fmt.Sprintf("%d", hole.Nr) }</td>
@@ -152,7 +151,7 @@ templ RoundForm(resultId string, strokes int, course *armadan.Course, player *ar
 	</form>
 }
 
-templ PlayerDropdown(resultId uuid.UUID, players []armadan.Player) {
+templ PlayerDropdown(resultId string, players []armadan.Player) {
 	<div id="player-dropdown" class="select-wrapper" hx-swap-oob="outerHTML">
 		<select
 			id="players"
@@ -164,7 +163,7 @@ templ PlayerDropdown(resultId uuid.UUID, players []armadan.Player) {
 		>
 			<option hidden disabled selected value>Spelare</option>
 			for _, player := range players {
-				<option value={ player.ID.String() }>{ fmt.Sprintf("%s %s", player.FirstName, player.LastName) }</option>
+				<option value={ player.ID }>{ fmt.Sprintf("%s %s", player.FirstName, player.LastName) }</option>
 			}
 		</select>
 	</div>

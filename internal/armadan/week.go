@@ -4,16 +4,14 @@ import (
 	"context"
 	"fmt"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type WeekService interface {
 	All(context.Context) ([]Week, error)
-	Get(context.Context, uuid.UUID) (*Week, error)
+	Get(context.Context, string) (*Week, error)
 	Create(context.Context, *Week) (*Week, error)
 	Update(context.Context, *Week) (*Week, error)
-	Delete(context.Context, uuid.UUID) error
+	Delete(context.Context, string) error
 }
 
 type WeekDates struct {
@@ -46,13 +44,13 @@ func GetWeekDates(nr int) WeekDates {
 }
 
 type Week struct {
-	ID         uuid.UUID
-	Nr         int32
+	ID         string
+	Nr         int64
 	FinalsDate time.Time
 	IsFinals   bool
-	CourseID   uuid.UUID
+	CourseID   string
 	CourseName string
-	TeeID      uuid.UUID
+	TeeID      string
 	TeeName    string
 	Dates      WeekDates
 }

@@ -6,9 +6,9 @@ import "github.com/caarvid/armadan/internal/armadan"
 
 templ EmptyTeeForm() {
 	<div class="grid grid-cols-[1.5fr_0.5fr_0.5fr_0.1fr] gap-2">
-		<input type="text" class="input" name="tees.0.name" placeholder="name" required autocomplete="off"/>
-		<input type="number" class="input" name="tees.0.slope" placeholder="Slope" required/>
-		<input class="input" type="number" name="tees.0.cr" placeholder="CR" step="0.1" required/>
+		<input type="text" class="input" name="tees.0.name" placeholder="Tee" required autocomplete="off"/>
+		<input type="number" class="input-number" name="tees.0.slope" placeholder="Slope" required/>
+		<input class="input-number" type="number" name="tees.0.cr" placeholder="CR" step="0.1" required/>
 		<span
 			hx-get="/admin/courses/tee/remove"
 			hx-target="closest div"
@@ -22,10 +22,10 @@ templ EmptyTeeForm() {
 
 templ TeeForm(t armadan.Tee, idx int) {
 	<div class="grid grid-cols-[1.5fr_0.5fr_0.5fr_0.1fr] gap-2">
-		<input type="hidden" name={ fmt.Sprintf("tees.%d.id", idx) } value={ t.ID.String() }/>
-		<input type="text" class="input" name={ fmt.Sprintf("tees.%d.name", idx) } placeholder="name" required autocomplete="off" value={ t.Name }/>
-		<input type="number" class="input" name={ fmt.Sprintf("tees.%d.slope", idx) } placeholder="Slope" required value={ fmt.Sprintf("%d", t.Slope) }/>
-		<input class="input" type="number" name={ fmt.Sprintf("tees.%d.cr", idx) } placeholder="CR" step="0.1" required value={ fmt.Sprintf("%.1f", t.Cr) }/>
+		<input type="hidden" name={ fmt.Sprintf("tees.%d.id", idx) } value={ t.ID }/>
+		<input type="text" class="input-number" name={ fmt.Sprintf("tees.%d.name", idx) } placeholder="Tee" required autocomplete="off" value={ t.Name }/>
+		<input type="number" class="input-number" name={ fmt.Sprintf("tees.%d.slope", idx) } placeholder="Slope" required value={ fmt.Sprintf("%d", t.Slope) }/>
+		<input class="input-number" type="number" name={ fmt.Sprintf("tees.%d.cr", idx) } placeholder="CR" step="0.1" required value={ fmt.Sprintf("%.1f", t.Cr) }/>
 		<span
 			hx-delete={ fmt.Sprintf("/api/courses/tee/%s", t.ID) }
 			hx-target="closest div"
@@ -60,7 +60,7 @@ templ EditCourse(c armadan.Course) {
 							set inputs to <input/> in d
 							for inp in inputs
 								js(inp, i)
-									inp.name=inp.name.replace(/\\d+/, i)
+									inp.name=inp.name.replace(/\d+/, i)
 								end
 							end
 						end
@@ -87,13 +87,13 @@ templ EditCourse(c armadan.Course) {
 					for i := range 2 {
 						<div class="flex flex-col gap-3">
 							for h := range 9 {
-								<input type="hidden" name={ fmt.Sprintf("holes.%d.id", (i*9)+h) } value={ c.Holes[(i*9)+h].ID.String() }/>
+								<input type="hidden" name={ fmt.Sprintf("holes.%d.id", (i*9)+h) } value={ c.Holes[(i*9)+h].ID }/>
 								<input type="hidden" data-type="number" name={ fmt.Sprintf("holes.%d.nr", (i*9)+h) } value={ fmt.Sprintf("%d", c.Holes[(i*9)+h].Nr) }/>
 								<div class="grid grid-cols-[0.2fr_1fr_1fr] gap-3">
 									<div class="flex items-center justify-center">{ fmt.Sprintf("%d", ( i * 9 ) + h + 1 ) }</div>
 									<input
 										type="number"
-										class="input"
+										class="input-number"
 										name={ fmt.Sprintf("holes.%d.par", (i*9)+h) }
 										placeholder="Par"
 										min="3"
@@ -105,7 +105,7 @@ templ EditCourse(c armadan.Course) {
 									<input
 										value={ fmt.Sprintf("%d", c.Holes[(i*9)+h].Index) }
 										type="number"
-										class="input"
+										class="input-number"
 										name={ fmt.Sprintf("holes.%d.index", (i*9)+h) }
 										placeholder="Index"
 										min="1"
@@ -155,11 +155,13 @@ templ CreateCourse() {
 				_="
 					on mutation of childList
 						set divs to <div/> in me
+						log divs
 					 	for d in divs index i
 							set inputs to <input/> in d
+							log inputs
 							for inp in inputs
 								js(inp, i)
-									inp.name=inp.name.replace(/\\d+/, i)
+									inp.name=inp.name.replace(/\d+/, i)
 								end
 							end
 						end

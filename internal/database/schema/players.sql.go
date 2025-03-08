@@ -7,24 +7,23 @@ package schema
 
 import (
 	"context"
-
-	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 const createPlayer = `-- name: CreatePlayer :one
-INSERT INTO players (first_name, last_name, hcp, user_id) VALUES ($1, $2, $3, $4) RETURNING id, first_name, last_name, points, user_id, hcp
+INSERT INTO players (id, first_name, last_name, hcp, user_id) VALUES (?, ?, ?, ?, ?) RETURNING id, first_name, last_name, hcp, user_id
 `
 
 type CreatePlayerParams struct {
-	FirstName string          `json:"firstName"`
-	LastName  string          `json:"lastName"`
-	Hcp       decimal.Decimal `json:"hcp"`
-	UserID    uuid.UUID       `json:"userId"`
+	ID        string  `json:"id"`
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+	Hcp       float64 `json:"hcp"`
+	UserID    string  `json:"userId"`
 }
 
 func (q *Queries) CreatePlayer(ctx context.Context, arg *CreatePlayerParams) (Player, error) {
-	row := q.db.QueryRow(ctx, createPlayer,
+	row := q.queryRow(ctx, q.createPlayerStmt, createPlayer,
+		arg.ID,
 		arg.FirstName,
 		arg.LastName,
 		arg.Hcp,
@@ -35,45 +34,44 @@ func (q *Queries) CreatePlayer(ctx context.Context, arg *CreatePlayerParams) (Pl
 		&i.ID,
 		&i.FirstName,
 		&i.LastName,
-		&i.Points,
-		&i.UserID,
 		&i.Hcp,
+		&i.UserID,
 	)
 	return i, err
 }
 
 const deletePlayer = `-- name: DeletePlayer :exec
-DELETE FROM players WHERE id = $1
+DELETE FROM players WHERE id = ?
 `
 
-func (q *Queries) DeletePlayer(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deletePlayer, id)
+func (q *Queries) DeletePlayer(ctx context.Context, id string) error {
+	_, err := q.exec(ctx, q.deletePlayerStmt, deletePlayer, id)
 	return err
 }
 
 const getLeaderboard = `-- name: GetLeaderboard :many
-SELECT
-  p.id,
-  p.first_name,
-  p.last_name,
-  p.points,
-  COUNT(rounds.id) as nr_of_rounds
-FROM players p
-LEFT JOIN rounds ON rounds.player_id = p.id
+SELECT 
+  p.id, p.first_name, p.last_name, p.hcp, p.user_id, p.email, p.points,
+  count(r.id) as nr_of_rounds
+FROM players_with_points p
+LEFT JOIN rounds r ON r.player_id = p.id
 GROUP BY p.id
-ORDER BY p.points DESC, nr_of_rounds DESC
+ORDER BY p.points ASC, nr_of_rounds DESC
 `
 
 type GetLeaderboardRow struct {
-	ID         uuid.UUID `json:"id"`
-	FirstName  string    `json:"firstName"`
-	LastName   string    `json:"lastName"`
-	Points     int32     `json:"points"`
-	NrOfRounds int64     `json:"nrOfRounds"`
+	ID         string  `json:"id"`
+	FirstName  string  `json:"firstName"`
+	LastName   string  `json:"lastName"`
+	Hcp        float64 `json:"hcp"`
+	UserID     string  `json:"userId"`
+	Email      string  `json:"email"`
+	Points     int64   `json:"points"`
+	NrOfRounds int64   `json:"nrOfRounds"`
 }
 
 func (q *Queries) GetLeaderboard(ctx context.Context) ([]GetLeaderboardRow, error) {
-	rows, err := q.db.Query(ctx, getLeaderboard)
+	rows, err := q.query(ctx, q.getLeaderboardStmt, getLeaderboard)
 	if err != nil {
 		return nil, err
 	}
@@ -85,12 +83,18 @@ func (q *Queries) GetLeaderboard(ctx context.Context) ([]GetLeaderboardRow, erro
 			&i.ID,
 			&i.FirstName,
 			&i.LastName,
+			&i.Hcp,
+			&i.UserID,
+			&i.Email,
 			&i.Points,
 			&i.NrOfRounds,
 		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -99,85 +103,52 @@ func (q *Queries) GetLeaderboard(ctx context.Context) ([]GetLeaderboardRow, erro
 }
 
 const getPlayer = `-- name: GetPlayer :one
-SELECT 
-  p.id, 
-  p.first_name, 
-  p.last_name, 
-  p.points, 
-  p.hcp,
-  u.email,
-  u.id::UUID AS user_id
-FROM players p LEFT JOIN users u ON u.id = p.user_id WHERE p.id = $1::UUID
+SELECT id, first_name, last_name, hcp, user_id, email, points FROM players_with_points p WHERE p.id = ?
 `
 
-type GetPlayerRow struct {
-	ID        uuid.UUID       `json:"id"`
-	FirstName string          `json:"firstName"`
-	LastName  string          `json:"lastName"`
-	Points    int32           `json:"points"`
-	Hcp       decimal.Decimal `json:"hcp"`
-	Email     string          `json:"email"`
-	UserID    uuid.UUID       `json:"userId"`
-}
-
-func (q *Queries) GetPlayer(ctx context.Context, dollar_1 uuid.UUID) (GetPlayerRow, error) {
-	row := q.db.QueryRow(ctx, getPlayer, dollar_1)
-	var i GetPlayerRow
+func (q *Queries) GetPlayer(ctx context.Context, id string) (PlayersWithPoint, error) {
+	row := q.queryRow(ctx, q.getPlayerStmt, getPlayer, id)
+	var i PlayersWithPoint
 	err := row.Scan(
 		&i.ID,
 		&i.FirstName,
 		&i.LastName,
-		&i.Points,
 		&i.Hcp,
-		&i.Email,
 		&i.UserID,
+		&i.Email,
+		&i.Points,
 	)
 	return i, err
 }
 
 const getPlayers = `-- name: GetPlayers :many
-SELECT 
-  p.id, 
-  p.first_name, 
-  p.last_name, 
-  p.points, 
-  p.hcp,
-  u.email,
-  u.id::UUID AS user_id
-FROM players p LEFT JOIN users u ON u.id = p.user_id ORDER BY p.last_name ASC, p.first_name ASC
+SELECT id, first_name, last_name, hcp, user_id, email, points FROM players_with_points p ORDER BY p.last_name ASC, p.first_name ASC
 `
 
-type GetPlayersRow struct {
-	ID        uuid.UUID       `json:"id"`
-	FirstName string          `json:"firstName"`
-	LastName  string          `json:"lastName"`
-	Points    int32           `json:"points"`
-	Hcp       decimal.Decimal `json:"hcp"`
-	Email     string          `json:"email"`
-	UserID    uuid.UUID       `json:"userId"`
-}
-
-func (q *Queries) GetPlayers(ctx context.Context) ([]GetPlayersRow, error) {
-	rows, err := q.db.Query(ctx, getPlayers)
+func (q *Queries) GetPlayers(ctx context.Context) ([]PlayersWithPoint, error) {
+	rows, err := q.query(ctx, q.getPlayersStmt, getPlayers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetPlayersRow
+	var items []PlayersWithPoint
 	for rows.Next() {
-		var i GetPlayersRow
+		var i PlayersWithPoint
 		if err := rows.Scan(
 			&i.ID,
 			&i.FirstName,
 			&i.LastName,
-			&i.Points,
 			&i.Hcp,
-			&i.Email,
 			&i.UserID,
+			&i.Email,
+			&i.Points,
 		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -186,18 +157,18 @@ func (q *Queries) GetPlayers(ctx context.Context) ([]GetPlayersRow, error) {
 }
 
 const updatePlayer = `-- name: UpdatePlayer :one
-UPDATE players SET first_name = $1, last_name = $2, hcp = $3 WHERE id = $4 RETURNING id, first_name, last_name, points, user_id, hcp
+UPDATE players SET first_name = ?, last_name = ?, hcp = ? WHERE id = ? RETURNING id, first_name, last_name, hcp, user_id
 `
 
 type UpdatePlayerParams struct {
-	FirstName string          `json:"firstName"`
-	LastName  string          `json:"lastName"`
-	Hcp       decimal.Decimal `json:"hcp"`
-	ID        uuid.UUID       `json:"id"`
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+	Hcp       float64 `json:"hcp"`
+	ID        string  `json:"id"`
 }
 
 func (q *Queries) UpdatePlayer(ctx context.Context, arg *UpdatePlayerParams) (Player, error) {
-	row := q.db.QueryRow(ctx, updatePlayer,
+	row := q.queryRow(ctx, q.updatePlayerStmt, updatePlayer,
 		arg.FirstName,
 		arg.LastName,
 		arg.Hcp,
@@ -208,9 +179,8 @@ func (q *Queries) UpdatePlayer(ctx context.Context, arg *UpdatePlayerParams) (Pl
 		&i.ID,
 		&i.FirstName,
 		&i.LastName,
-		&i.Points,
-		&i.UserID,
 		&i.Hcp,
+		&i.UserID,
 	)
 	return i, err
 }

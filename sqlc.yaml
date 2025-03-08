@@ -1,29 +1,26 @@
 version: "2"
 sql:
-  - engine: "postgresql"
+  - engine: "sqlite"
     queries: "./db/queries/"
     schema: "./db/migrations/"
     gen:
       go:
         package: "schema"
         out: "./internal/database/schema"
-        sql_package: "pgx/v5"
+        sql_package: "database/sql"
         emit_json_tags: true
         emit_interface: true
+        emit_prepared_queries: true
         emit_params_struct_pointers: true
         json_tags_case_style: camel
         overrides:
-          - db_type: "uuid"
-            go_type: "github.com/google/uuid.UUID"
-          - db_type: "uuid"
-            nullable: true
-            go_type: "github.com/google/uuid.UUID"
-          - db_type: "text"
-            go_type: "string"
-          - db_type: "text"
-            nullable: true
-            go_type: "string"
-          - db_type: "pg_catalog.bool"
-            go_type: "bool"
-          - db_type: "pg_catalog.numeric"
-            go_type: "github.com/shopspring/decimal.Decimal"
+          - column: "players_with_point.points"
+            go_type: "int64"
+          - column: "course_details.holes"
+            go_type:
+              import: "database/sql"
+              type: "NullString"
+          - column: "course_details.tees"
+            go_type:
+              import: "database/sql"
+              type: "NullString"
