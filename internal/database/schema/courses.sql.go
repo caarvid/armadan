@@ -7,153 +7,181 @@ package schema
 
 import (
 	"context"
-
-	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 const createCourse = `-- name: CreateCourse :one
-INSERT INTO courses (name, par) VALUES ($1, $2) RETURNING id, name, par
+INSERT INTO courses (id, name, par) VALUES (?, ?, ?) RETURNING id, name, par
 `
 
 type CreateCourseParams struct {
+	ID   string `json:"id"`
 	Name string `json:"name"`
-	Par  int32  `json:"par"`
+	Par  int64  `json:"par"`
 }
 
 func (q *Queries) CreateCourse(ctx context.Context, arg *CreateCourseParams) (Course, error) {
-	row := q.db.QueryRow(ctx, createCourse, arg.Name, arg.Par)
+	row := q.queryRow(ctx, q.createCourseStmt, createCourse, arg.ID, arg.Name, arg.Par)
 	var i Course
 	err := row.Scan(&i.ID, &i.Name, &i.Par)
 	return i, err
 }
 
+const createHoles = `-- name: CreateHoles :one
+INSERT INTO holes (id, nr, par, stroke_index, course_id) VALUES (?, ?, ?, ?, ?) RETURNING id, nr, par, stroke_index, course_id
+`
+
 type CreateHolesParams struct {
-	Nr       int32     `json:"nr"`
-	Par      int32     `json:"par"`
-	Index    int32     `json:"index"`
-	CourseID uuid.UUID `json:"courseId"`
+	ID          string `json:"id"`
+	Nr          int64  `json:"nr"`
+	Par         int64  `json:"par"`
+	StrokeIndex int64  `json:"strokeIndex"`
+	CourseID    string `json:"courseId"`
 }
 
+func (q *Queries) CreateHoles(ctx context.Context, arg *CreateHolesParams) (Hole, error) {
+	row := q.queryRow(ctx, q.createHolesStmt, createHoles,
+		arg.ID,
+		arg.Nr,
+		arg.Par,
+		arg.StrokeIndex,
+		arg.CourseID,
+	)
+	var i Hole
+	err := row.Scan(
+		&i.ID,
+		&i.Nr,
+		&i.Par,
+		&i.StrokeIndex,
+		&i.CourseID,
+	)
+	return i, err
+}
+
+const createTees = `-- name: CreateTees :one
+INSERT INTO tees (id, name, slope, cr, course_id) VALUES (?, ?, ?, ?, ?) RETURNING id, name, slope, cr, course_id
+`
+
 type CreateTeesParams struct {
-	Name     string          `json:"name"`
-	Slope    int32           `json:"slope"`
-	Cr       decimal.Decimal `json:"cr"`
-	CourseID uuid.UUID       `json:"courseId"`
+	ID       string  `json:"id"`
+	Name     string  `json:"name"`
+	Slope    int64   `json:"slope"`
+	Cr       float64 `json:"cr"`
+	CourseID string  `json:"courseId"`
+}
+
+func (q *Queries) CreateTees(ctx context.Context, arg *CreateTeesParams) (Tee, error) {
+	row := q.queryRow(ctx, q.createTeesStmt, createTees,
+		arg.ID,
+		arg.Name,
+		arg.Slope,
+		arg.Cr,
+		arg.CourseID,
+	)
+	var i Tee
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Slope,
+		&i.Cr,
+		&i.CourseID,
+	)
+	return i, err
 }
 
 const deleteCourse = `-- name: DeleteCourse :exec
-DELETE FROM courses WHERE id = $1
+DELETE FROM courses WHERE id = ?
 `
 
-func (q *Queries) DeleteCourse(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteCourse, id)
+func (q *Queries) DeleteCourse(ctx context.Context, id string) error {
+	_, err := q.exec(ctx, q.deleteCourseStmt, deleteCourse, id)
 	return err
 }
 
 const deleteTee = `-- name: DeleteTee :exec
-DELETE FROM tees WHERE id = $1
+DELETE FROM tees WHERE id = ?
 `
 
-func (q *Queries) DeleteTee(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteTee, id)
+func (q *Queries) DeleteTee(ctx context.Context, id string) error {
+	_, err := q.exec(ctx, q.deleteTeeStmt, deleteTee, id)
 	return err
 }
 
 const getCourse = `-- name: GetCourse :one
-SELECT
-  c.id,
-  c.name,
-  c.par,
-  COALESCE(
-    (
-      SELECT jsonb_agg(to_jsonb(t))
-      FROM tees t 
-      WHERE t.course_id = c.id
-    ), '[]'
-  )::jsonb AS tees,
-  COALESCE(
-    (
-      SELECT jsonb_agg(to_jsonb(h) ORDER BY h.nr)
-      FROM holes h 
-      WHERE h.course_id = c.id
-  ), '[]'
-  )::jsonb AS holes
-FROM courses c
-WHERE c.id=$1
+SELECT id, name, par, holes, tees FROM course_details c WHERE c.id = ?
 `
 
-type GetCourseRow struct {
-	ID    uuid.UUID `json:"id"`
-	Name  string    `json:"name"`
-	Par   int32     `json:"par"`
-	Tees  []byte    `json:"tees"`
-	Holes []byte    `json:"holes"`
-}
-
-func (q *Queries) GetCourse(ctx context.Context, id uuid.UUID) (GetCourseRow, error) {
-	row := q.db.QueryRow(ctx, getCourse, id)
-	var i GetCourseRow
+func (q *Queries) GetCourse(ctx context.Context, id string) (CourseDetail, error) {
+	row := q.queryRow(ctx, q.getCourseStmt, getCourse, id)
+	var i CourseDetail
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Par,
-		&i.Tees,
 		&i.Holes,
+		&i.Tees,
 	)
 	return i, err
 }
 
 const getCourses = `-- name: GetCourses :many
-SELECT
-  c.id,
-  c.name,
-  c.par,
-  COALESCE(
-    (
-      SELECT jsonb_agg(to_jsonb(t))
-      FROM tees t 
-      WHERE t.course_id = c.id
-    ), '[]'
-  )::jsonb AS tees,
-  COALESCE(
-    (
-      SELECT jsonb_agg(to_jsonb(h) ORDER BY h.nr)
-      FROM holes h 
-      WHERE h.course_id = c.id
-  ), '[]'
-  )::jsonb AS holes
-FROM courses c
-GROUP BY c.id
+SELECT id, name, par, holes, tees FROM course_details c
 `
 
-type GetCoursesRow struct {
-	ID    uuid.UUID `json:"id"`
-	Name  string    `json:"name"`
-	Par   int32     `json:"par"`
-	Tees  []byte    `json:"tees"`
-	Holes []byte    `json:"holes"`
-}
-
-func (q *Queries) GetCourses(ctx context.Context) ([]GetCoursesRow, error) {
-	rows, err := q.db.Query(ctx, getCourses)
+func (q *Queries) GetCourses(ctx context.Context) ([]CourseDetail, error) {
+	rows, err := q.query(ctx, q.getCoursesStmt, getCourses)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetCoursesRow
+	var items []CourseDetail
 	for rows.Next() {
-		var i GetCoursesRow
+		var i CourseDetail
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.Par,
-			&i.Tees,
 			&i.Holes,
+			&i.Tees,
 		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTeesByCourse = `-- name: GetTeesByCourse :many
+SELECT id, name, slope, cr, course_id FROM tees WHERE course_id = ?
+`
+
+func (q *Queries) GetTeesByCourse(ctx context.Context, courseID string) ([]Tee, error) {
+	rows, err := q.query(ctx, q.getTeesByCourseStmt, getTeesByCourse, courseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Tee
+	for rows.Next() {
+		var i Tee
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Slope,
+			&i.Cr,
+			&i.CourseID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -162,18 +190,60 @@ func (q *Queries) GetCourses(ctx context.Context) ([]GetCoursesRow, error) {
 }
 
 const updateCourse = `-- name: UpdateCourse :one
-UPDATE courses SET name = $1, par = $2 WHERE id = $3 RETURNING id, name, par
+UPDATE courses SET name = ?, par = ? WHERE id = ? RETURNING id, name, par
 `
 
 type UpdateCourseParams struct {
-	Name string    `json:"name"`
-	Par  int32     `json:"par"`
-	ID   uuid.UUID `json:"id"`
+	Name string `json:"name"`
+	Par  int64  `json:"par"`
+	ID   string `json:"id"`
 }
 
 func (q *Queries) UpdateCourse(ctx context.Context, arg *UpdateCourseParams) (Course, error) {
-	row := q.db.QueryRow(ctx, updateCourse, arg.Name, arg.Par, arg.ID)
+	row := q.queryRow(ctx, q.updateCourseStmt, updateCourse, arg.Name, arg.Par, arg.ID)
 	var i Course
 	err := row.Scan(&i.ID, &i.Name, &i.Par)
 	return i, err
+}
+
+const updateHoles = `-- name: UpdateHoles :exec
+UPDATE holes SET nr = ?, par = ?, stroke_index = ? WHERE id = ?
+`
+
+type UpdateHolesParams struct {
+	Nr          int64  `json:"nr"`
+	Par         int64  `json:"par"`
+	StrokeIndex int64  `json:"strokeIndex"`
+	ID          string `json:"id"`
+}
+
+func (q *Queries) UpdateHoles(ctx context.Context, arg *UpdateHolesParams) error {
+	_, err := q.exec(ctx, q.updateHolesStmt, updateHoles,
+		arg.Nr,
+		arg.Par,
+		arg.StrokeIndex,
+		arg.ID,
+	)
+	return err
+}
+
+const updateTees = `-- name: UpdateTees :exec
+UPDATE tees SET name = ?, slope = ?, cr = ? WHERE id = ?
+`
+
+type UpdateTeesParams struct {
+	Name  string  `json:"name"`
+	Slope int64   `json:"slope"`
+	Cr    float64 `json:"cr"`
+	ID    string  `json:"id"`
+}
+
+func (q *Queries) UpdateTees(ctx context.Context, arg *UpdateTeesParams) error {
+	_, err := q.exec(ctx, q.updateTeesStmt, updateTees,
+		arg.Name,
+		arg.Slope,
+		arg.Cr,
+		arg.ID,
+	)
+	return err
 }

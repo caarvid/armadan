@@ -104,15 +104,15 @@ ci/build: clean install
 ### MIGRATIONS ###
 .PHONY: migrate/new
 migrate/new:
-	@goose -dir ./db/migrations create $(name) sql
+	@goose -dir ./db/migrations sqlite3 ./db/armadan.sqlite create $(name) sql
 
 .PHONY: migrate/up
 migrate/up:
-	@goose -dir ./db/migrations postgres "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}" up
+	@goose -dir ./db/migrations sqlite3 ./db/armadan.sqlite up
 
 .PHONY: migrate/down
 migrate/down:
-	@goose -dir ./db/migrations postgres "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}" down
+	@goose -dir ./db/migrations sqlite3 ./db/armadan.sqlite down
 
 ### DATABASE ###
 .PHONY: db/start

@@ -5,15 +5,15 @@ import (
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
-	"github.com/google/uuid"
 	"github.com/patrickmn/go-cache"
 )
 
 const POSTS_CACHE_KEY = "posts:all"
 
 type posts struct {
-	db    schema.Querier
-	cache *cache.Cache
+	dbReader schema.Querier
+	dbWriter schema.Querier
+	cache    *cache.Cache
 }
 
 func toPost(post any) *armadan.Post {
@@ -24,17 +24,18 @@ func toPost(post any) *armadan.Post {
 			Title:     p.Title,
 			Body:      p.Body,
 			Author:    p.Author,
-			CreatedAt: p.CreatedAt.Time,
+			CreatedAt: armadan.ParseTime(p.CreatedAt),
 		}
 	}
 
 	return &armadan.Post{}
 }
 
-func NewPostService(db schema.Querier, cache *cache.Cache) *posts {
+func NewPostService(reader schema.Querier, writer schema.Querier, cache *cache.Cache) *posts {
 	return &posts{
-		db:    db,
-		cache: cache,
+		dbReader: reader,
+		dbWriter: writer,
+		cache:    cache,
 	}
 }
 
@@ -43,7 +44,7 @@ func (s *posts) All(ctx context.Context) ([]armadan.Post, error) {
 		return cachedPosts.([]armadan.Post), nil
 	}
 
-	posts, err := s.db.GetPosts(ctx)
+	posts, err := s.dbReader.GetPosts(ctx)
 
 	if err != nil {
 		return nil, err
@@ -56,8 +57,8 @@ func (s *posts) All(ctx context.Context) ([]armadan.Post, error) {
 	return mappedPosts, nil
 }
 
-func (s *posts) Get(ctx context.Context, id uuid.UUID) (*armadan.Post, error) {
-	post, err := s.db.GetPost(ctx, id)
+func (s *posts) Get(ctx context.Context, id string) (*armadan.Post, error) {
+	post, err := s.dbReader.GetPost(ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -67,7 +68,8 @@ func (s *posts) Get(ctx context.Context, id uuid.UUID) (*armadan.Post, error) {
 }
 
 func (s *posts) Create(ctx context.Context, data *armadan.Post) (*armadan.Post, error) {
-	post, err := s.db.CreatePost(ctx, &schema.CreatePostParams{
+	post, err := s.dbWriter.CreatePost(ctx, &schema.CreatePostParams{
+		ID:     armadan.GetId(),
 		Title:  data.Title,
 		Body:   data.Body,
 		Author: data.Author,
@@ -83,8 +85,8 @@ func (s *posts) Create(ctx context.Context, data *armadan.Post) (*armadan.Post, 
 }
 
 func (s *posts) Update(ctx context.Context, data *armadan.Post) (*armadan.Post, error) {
-	post, err := s.db.UpdatePost(ctx, &schema.UpdatePostParams{
-		ID:     data.ID,
+	post, err := s.dbWriter.UpdatePost(ctx, &schema.UpdatePostParams{
+		ID:     armadan.GetId(),
 		Title:  data.Title,
 		Body:   data.Body,
 		Author: data.Author,
@@ -99,8 +101,8 @@ func (s *posts) Update(ctx context.Context, data *armadan.Post) (*armadan.Post, 
 	return toPost(post), nil
 }
 
-func (s *posts) Delete(ctx context.Context, id uuid.UUID) error {
-	err := s.db.DeletePost(ctx, id)
+func (s *posts) Delete(ctx context.Context, id string) error {
+	err := s.dbWriter.DeletePost(ctx, id)
 	if err != nil {
 		return err
 	}

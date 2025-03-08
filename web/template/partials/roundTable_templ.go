@@ -18,17 +18,24 @@ var diffClas = map[int]string{
 }
 
 func getHcpDiff(r armadan.Round) string {
-	if r.NewHcp.Cmp(r.OldHcp) == 0 {
+	if r.NewHcp == r.OldHcp {
 		return "-"
 	}
 
-	diff, _ := r.NewHcp.Sub(r.OldHcp).Float64()
+	diff := r.NewHcp - r.OldHcp
 
 	return fmt.Sprintf("%+.1f", diff)
 }
 
 func getDiffClass(r armadan.Round) string {
-	sign := r.NewHcp.Sub(r.OldHcp).Sign()
+	sign := 0
+	diff := r.NewHcp - r.OldHcp
+
+	if diff > 0 {
+		sign = 1
+	} else if diff < 0 {
+		diff = -1
+	}
 
 	return diffClas[sign]
 }
@@ -78,7 +85,7 @@ func RoundTable(rounds []armadan.Round) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %s", round.FirstName, round.LastName))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 43, Col: 75}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 50, Col: 75}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -91,7 +98,7 @@ func RoundTable(rounds []armadan.Round) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s", round.OldHcp))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 44, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 51, Col: 53}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -104,7 +111,7 @@ func RoundTable(rounds []armadan.Round) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s", round.NewHcp))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 46, Col: 74}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 53, Col: 74}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -139,7 +146,7 @@ func RoundTable(rounds []armadan.Round) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s", getHcpDiff(round)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 47, Col: 112}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 54, Col: 112}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -152,7 +159,7 @@ func RoundTable(rounds []armadan.Round) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(round.GrossTotal))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 49, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 56, Col: 50}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -165,7 +172,7 @@ func RoundTable(rounds []armadan.Round) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(round.NetTotal))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 50, Col: 48}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 57, Col: 48}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -178,7 +185,7 @@ func RoundTable(rounds []armadan.Round) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/results/%s/round/%s", round.ResultID, round.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 55, Col: 85}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 62, Col: 85}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -191,7 +198,7 @@ func RoundTable(rounds []armadan.Round) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Ta bort rundan?"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 56, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/roundTable.templ`, Line: 63, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {

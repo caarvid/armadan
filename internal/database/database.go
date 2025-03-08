@@ -1,39 +1,28 @@
 package database
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
 
-	pgxdecimal "github.com/jackc/pgx-shopspring-decimal"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func CreatePool(ctx context.Context, host, port, name, user, password string) (*pgxpool.Pool, error) {
-	dbConfig, err := pgxpool.ParseConfig(fmt.Sprintf(
-		"host=%s port=%s dbname=%s user=%s password=%s sslmode=disable pool_max_conns=50",
-		host,
-		port,
-		name,
-		user,
-		password,
-	))
+func Create() (*sql.DB, *sql.DB, error) {
+	dbPath := "/Users/calle/projects/armadan/db/armadan.sqlite"
 
+	reader, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?mode=ro&_txlock=immediate", dbPath))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	dbConfig.AfterConnect = func(ctx context.Context, c *pgx.Conn) error {
-		pgxdecimal.Register(c.TypeMap())
+	reader.SetMaxOpenConns(100)
 
-		return nil
-	}
-
-	pool, err := pgxpool.NewWithConfig(ctx, dbConfig)
-
+	writer, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?mode=rwc&_txlock=immediate", dbPath))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return pool, nil
+	writer.SetMaxOpenConns(1)
+
+	return reader, writer, nil
 }

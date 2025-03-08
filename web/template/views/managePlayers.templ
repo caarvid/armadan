@@ -17,7 +17,9 @@ templ ManagePlayers(players []armadan.Player) {
 			</button>
 		}
 		if len(players) == 0 {
-			@partials.NoData("Nya spelare kommer dyka upp här")
+			<span id="player-list">
+				@partials.NoData("Nya spelare kommer dyka upp här")
+			</span>
 		} else {
 			@partials.PlayerList(players)
 		}

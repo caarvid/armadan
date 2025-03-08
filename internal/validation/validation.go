@@ -24,26 +24,26 @@ func New() *customValidator {
 	}
 }
 
-func (cv *customValidator) ValidateIdParam(r *http.Request, name string) (*uuid.UUID, error) {
+func (cv *customValidator) ValidateIdParam(r *http.Request, name string) (string, error) {
 	v := r.PathValue(name)
 
 	if v == "" {
-		return nil, errors.New("could not find id param")
+		return "", errors.New("could not find id param")
 	}
 
 	err := cv.validator.Var(v, "required,uuid4")
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	val, err := uuid.Parse(v)
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &val, nil
+	return val.String(), nil
 }
 
 func (cv *customValidator) Validate(r *http.Request, i interface{}) error {

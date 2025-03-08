@@ -7,25 +7,25 @@ package schema
 
 import (
 	"context"
-
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
+	"database/sql"
 )
 
 const createWeek = `-- name: CreateWeek :one
-INSERT INTO weeks (nr, course_id, tee_id, is_finals, finals_date) VALUES ($1, $2, $3, $4, $5) RETURNING id, nr, course_id, tee_id, finals_date, is_finals
+INSERT INTO weeks (id, nr, course_id, tee_id, is_finals, finals_date) VALUES (?, ?, ?, ?, ?, ?) RETURNING id, nr, is_finals, finals_date, course_id, tee_id
 `
 
 type CreateWeekParams struct {
-	Nr         int32              `json:"nr"`
-	CourseID   uuid.UUID          `json:"courseId"`
-	TeeID      uuid.UUID          `json:"teeId"`
-	IsFinals   pgtype.Bool        `json:"isFinals"`
-	FinalsDate pgtype.Timestamptz `json:"finalsDate"`
+	ID         string         `json:"id"`
+	Nr         int64          `json:"nr"`
+	CourseID   string         `json:"courseId"`
+	TeeID      string         `json:"teeId"`
+	IsFinals   int64          `json:"isFinals"`
+	FinalsDate sql.NullString `json:"finalsDate"`
 }
 
 func (q *Queries) CreateWeek(ctx context.Context, arg *CreateWeekParams) (Week, error) {
-	row := q.db.QueryRow(ctx, createWeek,
+	row := q.queryRow(ctx, q.createWeekStmt, createWeek,
+		arg.ID,
 		arg.Nr,
 		arg.CourseID,
 		arg.TeeID,
@@ -36,29 +36,29 @@ func (q *Queries) CreateWeek(ctx context.Context, arg *CreateWeekParams) (Week, 
 	err := row.Scan(
 		&i.ID,
 		&i.Nr,
+		&i.IsFinals,
+		&i.FinalsDate,
 		&i.CourseID,
 		&i.TeeID,
-		&i.FinalsDate,
-		&i.IsFinals,
 	)
 	return i, err
 }
 
 const deleteWeek = `-- name: DeleteWeek :exec
-DELETE FROM weeks WHERE id = $1
+DELETE FROM weeks WHERE id = ?
 `
 
-func (q *Queries) DeleteWeek(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteWeek, id)
+func (q *Queries) DeleteWeek(ctx context.Context, id string) error {
+	_, err := q.exec(ctx, q.deleteWeekStmt, deleteWeek, id)
 	return err
 }
 
 const getWeek = `-- name: GetWeek :one
-SELECT id, nr, finals_date, is_finals, course_id, course_name, tee_id, tee_name FROM week_details WHERE id = $1::UUID
+SELECT id, nr, finals_date, is_finals, course_id, course_name, tee_id, tee_name FROM week_details WHERE id = ?
 `
 
-func (q *Queries) GetWeek(ctx context.Context, dollar_1 uuid.UUID) (WeekDetail, error) {
-	row := q.db.QueryRow(ctx, getWeek, dollar_1)
+func (q *Queries) GetWeek(ctx context.Context, id string) (WeekDetail, error) {
+	row := q.queryRow(ctx, q.getWeekStmt, getWeek, id)
 	var i WeekDetail
 	err := row.Scan(
 		&i.ID,
@@ -78,7 +78,7 @@ SELECT id, nr, finals_date, is_finals, course_id, course_name, tee_id, tee_name 
 `
 
 func (q *Queries) GetWeeks(ctx context.Context) ([]WeekDetail, error) {
-	rows, err := q.db.Query(ctx, getWeeks)
+	rows, err := q.query(ctx, q.getWeeksStmt, getWeeks)
 	if err != nil {
 		return nil, err
 	}
@@ -100,6 +100,9 @@ func (q *Queries) GetWeeks(ctx context.Context) ([]WeekDetail, error) {
 		}
 		items = append(items, i)
 	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -107,18 +110,18 @@ func (q *Queries) GetWeeks(ctx context.Context) ([]WeekDetail, error) {
 }
 
 const updateWeek = `-- name: UpdateWeek :one
-UPDATE weeks SET nr = $1, course_id = $2, tee_id = $3 WHERE id = $4 RETURNING id, nr, course_id, tee_id, finals_date, is_finals
+UPDATE weeks SET nr = ?, course_id = ?, tee_id = ? WHERE id = ? RETURNING id, nr, is_finals, finals_date, course_id, tee_id
 `
 
 type UpdateWeekParams struct {
-	Nr       int32     `json:"nr"`
-	CourseID uuid.UUID `json:"courseId"`
-	TeeID    uuid.UUID `json:"teeId"`
-	ID       uuid.UUID `json:"id"`
+	Nr       int64  `json:"nr"`
+	CourseID string `json:"courseId"`
+	TeeID    string `json:"teeId"`
+	ID       string `json:"id"`
 }
 
 func (q *Queries) UpdateWeek(ctx context.Context, arg *UpdateWeekParams) (Week, error) {
-	row := q.db.QueryRow(ctx, updateWeek,
+	row := q.queryRow(ctx, q.updateWeekStmt, updateWeek,
 		arg.Nr,
 		arg.CourseID,
 		arg.TeeID,
@@ -128,10 +131,10 @@ func (q *Queries) UpdateWeek(ctx context.Context, arg *UpdateWeekParams) (Week, 
 	err := row.Scan(
 		&i.ID,
 		&i.Nr,
+		&i.IsFinals,
+		&i.FinalsDate,
 		&i.CourseID,
 		&i.TeeID,
-		&i.FinalsDate,
-		&i.IsFinals,
 	)
 	return i, err
 }

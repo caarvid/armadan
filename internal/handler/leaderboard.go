@@ -14,7 +14,7 @@ func GetLeaderboardSummary(rs armadan.ResultService, v armadan.Validator) http.H
 			return
 		}
 
-		summary, err := rs.LeaderboardSummary(r.Context(), *id)
+		summary, err := rs.LeaderboardSummary(r.Context(), id)
 		if err != nil {
 			return
 		}

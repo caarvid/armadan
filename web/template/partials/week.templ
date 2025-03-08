@@ -58,7 +58,7 @@ templ EditWeekRow(week armadan.Week, courses []armadan.Course, tees []armadan.Te
 				>
 					for _, course := range courses {
 						<option
-							value={ course.ID.String() }
+							value={ course.ID }
 							if course.ID==week.CourseID {
 								selected="selected"
 							}
@@ -71,10 +71,10 @@ templ EditWeekRow(week armadan.Week, courses []armadan.Course, tees []armadan.Te
 		</td>
 		<td class="td">
 			<div class="select-wrapper">
-				<select class="select" name="teeId" required value={ week.TeeID.String() }>
+				<select class="select" name="teeId" required value={ week.TeeID }>
 					for _, tee := range tees {
 						<option
-							value={ tee.ID.String() }
+							value={ tee.ID }
 							if tee.ID==week.TeeID {
 								selected="selected"
 							}

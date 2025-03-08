@@ -2,12 +2,11 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/patrickmn/go-cache"
 )
 
@@ -15,26 +14,17 @@ const COURSES_CACHE_KEY = "courses:all"
 
 func toCourse(data any) *armadan.Course {
 	switch c := data.(type) {
-	case schema.GetCourseRow:
+	case schema.CourseDetail:
 		var holes []armadan.Hole
 		var tees []armadan.Tee
 
-		json.Unmarshal(c.Holes, &holes)
-		json.Unmarshal(c.Tees, &tees)
-
-		return &armadan.Course{
-			ID:    c.ID,
-			Par:   c.Par,
-			Name:  c.Name,
-			Holes: holes,
-			Tees:  tees,
+		if c.Holes.Valid {
+			json.Unmarshal([]byte(c.Holes.String), &holes)
 		}
-	case schema.GetCoursesRow:
-		var holes []armadan.Hole
-		var tees []armadan.Tee
 
-		json.Unmarshal(c.Holes, &holes)
-		json.Unmarshal(c.Tees, &tees)
+		if c.Tees.Valid {
+			json.Unmarshal([]byte(c.Tees.String), &tees)
+		}
 
 		return &armadan.Course{
 			ID:    c.ID,
@@ -49,13 +39,19 @@ func toCourse(data any) *armadan.Course {
 }
 
 type courses struct {
-	db    schema.Querier
-	pool  *pgxpool.Pool
-	cache *cache.Cache
+	dbReader schema.Querier
+	dbWriter schema.Querier
+	pool     *sql.DB
+	cache    *cache.Cache
 }
 
-func NewCourseService(db schema.Querier, pool *pgxpool.Pool, cache *cache.Cache) *courses {
-	return &courses{db: db, pool: pool, cache: cache}
+func NewCourseService(reader, writer schema.Querier, pool *sql.DB, cache *cache.Cache) *courses {
+	return &courses{
+		dbReader: reader,
+		dbWriter: writer,
+		pool:     pool,
+		cache:    cache,
+	}
 }
 
 func (cs *courses) All(ctx context.Context) ([]armadan.Course, error) {
@@ -63,7 +59,7 @@ func (cs *courses) All(ctx context.Context) ([]armadan.Course, error) {
 		return cachedCourses.([]armadan.Course), nil
 	}
 
-	courses, err := cs.db.GetCourses(ctx)
+	courses, err := cs.dbReader.GetCourses(ctx)
 
 	if err != nil {
 		return nil, err
@@ -76,8 +72,8 @@ func (cs *courses) All(ctx context.Context) ([]armadan.Course, error) {
 	return mappedCourses, nil
 }
 
-func (cs *courses) Get(ctx context.Context, id uuid.UUID) (*armadan.Course, error) {
-	course, err := cs.db.GetCourse(ctx, id)
+func (cs *courses) Get(ctx context.Context, id string) (*armadan.Course, error) {
+	course, err := cs.dbReader.GetCourse(ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -86,8 +82,8 @@ func (cs *courses) Get(ctx context.Context, id uuid.UUID) (*armadan.Course, erro
 	return toCourse(course), nil
 }
 
-func (cs *courses) GetTees(ctx context.Context, id uuid.UUID) ([]armadan.Tee, error) {
-	tees, err := cs.db.GetTeesByCourse(ctx, id)
+func (cs *courses) GetTees(ctx context.Context, id string) ([]armadan.Tee, error) {
+	tees, err := cs.dbReader.GetTeesByCourse(ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -110,21 +106,21 @@ func (cs *courses) GetTees(ctx context.Context, id uuid.UUID) ([]armadan.Tee, er
 }
 
 func (cs *courses) Create(ctx context.Context, data *armadan.Course) (*armadan.Course, error) {
-	tx, err := cs.pool.Begin(ctx)
+	tx, err := cs.pool.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	defer tx.Rollback(ctx)
+	defer tx.Rollback()
 	qtx := schema.New(tx)
 
-	var par int32
-
+	var par int64
 	for _, h := range data.Holes {
 		par += h.Par
 	}
 
 	course, err := qtx.CreateCourse(ctx, &schema.CreateCourseParams{
+		ID:   armadan.GetId(),
 		Name: data.Name,
 		Par:  par,
 	})
@@ -133,116 +129,110 @@ func (cs *courses) Create(ctx context.Context, data *armadan.Course) (*armadan.C
 		return nil, err
 	}
 
-	var newHoles []*schema.CreateHolesParams
-
 	for _, newHole := range data.Holes {
-		newHoles = append(newHoles, &schema.CreateHolesParams{
-			Nr:       newHole.Nr,
-			Par:      newHole.Par,
-			Index:    newHole.Index,
-			CourseID: course.ID,
+		_, err = qtx.CreateHoles(ctx, &schema.CreateHolesParams{
+			ID:          armadan.GetId(),
+			Nr:          newHole.Nr,
+			Par:         newHole.Par,
+			StrokeIndex: newHole.Index,
+			CourseID:    course.ID,
 		})
-	}
 
-	if _, err := qtx.CreateHoles(ctx, newHoles); err != nil {
-		return nil, err
-	}
-
-	if len(data.Tees) > 0 {
-		var newTees []*schema.CreateTeesParams
-
-		for _, newTee := range data.Tees {
-			newTees = append(newTees, &schema.CreateTeesParams{
-				Name:     newTee.Name,
-				Slope:    newTee.Slope,
-				Cr:       newTee.Cr,
-				CourseID: course.ID,
-			})
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	if err = tx.Commit(ctx); err != nil {
+	for _, newTee := range data.Tees {
+		_, err = qtx.CreateTees(ctx, &schema.CreateTeesParams{
+			ID:       armadan.GetId(),
+			Name:     newTee.Name,
+			Slope:    newTee.Slope,
+			Cr:       newTee.Cr,
+			CourseID: course.ID,
+		})
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
 
 	cs.cache.Delete(WEEKS_CACHE_KEY)
 	cs.cache.Delete(COURSES_CACHE_KEY)
 
-	// TODO: Do I really need to return the new course here?
 	return nil, nil
 }
 
 func (cs *courses) Update(ctx context.Context, data *armadan.Course) (*armadan.Course, error) {
-	tx, err := cs.pool.Begin(ctx)
+	tx, err := cs.pool.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	defer tx.Rollback(ctx)
+	defer tx.Rollback()
 	qtx := schema.New(tx)
 
-	var par int32
+	var par int64
 
 	for _, h := range data.Holes {
 		par += h.Par
 	}
 
 	course, err := qtx.UpdateCourse(ctx, &schema.UpdateCourseParams{
+		ID:   data.ID,
 		Name: data.Name,
 		Par:  par,
-		ID:   data.ID,
 	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	var holes []*schema.UpdateHolesParams
-
 	for _, h := range data.Holes {
-		holes = append(holes, &schema.UpdateHolesParams{
-			Nr:    h.Nr,
-			ID:    h.ID,
-			Index: h.Index,
-			Par:   h.Par,
+		err = qtx.UpdateHoles(ctx, &schema.UpdateHolesParams{
+			Nr:          h.Nr,
+			ID:          h.ID,
+			StrokeIndex: h.Index,
+			Par:         h.Par,
 		})
+
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	qtx.UpdateHoles(ctx, holes).Exec(nil)
+	for _, t := range data.Tees {
+		if len(t.ID) == 0 {
+			_, err = qtx.CreateTees(ctx, &schema.CreateTeesParams{
+				ID:       armadan.GetId(),
+				Name:     t.Name,
+				Slope:    t.Slope,
+				Cr:       t.Cr,
+				CourseID: course.ID,
+			})
 
-	if len(data.Tees) > 0 {
-		var tees []*schema.CreateTeesParams
-		var updatedTees []*schema.UpdateTeesParams
-		emptyId := uuid.UUID{}
-
-		for _, t := range data.Tees {
-			if t.ID.String() == emptyId.String() {
-				tees = append(tees, &schema.CreateTeesParams{
-					Name:     t.Name,
-					Slope:    t.Slope,
-					Cr:       t.Cr,
-					CourseID: course.ID,
-				})
-			} else {
-				updatedTees = append(updatedTees, &schema.UpdateTeesParams{
-					ID:    t.ID,
-					Name:  t.Name,
-					Slope: t.Slope,
-					Cr:    t.Cr,
-				})
+			if err != nil {
+				return nil, err
 			}
-		}
+		} else {
+			err = qtx.UpdateTees(ctx, &schema.UpdateTeesParams{
+				ID:    t.ID,
+				Name:  t.Name,
+				Slope: t.Slope,
+				Cr:    t.Cr,
+			})
 
-		if len(tees) > 0 {
-			if _, err := qtx.CreateTees(ctx, tees); err != nil {
+			if err != nil {
 				return nil, err
 			}
 		}
-
-		qtx.UpdateTees(ctx, updatedTees).Exec(nil)
 	}
 
-	if err = tx.Commit(ctx); err != nil {
+	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
 
@@ -253,19 +243,19 @@ func (cs *courses) Update(ctx context.Context, data *armadan.Course) (*armadan.C
 	return nil, nil
 }
 
-func (cs *courses) Delete(ctx context.Context, id uuid.UUID) error {
-	if err := cs.db.DeleteCourse(ctx, id); err != nil {
+func (cs *courses) Delete(ctx context.Context, id string) error {
+	if err := cs.dbWriter.DeleteCourse(ctx, id); err != nil {
 		return err
 	}
 
-	cs.db.DeleteCourse(ctx, id)
+	cs.cache.Delete(WEEKS_CACHE_KEY)
 	cs.cache.Delete(COURSES_CACHE_KEY)
 
 	return nil
 }
 
-func (cs *courses) DeleteTee(ctx context.Context, id uuid.UUID) error {
-	if err := cs.db.DeleteTee(ctx, id); err != nil {
+func (cs *courses) DeleteTee(ctx context.Context, id string) error {
+	if err := cs.dbWriter.DeleteTee(ctx, id); err != nil {
 		return err
 	}
 

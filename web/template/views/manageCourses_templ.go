@@ -33,7 +33,7 @@ func EmptyTeeForm() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"grid grid-cols-[1.5fr_0.5fr_0.5fr_0.1fr] gap-2\"><input type=\"text\" class=\"input\" name=\"tees.0.name\" placeholder=\"name\" required autocomplete=\"off\"> <input type=\"number\" class=\"input\" name=\"tees.0.slope\" placeholder=\"Slope\" required> <input class=\"input\" type=\"number\" name=\"tees.0.cr\" placeholder=\"CR\" step=\"0.1\" required> <span hx-get=\"/admin/courses/tee/remove\" hx-target=\"closest div\" hx-swap=\"outerHTML\" class=\"cursor-pointer flex items-center justify-center hover:text-destructive text-lg\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"grid grid-cols-[1.5fr_0.5fr_0.5fr_0.1fr] gap-2\"><input type=\"text\" class=\"input\" name=\"tees.0.name\" placeholder=\"Tee\" required autocomplete=\"off\"> <input type=\"number\" class=\"input-number\" name=\"tees.0.slope\" placeholder=\"Slope\" required> <input class=\"input-number\" type=\"number\" name=\"tees.0.cr\" placeholder=\"CR\" step=\"0.1\" required> <span hx-get=\"/admin/courses/tee/remove\" hx-target=\"closest div\" hx-swap=\"outerHTML\" class=\"cursor-pointer flex items-center justify-center hover:text-destructive text-lg\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -88,48 +88,48 @@ func TeeForm(t armadan.Tee, idx int) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(t.ID.String())
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(t.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 25, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 25, Col: 75}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <input type=\"text\" class=\"input\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <input type=\"text\" class=\"input-number\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("tees.%d.name", idx))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 26, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 26, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" placeholder=\"name\" required autocomplete=\"off\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" placeholder=\"Tee\" required autocomplete=\"off\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(t.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 26, Col: 138}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 26, Col: 144}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"> <input type=\"number\" class=\"input\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"> <input type=\"number\" class=\"input-number\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("tees.%d.slope", idx))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 27, Col: 77}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 27, Col: 84}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -142,20 +142,20 @@ func TeeForm(t armadan.Tee, idx int) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", t.Slope))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 27, Col: 143}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 27, Col: 150}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"> <input class=\"input\" type=\"number\" name=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"> <input class=\"input-number\" type=\"number\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("tees.%d.cr", idx))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 28, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 28, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -168,7 +168,7 @@ func TeeForm(t armadan.Tee, idx int) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", t.Cr))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 28, Col: 147}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 28, Col: 154}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -275,7 +275,7 @@ func EditCourse(c armadan.Course) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" placeholder=\"Namn\" required autocomplete=\"off\"><fieldset class=\"flex p-4 border-2 flex-col gap-2 relative\" id=\"tees\" _=\"\n\t\t\t\t\ton mutation of childList\n\t\t\t\t\t\tset divs to &lt;div/&gt; in me\n\t\t\t\t\t \tfor d in divs index i\n\t\t\t\t\t\t\tset inputs to &lt;input/&gt; in d\n\t\t\t\t\t\t\tfor inp in inputs\n\t\t\t\t\t\t\t\tjs(inp, i)\n\t\t\t\t\t\t\t\t\tinp.name=inp.name.replace(/\\\\d+/, i)\n\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\tend\n\t\t\t\t\t\tend\n\t\t\t\t\"><legend>Tees</legend> <button type=\"button\" class=\"bg-white btn-ghost absolute -top-[1.9rem] right-4 flex\" hx-get=\"/admin/courses/tee/new\" hx-target=\"#tees\" hx-swap=\"beforeend\" hx-select=\"unset\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" placeholder=\"Namn\" required autocomplete=\"off\"><fieldset class=\"flex p-4 border-2 flex-col gap-2 relative\" id=\"tees\" _=\"\n\t\t\t\t\ton mutation of childList\n\t\t\t\t\t\tset divs to &lt;div/&gt; in me\n\t\t\t\t\t \tfor d in divs index i\n\t\t\t\t\t\t\tset inputs to &lt;input/&gt; in d\n\t\t\t\t\t\t\tfor inp in inputs\n\t\t\t\t\t\t\t\tjs(inp, i)\n\t\t\t\t\t\t\t\t\tinp.name=inp.name.replace(/\\d+/, i)\n\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\tend\n\t\t\t\t\t\tend\n\t\t\t\t\"><legend>Tees</legend> <button type=\"button\" class=\"bg-white btn-ghost absolute -top-[1.9rem] right-4 flex\" hx-get=\"/admin/courses/tee/new\" hx-target=\"#tees\" hx-swap=\"beforeend\" hx-select=\"unset\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -321,9 +321,9 @@ func EditCourse(c armadan.Course) templ.Component {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var18 string
-					templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(c.Holes[(i*9)+h].ID.String())
+					templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(c.Holes[(i*9)+h].ID)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 90, Col: 110}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 90, Col: 101}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 					if templ_7745c5c3_Err != nil {
@@ -368,7 +368,7 @@ func EditCourse(c armadan.Course) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</div><input type=\"number\" class=\"input\" name=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</div><input type=\"number\" class=\"input-number\" name=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -407,7 +407,7 @@ func EditCourse(c armadan.Course) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" type=\"number\" class=\"input\" name=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" type=\"number\" class=\"input-number\" name=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -499,7 +499,7 @@ func CreateCourse() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, " <form hx-post=\"/api/courses\" hx-target=\"#admin-content\" hx-swap=\"outerHTML\" hx-select=\"#admin-content\" hx-ext=\"json-form\" class=\"pb-4 flex flex-col gap-4\"><input type=\"text\" name=\"name\" class=\"input\" placeholder=\"Namn\" required autocomplete=\"off\"><fieldset class=\"flex p-4 border-2 flex-col gap-2 relative\" id=\"tees\" _=\"\n\t\t\t\t\ton mutation of childList\n\t\t\t\t\t\tset divs to &lt;div/&gt; in me\n\t\t\t\t\t \tfor d in divs index i\n\t\t\t\t\t\t\tset inputs to &lt;input/&gt; in d\n\t\t\t\t\t\t\tfor inp in inputs\n\t\t\t\t\t\t\t\tjs(inp, i)\n\t\t\t\t\t\t\t\t\tinp.name=inp.name.replace(/\\\\d+/, i)\n\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\tend\n\t\t\t\t\t\tend\n\t\t\t\t\"><legend>Tees</legend> <button type=\"button\" class=\"bg-white btn-ghost absolute -top-[1.9rem] right-4 flex\" hx-get=\"/admin/courses/tee/new\" hx-target=\"#tees\" hx-swap=\"beforeend\" hx-select=\"unset\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, " <form hx-post=\"/api/courses\" hx-target=\"#admin-content\" hx-swap=\"outerHTML\" hx-select=\"#admin-content\" hx-ext=\"json-form\" class=\"pb-4 flex flex-col gap-4\"><input type=\"text\" name=\"name\" class=\"input\" placeholder=\"Namn\" required autocomplete=\"off\"><fieldset class=\"flex p-4 border-2 flex-col gap-2 relative\" id=\"tees\" _=\"\n\t\t\t\t\ton mutation of childList\n\t\t\t\t\t\tset divs to &lt;div/&gt; in me\n\t\t\t\t\t\tlog divs\n\t\t\t\t\t \tfor d in divs index i\n\t\t\t\t\t\t\tset inputs to &lt;input/&gt; in d\n\t\t\t\t\t\t\tlog inputs\n\t\t\t\t\t\t\tfor inp in inputs\n\t\t\t\t\t\t\t\tjs(inp, i)\n\t\t\t\t\t\t\t\t\tinp.name=inp.name.replace(/\\d+/, i)\n\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\tend\n\t\t\t\t\t\tend\n\t\t\t\t\"><legend>Tees</legend> <button type=\"button\" class=\"bg-white btn-ghost absolute -top-[1.9rem] right-4 flex\" hx-get=\"/admin/courses/tee/new\" hx-target=\"#tees\" hx-swap=\"beforeend\" hx-select=\"unset\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -524,7 +524,7 @@ func CreateCourse() templ.Component {
 					var templ_7745c5c3_Var29 string
 					templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("holes.%d.nr", (i*9)+h))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 186, Col: 90}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 188, Col: 90}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 					if templ_7745c5c3_Err != nil {
@@ -537,7 +537,7 @@ func CreateCourse() templ.Component {
 					var templ_7745c5c3_Var30 string
 					templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", (i*9)+h+1))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 186, Col: 129}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 188, Col: 129}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 					if templ_7745c5c3_Err != nil {
@@ -550,7 +550,7 @@ func CreateCourse() templ.Component {
 					var templ_7745c5c3_Var31 string
 					templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", (i*9)+h+1))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 188, Col: 94}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 190, Col: 94}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 					if templ_7745c5c3_Err != nil {
@@ -563,7 +563,7 @@ func CreateCourse() templ.Component {
 					var templ_7745c5c3_Var32 string
 					templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("holes.%d.par", (i*9)+h))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 189, Col: 87}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 191, Col: 87}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 					if templ_7745c5c3_Err != nil {
@@ -576,7 +576,7 @@ func CreateCourse() templ.Component {
 					var templ_7745c5c3_Var33 string
 					templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("holes.%d.index", (i*9)+h))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 190, Col: 89}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageCourses.templ`, Line: 192, Col: 89}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 					if templ_7745c5c3_Err != nil {

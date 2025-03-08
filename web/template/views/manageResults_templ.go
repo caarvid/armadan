@@ -9,7 +9,6 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import "fmt"
-import "github.com/google/uuid"
 import "github.com/caarvid/armadan/web/template/partials"
 import "github.com/caarvid/armadan/internal/armadan"
 
@@ -34,7 +33,7 @@ func resultRow(week armadan.ResultDetail) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var2 = []any{"tr group", templ.KV("opacity-50", week.ResultID.Variant() == uuid.Reserved && !week.IsFirstUnpublished)}
+		var templ_7745c5c3_Var2 = []any{"tr group", templ.KV("opacity-50", len(week.ResultID) > 0 && !week.IsFirstUnpublished)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -56,11 +55,11 @@ func resultRow(week armadan.ResultDetail) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if week.ResultID.Variant() != uuid.Reserved && !week.Published {
+		if len(week.ResultID) > 0 && !week.Published {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d*", week.Nr))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 12, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 11, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -70,7 +69,7 @@ func resultRow(week armadan.ResultDetail) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", week.Nr))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 14, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 13, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -84,7 +83,7 @@ func resultRow(week armadan.ResultDetail) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(week.CourseName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 17, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 16, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -97,7 +96,7 @@ func resultRow(week armadan.ResultDetail) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(week.TeeName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 18, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 17, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -111,7 +110,7 @@ func resultRow(week armadan.ResultDetail) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(week.Participants))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 21, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 20, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -131,7 +130,7 @@ func resultRow(week armadan.ResultDetail) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(week.Winners))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 28, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 27, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -147,7 +146,7 @@ func resultRow(week armadan.ResultDetail) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if week.Published || week.ResultID.Variant() != uuid.Reserved {
+		if week.Published || len(week.ResultID) > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<button class=\"btn-link p-0 h-auto text-primary/60 hover:text-primary\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -155,7 +154,7 @@ func resultRow(week armadan.ResultDetail) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/admin/results/%s", week.ResultID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 38, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 37, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -173,13 +172,13 @@ func resultRow(week armadan.ResultDetail) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/admin/results/week/%s/new", week.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 48, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 47, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-swap=\"outerHTML\" hx-select=\"#admin-content\" hx-target=\"#admin-content\">Lägg till\t</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-swap=\"outerHTML\" hx-select=\"#content\" hx-target=\"#content\">Lägg till\t</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -284,7 +283,7 @@ func EditResult(result *armadan.Result, rounds []armadan.Round, players []armada
 						var templ_7745c5c3_Var17 string
 						templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Resultat - v.%d", result.WeekNr))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 72, Col: 55}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageResults.templ`, Line: 71, Col: 55}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 						if templ_7745c5c3_Err != nil {

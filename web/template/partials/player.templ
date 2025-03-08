@@ -42,7 +42,7 @@ templ AddPlayer() {
 			}
 			@newPlayerGridRow() {
 				@newPlayerInputLabel("HCP:", "hcp")
-				<input id="hcp" name="hcp" type="number" step="0.1" class="input col-span-3" required autocomplete="off"/>
+				<input id="hcp" name="hcp" type="number" step="0.1" class="input-number col-span-3" required autocomplete="off"/>
 			}
 		</form>
 		<div class="flex justify-end gap-3">
@@ -82,7 +82,7 @@ templ EditPlayer(player armadan.Player) {
 			<input name="email" type="email" class="input" placeholder="Email" required autocomplete="off" value={ player.Email }/>
 		</td>
 		<td class="td">
-			<input name="hcp" type="number" class="input" placeholder="HCP" required autocomplete="off" value={ player.Hcp.String() }/>
+			<input name="hcp" type="number" class="input" placeholder="HCP" required autocomplete="off" value={ fmt.Sprintf("%2.1f", player.Hcp) }/>
 		</td>
 		<td class="td">
 			<div class="flex gap-3 text-sm ml-auto justify-end">
@@ -109,7 +109,7 @@ templ Player(player armadan.Player) {
 		<td class="td">{ player.FirstName }</td>
 		<td class="td">{ player.LastName }</td>
 		<td class="td">{ player.Email }</td>
-		<td class="td">{ player.Hcp.String() }</td>
+		<td class="td">{ fmt.Sprintf("%2.1f", player.Hcp) }</td>
 		<td class="td">
 			<div class="flex gap-3 ml-auto justify-end">
 				<button

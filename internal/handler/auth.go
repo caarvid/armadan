@@ -73,7 +73,7 @@ func Login(us armadan.UserService, ss armadan.SessionService, v armadan.Validato
 		if err != nil {
 			l.Error().
 				AnErr("raw_err", err).
-				Stringer("user_id", user.ID).
+				Str("user_id", user.ID).
 				Msg("failed to create session")
 			response.GeneralLoginError(w, r)
 			return

@@ -2,15 +2,13 @@ package armadan
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 type UserService interface {
 	All(context.Context) ([]User, error)
-	Get(context.Context, uuid.UUID) (*User, error)
+	Get(context.Context, string) (*User, error)
 	GetByEmail(context.Context, string) (*User, error)
-	UpdateRole(context.Context, uuid.UUID, Role) (*User, error)
+	UpdateRole(context.Context, string, string) (*User, error)
 }
 
 type Role string
@@ -22,7 +20,7 @@ const (
 )
 
 type User struct {
-	ID    uuid.UUID
+	ID    string
 	Email string
 	Hash  string
 	Role  Role

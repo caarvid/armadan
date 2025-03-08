@@ -5,12 +5,12 @@ import (
 )
 
 type parInfo struct {
-	In  int32
-	Out int32
+	In  int64
+	Out int64
 }
 
 func GetParInfo(c *armadan.Course) parInfo {
-	var in, out int32
+	var in, out int64
 
 	for _, h := range c.Holes[:9] {
 		out = out + h.Par

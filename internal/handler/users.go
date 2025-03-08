@@ -30,7 +30,7 @@ func EditUser(us armadan.UserService, v armadan.Validator) http.Handler {
 			return
 		}
 
-		user, err := us.Get(r.Context(), *id)
+		user, err := us.Get(r.Context(), id)
 		if err != nil {
 			return
 		}
@@ -46,7 +46,7 @@ func CancelEditUser(us armadan.UserService, v armadan.Validator) http.Handler {
 			return
 		}
 
-		user, err := us.Get(r.Context(), *id)
+		user, err := us.Get(r.Context(), id)
 		if err != nil {
 			return
 		}
@@ -57,7 +57,7 @@ func CancelEditUser(us armadan.UserService, v armadan.Validator) http.Handler {
 
 func UpdateUser(us armadan.UserService, v armadan.Validator) http.Handler {
 	type updateUserData struct {
-		Role armadan.Role `json:"role" validate:"required"`
+		Role string `json:"role" validate:"required"`
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +72,7 @@ func UpdateUser(us armadan.UserService, v armadan.Validator) http.Handler {
 			return
 		}
 
-		user, err := us.UpdateRole(r.Context(), *id, data.Role)
+		user, err := us.UpdateRole(r.Context(), id, data.Role)
 		if err != nil {
 			return
 		}

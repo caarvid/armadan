@@ -43,22 +43,26 @@ func run(
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
-	dbPool, err := database.CreatePool(ctx, dbHost, dbPort, dbName, dbUser, dbPassword)
+	readDB, writeDB, err := database.Create()
 	if err != nil {
 		return err
 	}
 
-	db := schema.New(dbPool)
+	defer readDB.Close()
+	defer writeDB.Close()
+
+	dbReader := schema.New(readDB)
+	dbWriter := schema.New(writeDB)
 	cache := cache.New(30*time.Minute, 15*time.Minute)
 
 	srv := server.New(
-		service.NewPostService(db, cache),
-		service.NewWeekService(db, cache),
-		service.NewUserService(db),
-		service.NewPlayerService(db, dbPool),
-		service.NewSessionService(db),
-		service.NewCourseService(db, dbPool, cache),
-		service.NewResultService(db, dbPool),
+		service.NewPostService(dbReader, dbWriter, cache),
+		service.NewWeekService(dbReader, dbWriter, cache),
+		service.NewUserService(dbReader, dbWriter),
+		service.NewPlayerService(dbReader, dbWriter, writeDB),
+		service.NewSessionService(dbReader, dbWriter),
+		service.NewCourseService(dbReader, dbWriter, writeDB, cache),
+		service.NewResultService(dbReader, dbWriter, writeDB),
 		validation.New(),
 	)
 

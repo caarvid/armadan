@@ -2,41 +2,38 @@ package armadan
 
 import (
 	"context"
-
-	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 type CourseService interface {
 	All(context.Context) ([]Course, error)
-	Get(context.Context, uuid.UUID) (*Course, error)
-	GetTees(context.Context, uuid.UUID) ([]Tee, error)
+	Get(context.Context, string) (*Course, error)
+	GetTees(context.Context, string) ([]Tee, error)
 	Create(context.Context, *Course) (*Course, error)
 	Update(context.Context, *Course) (*Course, error)
-	Delete(context.Context, uuid.UUID) error
-	DeleteTee(context.Context, uuid.UUID) error
+	Delete(context.Context, string) error
+	DeleteTee(context.Context, string) error
 }
 
 type Hole struct {
-	ID       uuid.UUID
-	CourseID uuid.UUID `json:"course_id"`
-	Nr       int32
-	Par      int32
-	Index    int32
+	ID       string
+	CourseID string `json:"course_id"`
+	Nr       int64
+	Par      int64
+	Index    int64
 }
 
 type Tee struct {
-	ID       uuid.UUID
-	CourseID uuid.UUID `json:"course_id"`
+	ID       string
+	CourseID string `json:"course_id"`
 	Name     string
-	Slope    int32
-	Cr       decimal.Decimal
+	Slope    int64
+	Cr       float64
 }
 
 type Course struct {
-	ID    uuid.UUID
+	ID    string
 	Name  string
-	Par   int32
+	Par   int64
 	Holes []Hole
 	Tees  []Tee
 }

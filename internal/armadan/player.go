@@ -2,25 +2,22 @@ package armadan
 
 import (
 	"context"
-
-	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 type PlayerService interface {
 	All(context.Context) ([]Player, error)
-	Get(context.Context, uuid.UUID) (*Player, error)
+	Get(context.Context, string) (*Player, error)
 	Create(context.Context, *Player) (*Player, error)
 	Update(context.Context, *Player) (*Player, error)
-	Delete(context.Context, uuid.UUID) error
+	Delete(context.Context, string) error
 }
 
 type Player struct {
-	ID        uuid.UUID
+	ID        string
 	FirstName string
 	LastName  string
-	Points    int32
-	UserID    uuid.UUID
+	Points    int64
+	UserID    string
 	Email     string
-	Hcp       decimal.Decimal
+	Hcp       float64
 }

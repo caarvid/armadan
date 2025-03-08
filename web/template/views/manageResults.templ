@@ -1,14 +1,13 @@
 package views
 
 import "fmt"
-import "github.com/google/uuid"
 import "github.com/caarvid/armadan/web/template/partials"
 import "github.com/caarvid/armadan/internal/armadan"
 
 templ resultRow(week armadan.ResultDetail) {
-	<tr class={ "tr group", templ.KV("opacity-50", week.ResultID.Variant() == uuid.Reserved && !week.IsFirstUnpublished) }>
+	<tr class={ "tr group", templ.KV("opacity-50", len(week.ResultID) > 0 && !week.IsFirstUnpublished) }>
 		<td class="td">
-			if week.ResultID.Variant() != uuid.Reserved && !week.Published {
+			if len(week.ResultID) > 0 && !week.Published {
 				{ fmt.Sprintf("%d*", week.Nr) }
 			} else {
 				{ fmt.Sprintf("%d", week.Nr) }
@@ -32,7 +31,7 @@ templ resultRow(week armadan.ResultDetail) {
 		</td>
 		<td class="td">
 			<div class="flex gap-3 ml-auto justify-end">
-				if week.Published || week.ResultID.Variant() != uuid.Reserved {
+				if week.Published || len(week.ResultID) > 0 {
 					<button
 						class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
 						hx-get={ fmt.Sprintf("/admin/results/%s", week.ResultID) }
@@ -47,8 +46,8 @@ templ resultRow(week armadan.ResultDetail) {
 						class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
 						hx-get={ fmt.Sprintf("/admin/results/week/%s/new", week.ID) }
 						hx-swap="outerHTML"
-						hx-select="#admin-content"
-						hx-target="#admin-content"
+						hx-select="#content"
+						hx-target="#content"
 					>
 						Lägg till	
 					</button>
