@@ -24,7 +24,6 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg *CreateUserParams) (User, error)
 	CreateWeek(ctx context.Context, arg *CreateWeekParams) (Week, error)
 	DeleteCourse(ctx context.Context, id string) error
-	DeletePlayer(ctx context.Context, id string) error
 	DeletePost(ctx context.Context, id string) error
 	DeleteResult(ctx context.Context, id string) error
 	DeleteRound(ctx context.Context, id string) error

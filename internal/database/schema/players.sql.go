@@ -40,15 +40,6 @@ func (q *Queries) CreatePlayer(ctx context.Context, arg *CreatePlayerParams) (Pl
 	return i, err
 }
 
-const deletePlayer = `-- name: DeletePlayer :exec
-DELETE FROM players WHERE id = ?
-`
-
-func (q *Queries) DeletePlayer(ctx context.Context, id string) error {
-	_, err := q.exec(ctx, q.deletePlayerStmt, deletePlayer, id)
-	return err
-}
-
 const getLeaderboard = `-- name: GetLeaderboard :many
 SELECT 
   p.id, p.first_name, p.last_name, p.hcp, p.user_id, p.email, p.points,

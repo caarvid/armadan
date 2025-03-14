@@ -111,7 +111,7 @@ func sidebarList() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<ul class=\"m-0 text-lg\" _=\"\n\t\t\tinit\n\t\t\t\tfor x in (&lt;li /&gt; in me)\n\t\t\t\t\tif @hx-get of x is pathname of the location of the window\n\t\t\t\t\t \tremove .hidden from first &lt;span /&gt; in x\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\ton click\n\t\t\t\tif target matches &lt;li /&gt;\n\t\t\t\t\tfor elem in (&lt;li /&gt; in me)\n\t\t\t\t\t\tadd .hidden to first &lt;span /&gt; in elem\n\t\t\t\t\tend\n\t\t\t\t\tremove .hidden from first &lt;span /&gt; in target\n\t\t\t\tend\n\t\t\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<ul class=\"m-0 text-lg\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -119,7 +119,7 @@ func sidebarList() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</ul>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<script>\n\t\t\tany('li', me()).run((el) => {\n\t\t\t\tif (me(el).attr(\"hx-get\") === window.location.pathname) {\n\t\t\t\t\tme('span:first-child', el).removeClass('hidden');\n\t\t\t\t}\n\t\t\t});\n\t\t\tany('li', me()).on('click', (el) => {\n\t\t\t\tany('li', me(el).parentNode).run((e) => me('span:first-child', e).addClass('hidden'));\n\t\t\t\tme('span:first-child', me(el)).removeClass('hidden');\n\t\t\t});\n\t\t</script></ul>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

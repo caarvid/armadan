@@ -40,23 +40,19 @@ templ sidebarItem(i item) {
 templ sidebarList() {
 	<ul
 		class="m-0 text-lg"
-		_="
-			init
-				for x in (<li /> in me)
-					if @hx-get of x is pathname of the location of the window
-					 	remove .hidden from first <span /> in x
-					end
-				end
-			on click
-				if target matches <li />
-					for elem in (<li /> in me)
-						add .hidden to first <span /> in elem
-					end
-					remove .hidden from first <span /> in target
-				end
-		"
 	>
 		{ children... }
+		<script>
+			any('li', me()).run((el) => {
+				if (me(el).attr("hx-get") === window.location.pathname) {
+					me('span:first-child', el).removeClass('hidden');
+				}
+			});
+			any('li', me()).on('click', (el) => {
+				any('li', me(el).parentNode).run((e) => me('span:first-child', e).addClass('hidden'));
+				me('span:first-child', me(el)).removeClass('hidden');
+			});
+		</script>
 	</ul>
 }
 

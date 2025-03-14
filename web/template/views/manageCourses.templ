@@ -49,23 +49,19 @@ templ EditCourse(c armadan.Course) {
 			hx-swap="outerHTML"
 			hx-ext="json-form"
 		>
+			<script>me().onHtmxSuccess((el, e) => el.target === e && me("#edit-course-form").send('closeModal'))</script>
 			<input type="text" name="name" class="input" value={ c.Name } placeholder="Namn" required autocomplete="off"/>
 			<fieldset
 				class="flex p-4 border-2 flex-col gap-2 relative"
 				id="tees"
-				_="
-					on mutation of childList
-						set divs to <div/> in me
-					 	for d in divs index i
-							set inputs to <input/> in d
-							for inp in inputs
-								js(inp, i)
-									inp.name=inp.name.replace(/\d+/, i)
-								end
-							end
-						end
-				"
 			>
+				<script>
+					me().onMutation((el) => {
+						any('div', el)?.forEach((d, i) => {
+							any('input', d).run((inp) => inp.name = inp.name.replace(/\d+/, i));
+						});
+					});
+				</script>
 				<legend>Tees</legend>
 				<button
 					type="button"
@@ -123,12 +119,11 @@ templ EditCourse(c armadan.Course) {
 				<button
 					class="btn-secondary"
 					type="button"
-					_="on click trigger closeModal"
 				>Avbryt</button>
+				<script>me('-').on('click', (ev) => me(ev).send('closeModal'));</script>
 				<button
 					class="btn-default"
 					type="submit"
-					_="on click wait for htmx:afterRequest(successful) from #edit-course-form if successful trigger closeModal"
 				>Spara</button>
 			</span>
 		</form>
@@ -152,21 +147,14 @@ templ CreateCourse() {
 			<fieldset
 				class="flex p-4 border-2 flex-col gap-2 relative"
 				id="tees"
-				_="
-					on mutation of childList
-						set divs to <div/> in me
-						log divs
-					 	for d in divs index i
-							set inputs to <input/> in d
-							log inputs
-							for inp in inputs
-								js(inp, i)
-									inp.name=inp.name.replace(/\d+/, i)
-								end
-							end
-						end
-				"
 			>
+				<script>
+					me().onMutation((el) => {
+						any('div', el)?.forEach((d, i) => {
+							any('input', d).run((inp) => inp.name = inp.name.replace(/\d+/, i));
+						});
+					});
+				</script>
 				<legend>Tees</legend>
 				<button
 					type="button"

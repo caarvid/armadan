@@ -69,9 +69,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteCourseStmt, err = db.PrepareContext(ctx, deleteCourse); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteCourse: %w", err)
 	}
-	if q.deletePlayerStmt, err = db.PrepareContext(ctx, deletePlayer); err != nil {
-		return nil, fmt.Errorf("error preparing query DeletePlayer: %w", err)
-	}
 	if q.deletePostStmt, err = db.PrepareContext(ctx, deletePost); err != nil {
 		return nil, fmt.Errorf("error preparing query DeletePost: %w", err)
 	}
@@ -261,11 +258,6 @@ func (q *Queries) Close() error {
 	if q.deleteCourseStmt != nil {
 		if cerr := q.deleteCourseStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteCourseStmt: %w", cerr)
-		}
-	}
-	if q.deletePlayerStmt != nil {
-		if cerr := q.deletePlayerStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deletePlayerStmt: %w", cerr)
 		}
 	}
 	if q.deletePostStmt != nil {
@@ -507,7 +499,6 @@ type Queries struct {
 	createUserStmt                    *sql.Stmt
 	createWeekStmt                    *sql.Stmt
 	deleteCourseStmt                  *sql.Stmt
-	deletePlayerStmt                  *sql.Stmt
 	deletePostStmt                    *sql.Stmt
 	deleteResultStmt                  *sql.Stmt
 	deleteRoundStmt                   *sql.Stmt
@@ -566,7 +557,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		createUserStmt:                    q.createUserStmt,
 		createWeekStmt:                    q.createWeekStmt,
 		deleteCourseStmt:                  q.deleteCourseStmt,
-		deletePlayerStmt:                  q.deletePlayerStmt,
 		deletePostStmt:                    q.deletePostStmt,
 		deleteResultStmt:                  q.deleteResultStmt,
 		deleteRoundStmt:                   q.deleteRoundStmt,

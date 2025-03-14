@@ -119,7 +119,7 @@ func (s *weeks) Update(ctx context.Context, data *armadan.Week) (*armadan.Week, 
 }
 
 func (s *weeks) Delete(ctx context.Context, id string) error {
-	if err := s.dbWriter.DeletePost(ctx, id); err != nil {
+	if err := s.dbWriter.DeleteWeek(ctx, id); err != nil {
 		return err
 	}
 

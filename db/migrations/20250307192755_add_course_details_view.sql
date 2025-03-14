@@ -4,7 +4,7 @@ CREATE VIEW IF NOT EXISTS course_details AS
 SELECT
 	c.*,
 	coalesce((
-		json_group_array(
+		SELECT json_group_array(
 			json_object(
 				'id', h.id,
 				'nr', h.nr,
@@ -12,7 +12,7 @@ SELECT
 				'index', h.stroke_index,
 				'course_id', h.course_id
 			)
-		)
+		) FROM holes h WHERE h.course_id = c.id
 	), '[]') AS holes,
 	coalesce((
 		SELECT json_group_array(
@@ -25,8 +25,7 @@ SELECT
 			)
 		) FROM tees t WHERE t.course_id = c.id
 	), '[]') AS tees
-FROM courses c
-LEFT JOIN holes h ON h.course_id = c.id;
+FROM courses c;
 -- +goose StatementEnd
 
 -- +goose Down

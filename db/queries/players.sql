@@ -19,5 +19,3 @@ INSERT INTO players (id, first_name, last_name, hcp, user_id) VALUES (?, ?, ?, ?
 -- name: UpdatePlayer :one
 UPDATE players SET first_name = ?, last_name = ?, hcp = ? WHERE id = ? RETURNING *; 
 
--- name: DeletePlayer :exec
-DELETE FROM players WHERE id = ?;

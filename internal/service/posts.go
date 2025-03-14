@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
@@ -40,6 +41,7 @@ func NewPostService(reader schema.Querier, writer schema.Querier, cache *cache.C
 }
 
 func (s *posts) All(ctx context.Context) ([]armadan.Post, error) {
+	fmt.Println("reading all posts")
 	if cachedPosts, found := s.cache.Get(POSTS_CACHE_KEY); found {
 		return cachedPosts.([]armadan.Post), nil
 	}
@@ -86,7 +88,7 @@ func (s *posts) Create(ctx context.Context, data *armadan.Post) (*armadan.Post, 
 
 func (s *posts) Update(ctx context.Context, data *armadan.Post) (*armadan.Post, error) {
 	post, err := s.dbWriter.UpdatePost(ctx, &schema.UpdatePostParams{
-		ID:     armadan.GetId(),
+		ID:     data.ID,
 		Title:  data.Title,
 		Body:   data.Body,
 		Author: data.Author,

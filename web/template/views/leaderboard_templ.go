@@ -117,14 +117,14 @@ func Leaderboard(players []armadan.Leader) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" hx-target=\"this\" hx-swap=\"afterend\" hx-trigger=\"show\" _=\"\n\t\t\t\t\t\t\t\t\ton click \n\t\t\t\t\t\t\t\t\t\tif @data-open is &#39;false&#39; then\n\t\t\t\t\t\t\t\t\t\t\ttrigger show\n\t\t\t\t\t\t\t\t\t\t\tset @data-open to true\n\t\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\t\tremove next &lt;tr/&gt;\n\t\t\t\t\t\t\t\t\t\t\tset @data-open to false\n\t\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\t\"><td class=\"td\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" hx-target=\"this\" hx-swap=\"afterend\" hx-trigger=\"show\"><td class=\"td\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var8 string
 						templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(player.Name)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/leaderboard.templ`, Line: 40, Col: 36}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/leaderboard.templ`, Line: 30, Col: 36}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 						if templ_7745c5c3_Err != nil {
@@ -137,7 +137,7 @@ func Leaderboard(players []armadan.Leader) templ.Component {
 						var templ_7745c5c3_Var9 string
 						templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(player.NrOfRounds))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/leaderboard.templ`, Line: 41, Col: 66}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/leaderboard.templ`, Line: 31, Col: 66}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 						if templ_7745c5c3_Err != nil {
@@ -150,13 +150,13 @@ func Leaderboard(players []armadan.Leader) templ.Component {
 						var templ_7745c5c3_Var10 string
 						templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(player.Points))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/leaderboard.templ`, Line: 42, Col: 62}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/leaderboard.templ`, Line: 32, Col: 62}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</td></tr>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</td><script>\n\t\t\t\t\t\t\t\t\tme().on('click', (ev) => {\n\t\t\t\t\t\t\t\t\t\tif (me(ev).dataset.open === 'false') {\n\t\t\t\t\t\t\t\t\t\t\tme(ev).send('show');\n\t\t\t\t\t\t\t\t\t\t\tme(ev).dataset.open = true;\n\t\t\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\t\t\tme(ev).dataset.open = false;\n\t\t\t\t\t\t\t\t\t\t\tme(ev).nextSibling.remove();\n\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t})\n\t\t\t\t\t\t\t\t</script></tr>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}

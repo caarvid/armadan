@@ -29,7 +29,7 @@ func Modal(title string, wide bool) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"modal\" class=\"fixed inset-0 z-50 bg-black/70 flex items-center justify-center\" _=\"on closeModal add .closing then wait for animationend then remove me\"><div class=\"absolute -z-10 inset-0\" _=\"on click trigger closeModal\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"modal\" class=\"fixed inset-0 z-50 bg-black/70 flex items-center justify-center\"><div class=\"absolute -z-10 inset-0\"></div><script>\n\t\t\tme('-').on('click', (ev) => me(ev).send('closeModal'));\n\t\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -51,7 +51,7 @@ func Modal(title string, wide bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><div class=\"absolute top-4 right-4 cursor-pointer opacity-70 hover:opacity-100 text-lg\" _=\"on click trigger closeModal\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><div class=\"absolute top-4 right-4 cursor-pointer opacity-70 hover:opacity-100 text-lg\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -59,14 +59,14 @@ func Modal(title string, wide bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div class=\"flex flex-col space-y-1.5 text-center sm:text-left\"><div class=\"text-lg font-semibold tracking-tight leading-none\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<script>\n\t\t\t\t\tme().on('click', (ev) => me(ev).send('closeModal'));\n\t\t\t\t</script></div><div class=\"flex flex-col space-y-1.5 text-center sm:text-left\"><div class=\"text-lg font-semibold tracking-tight leading-none\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/modal.templ`, Line: 15, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/modal.templ`, Line: 20, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -80,7 +80,7 @@ func Modal(title string, wide bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div><script>\n\t\t\tme().on('closeModal', (ev) => { \n\t\t\t\tme(ev).addClass(\"closing\").once('animationend', (e) => { me(e).remove() });\n\t\t\t});\n\t\t</script></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

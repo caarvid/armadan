@@ -51,27 +51,6 @@ templ RoundForm(resultId string, strokes int, course *armadan.Course, player *ar
 			<tbody
 				data-strokes={ fmt.Sprint(strokes) }
 				class="tbody [&_td]:py-1"
-				_="
-					on input
-					set out to 0
-					set in to 0
-					for i in (<input /> in me)
-						set nr to the (@hole-nr of i) as an Int
-						if nr is not null then
-							set val to (i.value) as an SafeInt
-							if nr is less than 10 then
-								set out to out + val
-							else
-								set in to in + val
-							end
-						end
-					end
-					put out into #round-out
-					put in into #round-in
-					put out into #round-out-end
-					put out + in into #round-total
-					put Math.max((out + in) - @data-strokes, 0) into #net-total
-				"
 			>
 				for _, hole := range (course.Holes)[:9] {
 					<tr class={ "tr [&_td:last-child]:p-0", templ.KV("border-border!", hole.Nr == 9) }>
@@ -145,6 +124,23 @@ templ RoundForm(resultId string, strokes int, course *armadan.Course, player *ar
 					<td class="td text-center border-r">-</td>
 					<td id="net-total" class="td text-center">0</td>
 				</tr>
+				<script>
+					me().on('input', (ev) => {
+						let [o, i, strokes]  = [0, 0, Number(me(ev).dataset.strokes)];
+						any('input', me(ev)).run((el) => {
+							if (el.hasAttribute('hole-nr')) {
+								let nr = Number(el.getAttribute('hole-nr'));
+								let val = Number(el.value) || 0;
+								nr < 10 ? o += val : i += val;
+							}
+						});
+						me('#round-out').innerText = o;
+						me('#round-out-end').innerText = o;
+						me('#round-in').innerText = i;
+						me('#round-total').innerText = i + o;	
+						me('#net-total').innerText = Math.max(o + i - strokes, 0);
+					});
+				</script>
 			</tbody>
 		}
 		<button type="submit" class="btn-default">Lägg till</button>
@@ -159,13 +155,19 @@ templ PlayerDropdown(resultId string, players []armadan.Player) {
 			class="select text-gray-400"
 			hx-get={ fmt.Sprintf("/admin/results/%s/form", resultId) }
 			hx-target="#form-wrapper"
-			_="on change if my.value is not null then remove .text-gray-400 from me"
 		>
 			<option hidden disabled selected value>Spelare</option>
 			for _, player := range players {
 				<option value={ player.ID }>{ fmt.Sprintf("%s %s", player.FirstName, player.LastName) }</option>
 			}
 		</select>
+		<script>
+			me('-').on('change', (ev) => {
+				if (me(ev).value !== null) {
+					me(ev).removeClass('.text-gray-400');
+				}
+			});
+		</script>
 	</div>
 }
 

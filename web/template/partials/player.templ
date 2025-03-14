@@ -47,18 +47,25 @@ templ AddPlayer() {
 		</form>
 		<div class="flex justify-end gap-3">
 			<button
+				id="add-more-players"
 				type="submit"
 				class="btn-secondary"
 				form="new-player-form"
-				_="on click wait for htmx:afterRequest(successful) from #new-player-form if successful reset() the #new-player-form"
 			>Lägg till fler</button>
 			<button
+				id="save-player"
 				type="submit"
 				class="btn-default"
 				form="new-player-form"
-				_="on click wait for htmx:afterRequest(successful) from #new-player-form if successful trigger closeModal"
 			>Spara</button>
 		</div>
+		<script>
+			{
+				let form = me("#new-player-form");
+				me("#add-more-players").on("click", () => form.onHtmxSuccess(() => form.reset()));
+				me("#save-player").on("click", () => form.onHtmxSuccess(() => form.send("closeModal")));
+			}
+		</script>
 	}
 }
 

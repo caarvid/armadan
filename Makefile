@@ -69,17 +69,17 @@ dev:
 ### BUILD ###
 .PHONY: build/css
 build/css: 
-	@npx tailwindcss -i ./web/css/style.css -o ./web/static/main.css --minify
+	@npx --yes @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify
 
 .PHONY: build/templ
 build/templ:  
-	@templ generate
+	@go run github.com/a-h/templ/cmd/templ@latest generate
 
 .PHONY: build/sql
 build/sql: 
-	@sqlc generate 
+	@go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate 
 
-.PHONY: build
+.PHONY: build/armadan
 build: clean build/css build/templ build/sql
 	@GOOS=linux GOARCH=amd64 go build -o ./dist/armadan ./cmd/armadan/main.go	
 

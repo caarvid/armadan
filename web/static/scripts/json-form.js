@@ -5,7 +5,7 @@ htmx.defineExtension("json-form", {
     }
   },
 
-  encodeParameters: function (_xhr, params, elt) {
+  encodeParameters: function (_xhr, params, _elt) {
     function unflatten(data) {
       const result = {};
 
@@ -29,7 +29,7 @@ htmx.defineExtension("json-form", {
 
     const obj = {};
 
-    params.entries().forEach(([name, val]) => {
+    for (const [name, val] of params.entries()) {
       const e = document.body.querySelector(`[name="${name}"]`);
 
       if (!e) {
@@ -53,7 +53,7 @@ htmx.defineExtension("json-form", {
         default:
           obj[name] = val;
       }
-    });
+    }
 
     return JSON.stringify(unflatten(obj));
   },

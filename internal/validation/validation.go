@@ -61,7 +61,6 @@ func (cv *customValidator) Validate(r *http.Request, i interface{}) error {
 	if err := cv.validator.Struct(i); err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
 			return errors.New("invalid data")
-			// return echo.NewHTTPError(http.StatusBadRequest, "invalid data")
 		}
 
 		var vErr validationErrors
@@ -84,9 +83,6 @@ func (cv *customValidator) Validate(r *http.Request, i interface{}) error {
 		}
 
 		return errors.New("validation failed")
-		// return echo.NewHTTPError(http.StatusBadRequest, map[string]validationErrors{
-		// 	"errors": vErr,
-		// })
 	}
 
 	return nil

@@ -168,5 +168,5 @@ func (ps *players) Update(ctx context.Context, data *armadan.Player) (*armadan.P
 }
 
 func (ps *players) Delete(ctx context.Context, id string) error {
-	return ps.dbWriter.DeletePlayer(ctx, id)
+	return ps.dbWriter.DeleteUser(ctx, id)
 }

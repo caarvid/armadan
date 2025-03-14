@@ -29,20 +29,20 @@ func document(title string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<html><head><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"se\"><head><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/base.templ`, Line: 6, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/base.templ`, Line: 7, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/public/assets/favicon.svg\"><script src=\"/public/scripts/hyperscript.js\"></script><script src=\"/public/scripts/htmx.min.js\"></script><script src=\"/public/scripts/json-form.js\" defer></script><script src=\"/public/scripts/editor-utils.js\" defer></script><link rel=\"stylesheet\" href=\"/public/main.css\"><script>\n\t\t\t\thtmx.config.allowNestedOobSwaps = false;\n\t\t\t\thtmx.config.responseHandling.unshift({ code: \"422\", swap: true });\n\t\t\t\t_hyperscript.config.conversions[\"SafeInt\"] = function(val) {\n\t\t\t\t\tvar nr = Number(val);\n\n\t\t\t\t\treturn nr === NaN ? 0 : nr;\n\t\t\t\t}\n\t\t\t</script></head><body class=\"overflow-y-hidden\"><section class=\"overflow-y-hidden flex flex-auto flex-col min-h-screen max-h-screen\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta charset=\"UTF-8\"><meta name=\"description\" content=\"Sign in to your Armadan account and access the latest results, see the leaderboard and more.\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/public/assets/favicon.svg\"><script src=\"/public/scripts/htmx.min.js\"></script><script src=\"/public/scripts/surreal.min.js\"></script><script src=\"/public/scripts/json-form.js\" defer></script><script src=\"/public/scripts/editor-utils.js\" defer></script><link rel=\"stylesheet\" href=\"/public/main.css\"><script>\n\t\t\t\thtmx.config.allowNestedOobSwaps = false;\n\t\t\t\thtmx.config.responseHandling.unshift({ code: \"422\", swap: true });\n\t\t\t\tfunction customPlugin(e) {\n\t\t\t\t\tfunction toggle(e, val) {\n\t\t\t\t\t\te.style.display = val ? null : 'none';\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\t\t\t\t\tfunction toggleAttr(e, key, fn) {\n\t\t\t\t\t\te.attr(key, fn(e.attr(key)));\n\t\t\t\t\t\treturn e.attr(key);\n\t\t\t\t\t}\n\t\t\t\t\tfunction once(e, name, fn) {\n\t\t\t\t\t\te.addEventListener(name, fn, { once: true });\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\t\t\t\t\tfunction onHtmxSuccess(e, fn) {\n\t\t\t\t\t\te.on('htmx:afterRequest', (ev) => {\n\t\t\t\t\t\t\tif (ev.detail.successful) {\n\t\t\t\t\t\t\t\tfn(ev, e);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\t\t\t\t\tfunction removeAfterEvent(e, cl, ev) {\n\t\t\t\t\t\te.addClass(cl).once(ev, () => e.remove());\n\t\t\t\t\t\treturn e\n\t\t\t\t\t}\n\t\t\t\t\tfunction onMutation(e, fn) {\n\t\t\t\t\t\tlet observer = new MutationObserver((list) => {\n\t\t\t\t\t\t\tfor (const mutation of list) {\n\t\t\t\t\t\t\t\tif (mutation.type === \"childList\") { \n\t\t\t\t\t\t\t\t\tfn(e); \n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t\tobserver.observe(e, { childList: true } );\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\n\t\t\t\t\te.toggle = (val) => toggle(e, val);\n\t\t\t\t\te.hide = () => toggle(e, false);\n\t\t\t\t\te.show = () => toggle(e, true);\n\t\t\t\t\te.setAttr = (k, fn) => toggleAttr(e, k, fn);\n\t\t\t\t\te.once = (name, fn) => once(e, name, fn);\n\t\t\t\t\te.onHtmxSuccess = (fn) => onHtmxSuccess(e, fn);\n\t\t\t\t\te.removeAfterEvent = (cl, ev) => removeAfterEvent(e, cl, ev);\n\t\t\t\t\te.onMutation = (fn) => onMutation(e, fn);\n\t\t\t\t}\n\t\t\t\tsurreal.plugins.push(customPlugin);\n\t\t\t</script></head><body class=\"overflow-y-hidden\"><section class=\"overflow-y-hidden flex flex-auto flex-col min-h-dvh max-h-dvh\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
