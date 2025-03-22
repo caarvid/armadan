@@ -1,8 +1,8 @@
--- name: GetToken :one
+-- name: GetResetPasswordToken :one
 SELECT * FROM password_reset_tokens WHERE token = ?;
 
--- name: CreateToken :one
+-- name: CreateResetPasswordToken :one
 INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES (?, ?, ?) RETURNING *;
 
--- name: DeleteToken :exec
-DELETE FROM password_reset_tokens WHERE user_id = ?; 
+-- name: DeleteResetPasswordToken :exec
+DELETE FROM password_reset_tokens WHERE token = ?; 

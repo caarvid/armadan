@@ -108,9 +108,9 @@ func WeekCard(week armadan.Week) templ.Component {
 			}
 		} else {
 			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(week.Dates.String())
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(week.FormattedDate())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 22, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 22, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -451,9 +451,9 @@ func WeekRow(week armadan.Week) templ.Component {
 			}
 		} else {
 			var templ_7745c5c3_Var29 string
-			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(week.Dates.String())
+			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(week.FormattedDate())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 119, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 119, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {

@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  app:
+    build: ..
+    container_name: armadan
+    restart: unless-stopped
+    environment:
+      - DB_PATH=/var/lib/armadan/data/armadan.sqlite
+      - PORT=8080
+    volumes:
+      - sqlitedb:/var/lib/armadan/data
+    expose:
+      - "8080"
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certs:/etc/letsencrypt
+      - ./nginx/html:/usr/share/nginx/html
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

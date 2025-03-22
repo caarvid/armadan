@@ -14,13 +14,15 @@ sql:
         emit_params_struct_pointers: true
         json_tags_case_style: camel
         overrides:
-          - column: "players_with_point.points"
-            go_type: "int64"
           - column: "course_details.holes"
             go_type:
               import: "database/sql"
               type: "NullString"
           - column: "course_details.tees"
+            go_type:
+              import: "database/sql"
+              type: "NullString"
+          - column: "full_rounds.scores"
             go_type:
               import: "database/sql"
               type: "NullString"

@@ -10,15 +10,14 @@ import (
 )
 
 const createPlayer = `-- name: CreatePlayer :one
-INSERT INTO players (id, first_name, last_name, hcp, user_id) VALUES (?, ?, ?, ?, ?) RETURNING id, first_name, last_name, hcp, user_id
+INSERT INTO players (id, first_name, last_name, user_id) VALUES (?, ?, ?, ?) RETURNING id, first_name, last_name, user_id
 `
 
 type CreatePlayerParams struct {
-	ID        string  `json:"id"`
-	FirstName string  `json:"firstName"`
-	LastName  string  `json:"lastName"`
-	Hcp       float64 `json:"hcp"`
-	UserID    string  `json:"userId"`
+	ID        string `json:"id"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	UserID    string `json:"userId"`
 }
 
 func (q *Queries) CreatePlayer(ctx context.Context, arg *CreatePlayerParams) (Player, error) {
@@ -26,7 +25,6 @@ func (q *Queries) CreatePlayer(ctx context.Context, arg *CreatePlayerParams) (Pl
 		arg.ID,
 		arg.FirstName,
 		arg.LastName,
-		arg.Hcp,
 		arg.UserID,
 	)
 	var i Player
@@ -34,7 +32,6 @@ func (q *Queries) CreatePlayer(ctx context.Context, arg *CreatePlayerParams) (Pl
 		&i.ID,
 		&i.FirstName,
 		&i.LastName,
-		&i.Hcp,
 		&i.UserID,
 	)
 	return i, err
@@ -42,22 +39,22 @@ func (q *Queries) CreatePlayer(ctx context.Context, arg *CreatePlayerParams) (Pl
 
 const getLeaderboard = `-- name: GetLeaderboard :many
 SELECT 
-  p.id, p.first_name, p.last_name, p.hcp, p.user_id, p.email, p.points,
+  p.id, p.first_name, p.last_name, p.user_id, p.email, p.points, p.hcp,
   count(r.id) as nr_of_rounds
-FROM players_with_points p
+FROM players_extended p
 LEFT JOIN rounds r ON r.player_id = p.id
 GROUP BY p.id
-ORDER BY p.points ASC, nr_of_rounds DESC
+ORDER BY p.points DESC, nr_of_rounds DESC
 `
 
 type GetLeaderboardRow struct {
 	ID         string  `json:"id"`
 	FirstName  string  `json:"firstName"`
 	LastName   string  `json:"lastName"`
-	Hcp        float64 `json:"hcp"`
 	UserID     string  `json:"userId"`
 	Email      string  `json:"email"`
 	Points     int64   `json:"points"`
+	Hcp        float64 `json:"hcp"`
 	NrOfRounds int64   `json:"nrOfRounds"`
 }
 
@@ -74,10 +71,10 @@ func (q *Queries) GetLeaderboard(ctx context.Context) ([]GetLeaderboardRow, erro
 			&i.ID,
 			&i.FirstName,
 			&i.LastName,
-			&i.Hcp,
 			&i.UserID,
 			&i.Email,
 			&i.Points,
+			&i.Hcp,
 			&i.NrOfRounds,
 		); err != nil {
 			return nil, err
@@ -94,45 +91,45 @@ func (q *Queries) GetLeaderboard(ctx context.Context) ([]GetLeaderboardRow, erro
 }
 
 const getPlayer = `-- name: GetPlayer :one
-SELECT id, first_name, last_name, hcp, user_id, email, points FROM players_with_points p WHERE p.id = ?
+SELECT id, first_name, last_name, user_id, email, points, hcp FROM players_extended p WHERE p.id = ?
 `
 
-func (q *Queries) GetPlayer(ctx context.Context, id string) (PlayersWithPoint, error) {
+func (q *Queries) GetPlayer(ctx context.Context, id string) (PlayersExtended, error) {
 	row := q.queryRow(ctx, q.getPlayerStmt, getPlayer, id)
-	var i PlayersWithPoint
+	var i PlayersExtended
 	err := row.Scan(
 		&i.ID,
 		&i.FirstName,
 		&i.LastName,
-		&i.Hcp,
 		&i.UserID,
 		&i.Email,
 		&i.Points,
+		&i.Hcp,
 	)
 	return i, err
 }
 
 const getPlayers = `-- name: GetPlayers :many
-SELECT id, first_name, last_name, hcp, user_id, email, points FROM players_with_points p ORDER BY p.last_name ASC, p.first_name ASC
+SELECT id, first_name, last_name, user_id, email, points, hcp FROM players_extended p ORDER BY p.last_name ASC, p.first_name ASC
 `
 
-func (q *Queries) GetPlayers(ctx context.Context) ([]PlayersWithPoint, error) {
+func (q *Queries) GetPlayers(ctx context.Context) ([]PlayersExtended, error) {
 	rows, err := q.query(ctx, q.getPlayersStmt, getPlayers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []PlayersWithPoint
+	var items []PlayersExtended
 	for rows.Next() {
-		var i PlayersWithPoint
+		var i PlayersExtended
 		if err := rows.Scan(
 			&i.ID,
 			&i.FirstName,
 			&i.LastName,
-			&i.Hcp,
 			&i.UserID,
 			&i.Email,
 			&i.Points,
+			&i.Hcp,
 		); err != nil {
 			return nil, err
 		}
@@ -148,29 +145,22 @@ func (q *Queries) GetPlayers(ctx context.Context) ([]PlayersWithPoint, error) {
 }
 
 const updatePlayer = `-- name: UpdatePlayer :one
-UPDATE players SET first_name = ?, last_name = ?, hcp = ? WHERE id = ? RETURNING id, first_name, last_name, hcp, user_id
+UPDATE players SET first_name = ?, last_name = ?  WHERE id = ? RETURNING id, first_name, last_name, user_id
 `
 
 type UpdatePlayerParams struct {
-	FirstName string  `json:"firstName"`
-	LastName  string  `json:"lastName"`
-	Hcp       float64 `json:"hcp"`
-	ID        string  `json:"id"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	ID        string `json:"id"`
 }
 
 func (q *Queries) UpdatePlayer(ctx context.Context, arg *UpdatePlayerParams) (Player, error) {
-	row := q.queryRow(ctx, q.updatePlayerStmt, updatePlayer,
-		arg.FirstName,
-		arg.LastName,
-		arg.Hcp,
-		arg.ID,
-	)
+	row := q.queryRow(ctx, q.updatePlayerStmt, updatePlayer, arg.FirstName, arg.LastName, arg.ID)
 	var i Player
 	err := row.Scan(
 		&i.ID,
 		&i.FirstName,
 		&i.LastName,
-		&i.Hcp,
 		&i.UserID,
 	)
 	return i, err

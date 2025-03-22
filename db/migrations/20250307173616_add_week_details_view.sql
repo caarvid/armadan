@@ -2,13 +2,8 @@
 -- +goose StatementBegin
 CREATE VIEW IF NOT EXISTS week_details AS
 SELECT
-  w.id,
-  w.nr,
-  w.finals_date,
-  w.is_finals,
-  c.id as course_id,
+  w.*,
   c.name as course_name,
-  t.id as tee_id,
   t.name as tee_name
 FROM weeks w
 JOIN courses c ON c.id = w.course_id

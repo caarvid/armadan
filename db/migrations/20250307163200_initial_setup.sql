@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS players (
 	id text PRIMARY KEY NOT NULL,
 	first_name text NOT NULL,
 	last_name text NOT NULL,
-	hcp real NOT NULL,
 	user_id text UNIQUE NOT NULL,
 	CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -83,6 +82,8 @@ CREATE TABLE IF NOT EXISTS weeks (
 		)
 	),
 	finals_date text,
+	start_date text NOT NULL,
+	end_date text NOT NULL,
 	course_id text NOT NULL,
 	tee_id text NOT NULL,
 	CONSTRAINT fk_course_id FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
@@ -125,8 +126,11 @@ CREATE TABLE IF NOT EXISTS hcp_changes (
 	id integer PRIMARY KEY,
 	new_hcp REAL NOT NULL,
 	old_hcp REAL NOT NULL,
-	round_id text UNIQUE NOT NULL,
-	CONSTRAINT fk_round_id FOREIGN KEY (round_id) REFERENCES rounds(id) ON DELETE CASCADE
+	valid_from text NOT NULL,
+	round_id text UNIQUE,
+	player_id text,
+	CONSTRAINT fk_round_id FOREIGN KEY (round_id) REFERENCES rounds(id) ON DELETE CASCADE,
+	CONSTRAINT fk_player_id FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS winners (

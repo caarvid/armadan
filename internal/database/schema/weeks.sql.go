@@ -11,7 +11,7 @@ import (
 )
 
 const createWeek = `-- name: CreateWeek :one
-INSERT INTO weeks (id, nr, course_id, tee_id, is_finals, finals_date) VALUES (?, ?, ?, ?, ?, ?) RETURNING id, nr, is_finals, finals_date, course_id, tee_id
+INSERT INTO weeks (id, nr, course_id, tee_id, is_finals, finals_date, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, nr, is_finals, finals_date, start_date, end_date, course_id, tee_id
 `
 
 type CreateWeekParams struct {
@@ -21,6 +21,8 @@ type CreateWeekParams struct {
 	TeeID      string         `json:"teeId"`
 	IsFinals   int64          `json:"isFinals"`
 	FinalsDate sql.NullString `json:"finalsDate"`
+	StartDate  string         `json:"startDate"`
+	EndDate    string         `json:"endDate"`
 }
 
 func (q *Queries) CreateWeek(ctx context.Context, arg *CreateWeekParams) (Week, error) {
@@ -31,6 +33,8 @@ func (q *Queries) CreateWeek(ctx context.Context, arg *CreateWeekParams) (Week, 
 		arg.TeeID,
 		arg.IsFinals,
 		arg.FinalsDate,
+		arg.StartDate,
+		arg.EndDate,
 	)
 	var i Week
 	err := row.Scan(
@@ -38,6 +42,8 @@ func (q *Queries) CreateWeek(ctx context.Context, arg *CreateWeekParams) (Week, 
 		&i.Nr,
 		&i.IsFinals,
 		&i.FinalsDate,
+		&i.StartDate,
+		&i.EndDate,
 		&i.CourseID,
 		&i.TeeID,
 	)
@@ -54,7 +60,7 @@ func (q *Queries) DeleteWeek(ctx context.Context, id string) error {
 }
 
 const getWeek = `-- name: GetWeek :one
-SELECT id, nr, finals_date, is_finals, course_id, course_name, tee_id, tee_name FROM week_details WHERE id = ?
+SELECT id, nr, is_finals, finals_date, start_date, end_date, course_id, tee_id, course_name, tee_name FROM week_details WHERE id = ?
 `
 
 func (q *Queries) GetWeek(ctx context.Context, id string) (WeekDetail, error) {
@@ -63,18 +69,20 @@ func (q *Queries) GetWeek(ctx context.Context, id string) (WeekDetail, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Nr,
-		&i.FinalsDate,
 		&i.IsFinals,
+		&i.FinalsDate,
+		&i.StartDate,
+		&i.EndDate,
 		&i.CourseID,
-		&i.CourseName,
 		&i.TeeID,
+		&i.CourseName,
 		&i.TeeName,
 	)
 	return i, err
 }
 
 const getWeeks = `-- name: GetWeeks :many
-SELECT id, nr, finals_date, is_finals, course_id, course_name, tee_id, tee_name FROM week_details ORDER BY nr ASC
+SELECT id, nr, is_finals, finals_date, start_date, end_date, course_id, tee_id, course_name, tee_name FROM week_details ORDER BY nr ASC
 `
 
 func (q *Queries) GetWeeks(ctx context.Context) ([]WeekDetail, error) {
@@ -89,11 +97,13 @@ func (q *Queries) GetWeeks(ctx context.Context) ([]WeekDetail, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Nr,
-			&i.FinalsDate,
 			&i.IsFinals,
+			&i.FinalsDate,
+			&i.StartDate,
+			&i.EndDate,
 			&i.CourseID,
-			&i.CourseName,
 			&i.TeeID,
+			&i.CourseName,
 			&i.TeeName,
 		); err != nil {
 			return nil, err
@@ -110,14 +120,16 @@ func (q *Queries) GetWeeks(ctx context.Context) ([]WeekDetail, error) {
 }
 
 const updateWeek = `-- name: UpdateWeek :one
-UPDATE weeks SET nr = ?, course_id = ?, tee_id = ? WHERE id = ? RETURNING id, nr, is_finals, finals_date, course_id, tee_id
+UPDATE weeks SET nr = ?, course_id = ?, tee_id = ?, start_date = ?, end_date = ? WHERE id = ? RETURNING id, nr, is_finals, finals_date, start_date, end_date, course_id, tee_id
 `
 
 type UpdateWeekParams struct {
-	Nr       int64  `json:"nr"`
-	CourseID string `json:"courseId"`
-	TeeID    string `json:"teeId"`
-	ID       string `json:"id"`
+	Nr        int64  `json:"nr"`
+	CourseID  string `json:"courseId"`
+	TeeID     string `json:"teeId"`
+	StartDate string `json:"startDate"`
+	EndDate   string `json:"endDate"`
+	ID        string `json:"id"`
 }
 
 func (q *Queries) UpdateWeek(ctx context.Context, arg *UpdateWeekParams) (Week, error) {
@@ -125,6 +137,8 @@ func (q *Queries) UpdateWeek(ctx context.Context, arg *UpdateWeekParams) (Week, 
 		arg.Nr,
 		arg.CourseID,
 		arg.TeeID,
+		arg.StartDate,
+		arg.EndDate,
 		arg.ID,
 	)
 	var i Week
@@ -133,6 +147,8 @@ func (q *Queries) UpdateWeek(ctx context.Context, arg *UpdateWeekParams) (Week, 
 		&i.Nr,
 		&i.IsFinals,
 		&i.FinalsDate,
+		&i.StartDate,
+		&i.EndDate,
 		&i.CourseID,
 		&i.TeeID,
 	)

@@ -3,11 +3,13 @@ package service
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
 	"github.com/caarvid/armadan/internal/utils/hcp"
+	resultUtils "github.com/caarvid/armadan/internal/utils/result"
 )
 
 type results struct {
@@ -28,11 +30,14 @@ func toResult(entity any) *armadan.Result {
 	switch e := entity.(type) {
 	case schema.GetResultByIdRow:
 		return &armadan.Result{
-			ID:       e.ID,
-			Slope:    e.Slope,
-			Cr:       e.Cr,
-			WeekNr:   e.WeekNr,
-			CourseID: e.CourseID,
+			ID:            e.ID,
+			Slope:         e.Slope,
+			Cr:            e.Cr,
+			WeekNr:        e.WeekNr,
+			WeekStartDate: armadan.ParseTime(e.WeekStartDate),
+			WeekEndDate:   armadan.ParseTime(e.WeekEndDate),
+			WeekID:        e.WeekID,
+			CourseID:      e.CourseID,
 		}
 	case schema.Result:
 		return &armadan.Result{
@@ -65,6 +70,12 @@ func (rs *results) GetRounds(ctx context.Context, id string) ([]armadan.Round, e
 	return armadan.MapEntities(rounds, func(a any) *armadan.Round {
 		switch r := a.(type) {
 		case schema.GetRoundsByResultIdRow:
+			var scores []armadan.Score
+
+			if r.Scores.Valid {
+				json.Unmarshal([]byte(r.Scores.String), &scores)
+			}
+
 			return &armadan.Round{
 				ID:         r.ID,
 				NetIn:      r.NetIn,
@@ -79,12 +90,39 @@ func (rs *results) GetRounds(ctx context.Context, id string) ([]armadan.Round, e
 				ResultID:   r.ResultID,
 				FirstName:  r.FirstName,
 				LastName:   r.LastName,
-				Hcp:        r.Hcp,
+				Scores:     scores,
 			}
 		}
 
 		return &armadan.Round{}
 	}), nil
+}
+
+func (rs *results) GetRound(ctx context.Context, id string) (*armadan.Round, error) {
+	round, err := rs.dbReader.GetRoundById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	var scores []armadan.Score
+
+	if round.Scores.Valid {
+		json.Unmarshal([]byte(round.Scores.String), &scores)
+	}
+
+	return &armadan.Round{
+		ID:         round.ID,
+		NetIn:      round.NetIn,
+		NetOut:     round.NetOut,
+		NetTotal:   round.NetTotal.Int64,
+		GrossIn:    round.GrossIn,
+		GrossOut:   round.GrossOut,
+		GrossTotal: round.GrossTotal.Int64,
+		OldHcp:     round.OldHcp,
+		NewHcp:     round.NewHcp,
+		PlayerID:   round.PlayerID,
+		ResultID:   round.ResultID,
+		Scores:     scores,
+	}, nil
 }
 
 func (rs *results) GetRemainingPlayers(ctx context.Context, id string) ([]armadan.Player, error) {
@@ -191,9 +229,88 @@ func (rs *results) CreateRound(
 	}
 
 	_, err = qtx.CreateHcpChange(ctx, &schema.CreateHcpChangeParams{
-		RoundID: roundId,
-		NewHcp:  newHcp,
-		OldHcp:  round.Hcp,
+		RoundID:   sql.NullString{String: roundId, Valid: true},
+		PlayerID:  sql.NullString{String: round.PlayerID, Valid: true},
+		ValidFrom: result.WeekEndDate.Format(armadan.DEFAULT_TIME_FORMAT),
+		NewHcp:    newHcp,
+		OldHcp:    round.Hcp,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	for _, s := range scores {
+		_, err = qtx.CreateScores(ctx, &schema.CreateScoresParams{
+			Strokes: s.Strokes,
+			RoundID: roundId,
+			HoleID:  s.HoleID,
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
+func (rs *results) UpdateRound(ctx context.Context, round *armadan.Round, scores []armadan.Score) error {
+	result, err := rs.Get(ctx, round.ResultID)
+	if err != nil {
+		return err
+	}
+
+	tx, err := rs.pool.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+	qtx := schema.New(tx)
+
+	if err := qtx.DeleteRound(ctx, round.ID); err != nil {
+		return err
+	}
+
+	var par int64
+	for _, h := range scores {
+		par += h.Par
+	}
+
+	strokes := hcp.GetStrokes(round.Hcp, result.Cr, int(result.Slope), int(par))
+	roundSummary := getRoundSummary(scores, int64(strokes))
+	newHcp := hcp.GetNewHcp(round.Hcp, par, roundSummary.NetIn+roundSummary.NetOut)
+
+	roundId := armadan.GetId()
+	_, err = qtx.CreateRound(ctx, &schema.CreateRoundParams{
+		ID:       roundId,
+		PlayerID: round.PlayerID,
+		ResultID: result.ID,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	_, err = qtx.CreateRoundDetail(ctx, &schema.CreateRoundDetailParams{
+		RoundID:  roundId,
+		NetIn:    roundSummary.NetIn,
+		NetOut:   roundSummary.NetOut,
+		GrossIn:  roundSummary.GrossIn,
+		GrossOut: roundSummary.GrossOut,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	_, err = qtx.CreateHcpChange(ctx, &schema.CreateHcpChangeParams{
+		RoundID:   sql.NullString{String: roundId, Valid: true},
+		PlayerID:  sql.NullString{String: round.PlayerID, Valid: true},
+		ValidFrom: result.WeekEndDate.Format(armadan.DEFAULT_TIME_FORMAT),
+		NewHcp:    newHcp,
+		OldHcp:    round.Hcp,
 	})
 
 	if err != nil {
@@ -274,21 +391,27 @@ func (rs *results) ManagementView(ctx context.Context) ([]armadan.ResultDetail, 
 		return nil, err
 	}
 
+	foundFirstUnpublished := false
+
 	return armadan.MapEntities(details, func(a any) *armadan.ResultDetail {
 		switch d := a.(type) {
 		case schema.GetManageResultViewRow:
+			isPublished := d.IsPublished == 1
 			detail := &armadan.ResultDetail{
-				ID:         d.ID,
-				Nr:         d.Nr,
-				IsFinals:   d.IsFinals == 1,
-				CourseName: d.CourseName,
-				TeeName:    d.TeeName,
-				ResultID:   d.ResultID.String,
-				Published:  d.IsPublished == 1,
-				// Participants: d.Participants,
-				// Winners:      d.Winners,
-				// TODO: Fix this
-				IsFirstUnpublished: true,
+				ID:                 d.ID,
+				Nr:                 d.Nr,
+				IsFinals:           d.IsFinals == 1,
+				CourseName:         d.CourseName,
+				TeeName:            d.TeeName,
+				ResultID:           d.ResultID.String,
+				Published:          isPublished,
+				Participants:       d.Participants,
+				Winners:            d.Winners,
+				IsFirstUnpublished: !isPublished && !foundFirstUnpublished,
+			}
+
+			if !isPublished && !foundFirstUnpublished {
+				foundFirstUnpublished = true
 			}
 
 			return detail
@@ -296,4 +419,50 @@ func (rs *results) ManagementView(ctx context.Context) ([]armadan.ResultDetail, 
 
 		return &armadan.ResultDetail{}
 	}), nil
+}
+
+func (rs *results) Publish(ctx context.Context, id string) error {
+	result, err := rs.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	rounds, err := rs.GetRounds(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	tx, err := rs.pool.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+	qtx := schema.New(tx)
+
+	winners := resultUtils.GetWinners(rounds)
+
+	err = qtx.DeleteWinnersByWeek(ctx, result.WeekID)
+	if err != nil {
+		return err
+	}
+
+	for _, w := range winners {
+		_, err = qtx.CreateWinner(ctx, &schema.CreateWinnerParams{
+			ID:       w.ID,
+			Points:   w.Points,
+			PlayerID: w.PlayerID,
+			WeekID:   result.WeekID,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	err = qtx.PublishRound(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }

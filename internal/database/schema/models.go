@@ -23,24 +23,27 @@ type CourseDetail struct {
 }
 
 type FullRound struct {
-	ID         string        `json:"id"`
-	PlayerID   string        `json:"playerId"`
-	ResultID   string        `json:"resultId"`
-	NetIn      int64         `json:"netIn"`
-	NetOut     int64         `json:"netOut"`
-	NetTotal   sql.NullInt64 `json:"netTotal"`
-	GrossIn    int64         `json:"grossIn"`
-	GrossOut   int64         `json:"grossOut"`
-	GrossTotal sql.NullInt64 `json:"grossTotal"`
-	OldHcp     float64       `json:"oldHcp"`
-	NewHcp     float64       `json:"newHcp"`
+	ID         string         `json:"id"`
+	PlayerID   string         `json:"playerId"`
+	ResultID   string         `json:"resultId"`
+	NetIn      int64          `json:"netIn"`
+	NetOut     int64          `json:"netOut"`
+	NetTotal   sql.NullInt64  `json:"netTotal"`
+	GrossIn    int64          `json:"grossIn"`
+	GrossOut   int64          `json:"grossOut"`
+	GrossTotal sql.NullInt64  `json:"grossTotal"`
+	OldHcp     float64        `json:"oldHcp"`
+	NewHcp     float64        `json:"newHcp"`
+	Scores     sql.NullString `json:"scores"`
 }
 
 type HcpChange struct {
-	ID      int64   `json:"id"`
-	NewHcp  float64 `json:"newHcp"`
-	OldHcp  float64 `json:"oldHcp"`
-	RoundID string  `json:"roundId"`
+	ID        int64          `json:"id"`
+	NewHcp    float64        `json:"newHcp"`
+	OldHcp    float64        `json:"oldHcp"`
+	ValidFrom string         `json:"validFrom"`
+	RoundID   sql.NullString `json:"roundId"`
+	PlayerID  sql.NullString `json:"playerId"`
 }
 
 type Hole struct {
@@ -59,21 +62,20 @@ type PasswordResetToken struct {
 }
 
 type Player struct {
-	ID        string  `json:"id"`
-	FirstName string  `json:"firstName"`
-	LastName  string  `json:"lastName"`
-	Hcp       float64 `json:"hcp"`
-	UserID    string  `json:"userId"`
+	ID        string `json:"id"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	UserID    string `json:"userId"`
 }
 
-type PlayersWithPoint struct {
+type PlayersExtended struct {
 	ID        string  `json:"id"`
 	FirstName string  `json:"firstName"`
 	LastName  string  `json:"lastName"`
-	Hcp       float64 `json:"hcp"`
 	UserID    string  `json:"userId"`
 	Email     string  `json:"email"`
 	Points    int64   `json:"points"`
+	Hcp       float64 `json:"hcp"`
 }
 
 type Post struct {
@@ -141,6 +143,8 @@ type Week struct {
 	Nr         int64          `json:"nr"`
 	IsFinals   int64          `json:"isFinals"`
 	FinalsDate sql.NullString `json:"finalsDate"`
+	StartDate  string         `json:"startDate"`
+	EndDate    string         `json:"endDate"`
 	CourseID   string         `json:"courseId"`
 	TeeID      string         `json:"teeId"`
 }
@@ -148,11 +152,13 @@ type Week struct {
 type WeekDetail struct {
 	ID         string         `json:"id"`
 	Nr         int64          `json:"nr"`
-	FinalsDate sql.NullString `json:"finalsDate"`
 	IsFinals   int64          `json:"isFinals"`
+	FinalsDate sql.NullString `json:"finalsDate"`
+	StartDate  string         `json:"startDate"`
+	EndDate    string         `json:"endDate"`
 	CourseID   string         `json:"courseId"`
-	CourseName string         `json:"courseName"`
 	TeeID      string         `json:"teeId"`
+	CourseName string         `json:"courseName"`
 	TeeName    string         `json:"teeName"`
 }
 

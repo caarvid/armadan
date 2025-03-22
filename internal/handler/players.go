@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/caarvid/armadan/internal/armadan"
@@ -85,6 +86,7 @@ func InsertPlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 		})
 
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
 
@@ -129,6 +131,7 @@ func UpdatePlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 		})
 
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
 

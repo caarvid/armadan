@@ -7,17 +7,17 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func Create() (*sql.DB, *sql.DB, error) {
-	dbPath := "/Users/calle/projects/armadan/db/armadan.sqlite"
+func Create(db string) (*sql.DB, *sql.DB, error) {
+	dbPath := fmt.Sprintf("file:%s", db)
 
-	reader, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?mode=ro&_txlock=immediate", dbPath))
+	reader, err := sql.Open("sqlite3", fmt.Sprintf("%s?mode=ro&_fk=ON", dbPath))
 	if err != nil {
 		return nil, nil, err
 	}
 
 	reader.SetMaxOpenConns(100)
 
-	writer, err := sql.Open("sqlite3", fmt.Sprintf("file:%s?mode=rwc&_txlock=immediate", dbPath))
+	writer, err := sql.Open("sqlite3", fmt.Sprintf("%s?mode=rwc&_txlock=immediate&_timeout=5000&_journal=WAL&_sync=NORMAL&_fk=ON", dbPath))
 	if err != nil {
 		return nil, nil, err
 	}

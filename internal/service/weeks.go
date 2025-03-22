@@ -23,7 +23,8 @@ func toWeek(ws any) *armadan.Week {
 			CourseName: w.CourseName,
 			TeeID:      w.TeeID,
 			TeeName:    w.TeeName,
-			Dates:      armadan.GetWeekDates(int(w.Nr)),
+			StartDate:  armadan.ParseTime(w.StartDate),
+			EndDate:    armadan.ParseTime(w.EndDate),
 		}
 	case schema.Week:
 		return &armadan.Week{
@@ -33,7 +34,8 @@ func toWeek(ws any) *armadan.Week {
 			IsFinals:   w.IsFinals == 1,
 			CourseID:   w.CourseID,
 			TeeID:      w.TeeID,
-			Dates:      armadan.GetWeekDates(int(w.Nr)),
+			StartDate:  armadan.ParseTime(w.StartDate),
+			EndDate:    armadan.ParseTime(w.EndDate),
 		}
 	}
 
@@ -83,11 +85,14 @@ func (s *weeks) Get(ctx context.Context, id string) (*armadan.Week, error) {
 }
 
 func (s *weeks) Create(ctx context.Context, data *armadan.Week) (*armadan.Week, error) {
+	dates := armadan.GetWeekDates(int(data.Nr))
 	week, err := s.dbWriter.CreateWeek(ctx, &schema.CreateWeekParams{
 		ID:         armadan.GetId(),
 		Nr:         data.Nr,
 		IsFinals:   armadan.ToSqlBool(data.IsFinals),
 		FinalsDate: sql.NullString{String: data.FinalsDate.Format(armadan.DEFAULT_TIME_FORMAT), Valid: true},
+		StartDate:  dates.Start.Format(armadan.DEFAULT_TIME_FORMAT),
+		EndDate:    dates.End.Format(armadan.DEFAULT_TIME_FORMAT),
 		CourseID:   data.CourseID,
 		TeeID:      data.TeeID,
 	})
@@ -102,11 +107,14 @@ func (s *weeks) Create(ctx context.Context, data *armadan.Week) (*armadan.Week, 
 }
 
 func (s *weeks) Update(ctx context.Context, data *armadan.Week) (*armadan.Week, error) {
+	dates := armadan.GetWeekDates(int(data.Nr))
 	week, err := s.dbWriter.UpdateWeek(ctx, &schema.UpdateWeekParams{
-		ID:       data.ID,
-		Nr:       data.Nr,
-		CourseID: data.CourseID,
-		TeeID:    data.TeeID,
+		ID:        data.ID,
+		Nr:        data.Nr,
+		CourseID:  data.CourseID,
+		TeeID:     data.TeeID,
+		StartDate: dates.Start.Format(armadan.DEFAULT_TIME_FORMAT),
+		EndDate:   dates.End.Format(armadan.DEFAULT_TIME_FORMAT),
 	})
 
 	if err != nil {

@@ -104,23 +104,13 @@ ci/build: clean install
 ### MIGRATIONS ###
 .PHONY: migrate/new
 migrate/new:
-	@goose -dir ./db/migrations sqlite3 ./db/armadan.sqlite create $(name) sql
+	@goose -dir ./db/migrations sqlite3 $(DB_PATH) create $(name) sql
 
 .PHONY: migrate/up
 migrate/up:
-	@goose -dir ./db/migrations sqlite3 ./db/armadan.sqlite up
+	@goose -dir ./db/migrations sqlite3 $(DB_PATH) up
 
 .PHONY: migrate/down
 migrate/down:
-	@goose -dir ./db/migrations sqlite3 ./db/armadan.sqlite down
-
-### DATABASE ###
-.PHONY: db/start
-db/start: 
-	@docker compose --file ./docker/db.yml --env-file ./.env up --detach
-
-.PHONY: db/stop
-db/stop: 
-	@docker compose --file ./docker/db.yml --env-file ./.env down 
-
+	@goose -dir ./db/migrations sqlite3 $(DB_PATH) down
 

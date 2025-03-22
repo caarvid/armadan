@@ -5,10 +5,10 @@ SELECT * FROM week_details WHERE id = ?;
 SELECT * FROM week_details ORDER BY nr ASC;
 
 -- name: CreateWeek :one
-INSERT INTO weeks (id, nr, course_id, tee_id, is_finals, finals_date) VALUES (?, ?, ?, ?, ?, ?) RETURNING *;
+INSERT INTO weeks (id, nr, course_id, tee_id, is_finals, finals_date, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;
 
 -- name: UpdateWeek :one
-UPDATE weeks SET nr = ?, course_id = ?, tee_id = ? WHERE id = ? RETURNING *;
+UPDATE weeks SET nr = ?, course_id = ?, tee_id = ?, start_date = ?, end_date = ? WHERE id = ? RETURNING *;
 
 -- name: DeleteWeek :exec
 DELETE FROM weeks WHERE id = ?;

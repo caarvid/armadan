@@ -84,9 +84,13 @@ func setupRoutes(
 	main.Handle("GET /leaderboard/{id}", protected(h.GetLeaderboardSummary(resultService, validator)))
 	admin.Handle("GET /results", mw.HxPushPath("/admin", handler.ManageResultsView(resultService)))
 	admin.Handle("GET /results/{id}", mw.HxPushPath("/admin", handler.EditResultView(resultService, validator)))
+	admin.Handle("GET /results/{id}/publish", mw.HxPushPath("/admin", handler.PublishResultView(resultService, validator)))
 	admin.Handle("GET /results/week/{id}/new", handler.AddNewResult(resultService, playerService, validator))
 	admin.Handle("GET /results/{id}/form", handler.NewRoundForm(resultService, courseService, playerService, validator))
+	admin.Handle("GET /results/{resultId}/round/{roundId}/edit", handler.EditRound(resultService, playerService, courseService, validator))
 	api.Handle("POST /results/{id}/round", handler.InsertRound(resultService, validator))
+	api.Handle("POST /results/{id}/publish", handler.PublishRound(resultService, validator))
+	api.Handle("PUT /results/{resultId}/round/{roundId}", handler.UpdateRound(resultService, validator))
 	api.Handle("DELETE /results/{resultId}/round/{id}", handler.DeleteRound(resultService, validator))
 	api.Handle("DELETE /results/{id}", handler.DeleteResult(resultService, validator))
 

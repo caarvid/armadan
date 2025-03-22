@@ -39,6 +39,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createPostStmt, err = db.PrepareContext(ctx, createPost); err != nil {
 		return nil, fmt.Errorf("error preparing query CreatePost: %w", err)
 	}
+	if q.createResetPasswordTokenStmt, err = db.PrepareContext(ctx, createResetPasswordToken); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateResetPasswordToken: %w", err)
+	}
 	if q.createResultStmt, err = db.PrepareContext(ctx, createResult); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateResult: %w", err)
 	}
@@ -57,20 +60,23 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createTeesStmt, err = db.PrepareContext(ctx, createTees); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateTees: %w", err)
 	}
-	if q.createTokenStmt, err = db.PrepareContext(ctx, createToken); err != nil {
-		return nil, fmt.Errorf("error preparing query CreateToken: %w", err)
-	}
 	if q.createUserStmt, err = db.PrepareContext(ctx, createUser); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
 	}
 	if q.createWeekStmt, err = db.PrepareContext(ctx, createWeek); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateWeek: %w", err)
 	}
+	if q.createWinnerStmt, err = db.PrepareContext(ctx, createWinner); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateWinner: %w", err)
+	}
 	if q.deleteCourseStmt, err = db.PrepareContext(ctx, deleteCourse); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteCourse: %w", err)
 	}
 	if q.deletePostStmt, err = db.PrepareContext(ctx, deletePost); err != nil {
 		return nil, fmt.Errorf("error preparing query DeletePost: %w", err)
+	}
+	if q.deleteResetPasswordTokenStmt, err = db.PrepareContext(ctx, deleteResetPasswordToken); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteResetPasswordToken: %w", err)
 	}
 	if q.deleteResultStmt, err = db.PrepareContext(ctx, deleteResult); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteResult: %w", err)
@@ -84,14 +90,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteTeeStmt, err = db.PrepareContext(ctx, deleteTee); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteTee: %w", err)
 	}
-	if q.deleteTokenStmt, err = db.PrepareContext(ctx, deleteToken); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteToken: %w", err)
-	}
 	if q.deleteUserStmt, err = db.PrepareContext(ctx, deleteUser); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteUser: %w", err)
 	}
 	if q.deleteWeekStmt, err = db.PrepareContext(ctx, deleteWeek); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteWeek: %w", err)
+	}
+	if q.deleteWinnersByWeekStmt, err = db.PrepareContext(ctx, deleteWinnersByWeek); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteWinnersByWeek: %w", err)
 	}
 	if q.getCourseStmt, err = db.PrepareContext(ctx, getCourse); err != nil {
 		return nil, fmt.Errorf("error preparing query GetCourse: %w", err)
@@ -111,6 +117,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getPlayerStmt, err = db.PrepareContext(ctx, getPlayer); err != nil {
 		return nil, fmt.Errorf("error preparing query GetPlayer: %w", err)
 	}
+	if q.getPlayerHcpStmt, err = db.PrepareContext(ctx, getPlayerHcp); err != nil {
+		return nil, fmt.Errorf("error preparing query GetPlayerHcp: %w", err)
+	}
 	if q.getPlayersStmt, err = db.PrepareContext(ctx, getPlayers); err != nil {
 		return nil, fmt.Errorf("error preparing query GetPlayers: %w", err)
 	}
@@ -123,8 +132,14 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getRemainingPlayersByResultIdStmt, err = db.PrepareContext(ctx, getRemainingPlayersByResultId); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRemainingPlayersByResultId: %w", err)
 	}
+	if q.getResetPasswordTokenStmt, err = db.PrepareContext(ctx, getResetPasswordToken); err != nil {
+		return nil, fmt.Errorf("error preparing query GetResetPasswordToken: %w", err)
+	}
 	if q.getResultByIdStmt, err = db.PrepareContext(ctx, getResultById); err != nil {
 		return nil, fmt.Errorf("error preparing query GetResultById: %w", err)
+	}
+	if q.getRoundByIdStmt, err = db.PrepareContext(ctx, getRoundById); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRoundById: %w", err)
 	}
 	if q.getRoundsByResultIdStmt, err = db.PrepareContext(ctx, getRoundsByResultId); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRoundsByResultId: %w", err)
@@ -134,9 +149,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getTeesByCourseStmt, err = db.PrepareContext(ctx, getTeesByCourse); err != nil {
 		return nil, fmt.Errorf("error preparing query GetTeesByCourse: %w", err)
-	}
-	if q.getTokenStmt, err = db.PrepareContext(ctx, getToken); err != nil {
-		return nil, fmt.Errorf("error preparing query GetToken: %w", err)
 	}
 	if q.getUserByEmailStmt, err = db.PrepareContext(ctx, getUserByEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserByEmail: %w", err)
@@ -152,6 +164,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getWeeksStmt, err = db.PrepareContext(ctx, getWeeks); err != nil {
 		return nil, fmt.Errorf("error preparing query GetWeeks: %w", err)
+	}
+	if q.publishRoundStmt, err = db.PrepareContext(ctx, publishRound); err != nil {
+		return nil, fmt.Errorf("error preparing query PublishRound: %w", err)
 	}
 	if q.updateCourseStmt, err = db.PrepareContext(ctx, updateCourse); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateCourse: %w", err)
@@ -210,6 +225,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createPostStmt: %w", cerr)
 		}
 	}
+	if q.createResetPasswordTokenStmt != nil {
+		if cerr := q.createResetPasswordTokenStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createResetPasswordTokenStmt: %w", cerr)
+		}
+	}
 	if q.createResultStmt != nil {
 		if cerr := q.createResultStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createResultStmt: %w", cerr)
@@ -240,11 +260,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createTeesStmt: %w", cerr)
 		}
 	}
-	if q.createTokenStmt != nil {
-		if cerr := q.createTokenStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createTokenStmt: %w", cerr)
-		}
-	}
 	if q.createUserStmt != nil {
 		if cerr := q.createUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createUserStmt: %w", cerr)
@@ -255,6 +270,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createWeekStmt: %w", cerr)
 		}
 	}
+	if q.createWinnerStmt != nil {
+		if cerr := q.createWinnerStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createWinnerStmt: %w", cerr)
+		}
+	}
 	if q.deleteCourseStmt != nil {
 		if cerr := q.deleteCourseStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteCourseStmt: %w", cerr)
@@ -263,6 +283,11 @@ func (q *Queries) Close() error {
 	if q.deletePostStmt != nil {
 		if cerr := q.deletePostStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deletePostStmt: %w", cerr)
+		}
+	}
+	if q.deleteResetPasswordTokenStmt != nil {
+		if cerr := q.deleteResetPasswordTokenStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteResetPasswordTokenStmt: %w", cerr)
 		}
 	}
 	if q.deleteResultStmt != nil {
@@ -285,11 +310,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing deleteTeeStmt: %w", cerr)
 		}
 	}
-	if q.deleteTokenStmt != nil {
-		if cerr := q.deleteTokenStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteTokenStmt: %w", cerr)
-		}
-	}
 	if q.deleteUserStmt != nil {
 		if cerr := q.deleteUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteUserStmt: %w", cerr)
@@ -298,6 +318,11 @@ func (q *Queries) Close() error {
 	if q.deleteWeekStmt != nil {
 		if cerr := q.deleteWeekStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteWeekStmt: %w", cerr)
+		}
+	}
+	if q.deleteWinnersByWeekStmt != nil {
+		if cerr := q.deleteWinnersByWeekStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteWinnersByWeekStmt: %w", cerr)
 		}
 	}
 	if q.getCourseStmt != nil {
@@ -330,6 +355,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getPlayerStmt: %w", cerr)
 		}
 	}
+	if q.getPlayerHcpStmt != nil {
+		if cerr := q.getPlayerHcpStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getPlayerHcpStmt: %w", cerr)
+		}
+	}
 	if q.getPlayersStmt != nil {
 		if cerr := q.getPlayersStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getPlayersStmt: %w", cerr)
@@ -350,9 +380,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getRemainingPlayersByResultIdStmt: %w", cerr)
 		}
 	}
+	if q.getResetPasswordTokenStmt != nil {
+		if cerr := q.getResetPasswordTokenStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getResetPasswordTokenStmt: %w", cerr)
+		}
+	}
 	if q.getResultByIdStmt != nil {
 		if cerr := q.getResultByIdStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getResultByIdStmt: %w", cerr)
+		}
+	}
+	if q.getRoundByIdStmt != nil {
+		if cerr := q.getRoundByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRoundByIdStmt: %w", cerr)
 		}
 	}
 	if q.getRoundsByResultIdStmt != nil {
@@ -368,11 +408,6 @@ func (q *Queries) Close() error {
 	if q.getTeesByCourseStmt != nil {
 		if cerr := q.getTeesByCourseStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getTeesByCourseStmt: %w", cerr)
-		}
-	}
-	if q.getTokenStmt != nil {
-		if cerr := q.getTokenStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getTokenStmt: %w", cerr)
 		}
 	}
 	if q.getUserByEmailStmt != nil {
@@ -398,6 +433,11 @@ func (q *Queries) Close() error {
 	if q.getWeeksStmt != nil {
 		if cerr := q.getWeeksStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getWeeksStmt: %w", cerr)
+		}
+	}
+	if q.publishRoundStmt != nil {
+		if cerr := q.publishRoundStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing publishRoundStmt: %w", cerr)
 		}
 	}
 	if q.updateCourseStmt != nil {
@@ -489,44 +529,49 @@ type Queries struct {
 	createHolesStmt                   *sql.Stmt
 	createPlayerStmt                  *sql.Stmt
 	createPostStmt                    *sql.Stmt
+	createResetPasswordTokenStmt      *sql.Stmt
 	createResultStmt                  *sql.Stmt
 	createRoundStmt                   *sql.Stmt
 	createRoundDetailStmt             *sql.Stmt
 	createScoresStmt                  *sql.Stmt
 	createSessionStmt                 *sql.Stmt
 	createTeesStmt                    *sql.Stmt
-	createTokenStmt                   *sql.Stmt
 	createUserStmt                    *sql.Stmt
 	createWeekStmt                    *sql.Stmt
+	createWinnerStmt                  *sql.Stmt
 	deleteCourseStmt                  *sql.Stmt
 	deletePostStmt                    *sql.Stmt
+	deleteResetPasswordTokenStmt      *sql.Stmt
 	deleteResultStmt                  *sql.Stmt
 	deleteRoundStmt                   *sql.Stmt
 	deleteSessionStmt                 *sql.Stmt
 	deleteTeeStmt                     *sql.Stmt
-	deleteTokenStmt                   *sql.Stmt
 	deleteUserStmt                    *sql.Stmt
 	deleteWeekStmt                    *sql.Stmt
+	deleteWinnersByWeekStmt           *sql.Stmt
 	getCourseStmt                     *sql.Stmt
 	getCoursesStmt                    *sql.Stmt
 	getLeaderboardStmt                *sql.Stmt
 	getLeaderboardSummaryStmt         *sql.Stmt
 	getManageResultViewStmt           *sql.Stmt
 	getPlayerStmt                     *sql.Stmt
+	getPlayerHcpStmt                  *sql.Stmt
 	getPlayersStmt                    *sql.Stmt
 	getPostStmt                       *sql.Stmt
 	getPostsStmt                      *sql.Stmt
 	getRemainingPlayersByResultIdStmt *sql.Stmt
+	getResetPasswordTokenStmt         *sql.Stmt
 	getResultByIdStmt                 *sql.Stmt
+	getRoundByIdStmt                  *sql.Stmt
 	getRoundsByResultIdStmt           *sql.Stmt
 	getSessionByTokenStmt             *sql.Stmt
 	getTeesByCourseStmt               *sql.Stmt
-	getTokenStmt                      *sql.Stmt
 	getUserByEmailStmt                *sql.Stmt
 	getUserByIdStmt                   *sql.Stmt
 	getUsersStmt                      *sql.Stmt
 	getWeekStmt                       *sql.Stmt
 	getWeeksStmt                      *sql.Stmt
+	publishRoundStmt                  *sql.Stmt
 	updateCourseStmt                  *sql.Stmt
 	updateHolesStmt                   *sql.Stmt
 	updatePlayerStmt                  *sql.Stmt
@@ -547,44 +592,49 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		createHolesStmt:                   q.createHolesStmt,
 		createPlayerStmt:                  q.createPlayerStmt,
 		createPostStmt:                    q.createPostStmt,
+		createResetPasswordTokenStmt:      q.createResetPasswordTokenStmt,
 		createResultStmt:                  q.createResultStmt,
 		createRoundStmt:                   q.createRoundStmt,
 		createRoundDetailStmt:             q.createRoundDetailStmt,
 		createScoresStmt:                  q.createScoresStmt,
 		createSessionStmt:                 q.createSessionStmt,
 		createTeesStmt:                    q.createTeesStmt,
-		createTokenStmt:                   q.createTokenStmt,
 		createUserStmt:                    q.createUserStmt,
 		createWeekStmt:                    q.createWeekStmt,
+		createWinnerStmt:                  q.createWinnerStmt,
 		deleteCourseStmt:                  q.deleteCourseStmt,
 		deletePostStmt:                    q.deletePostStmt,
+		deleteResetPasswordTokenStmt:      q.deleteResetPasswordTokenStmt,
 		deleteResultStmt:                  q.deleteResultStmt,
 		deleteRoundStmt:                   q.deleteRoundStmt,
 		deleteSessionStmt:                 q.deleteSessionStmt,
 		deleteTeeStmt:                     q.deleteTeeStmt,
-		deleteTokenStmt:                   q.deleteTokenStmt,
 		deleteUserStmt:                    q.deleteUserStmt,
 		deleteWeekStmt:                    q.deleteWeekStmt,
+		deleteWinnersByWeekStmt:           q.deleteWinnersByWeekStmt,
 		getCourseStmt:                     q.getCourseStmt,
 		getCoursesStmt:                    q.getCoursesStmt,
 		getLeaderboardStmt:                q.getLeaderboardStmt,
 		getLeaderboardSummaryStmt:         q.getLeaderboardSummaryStmt,
 		getManageResultViewStmt:           q.getManageResultViewStmt,
 		getPlayerStmt:                     q.getPlayerStmt,
+		getPlayerHcpStmt:                  q.getPlayerHcpStmt,
 		getPlayersStmt:                    q.getPlayersStmt,
 		getPostStmt:                       q.getPostStmt,
 		getPostsStmt:                      q.getPostsStmt,
 		getRemainingPlayersByResultIdStmt: q.getRemainingPlayersByResultIdStmt,
+		getResetPasswordTokenStmt:         q.getResetPasswordTokenStmt,
 		getResultByIdStmt:                 q.getResultByIdStmt,
+		getRoundByIdStmt:                  q.getRoundByIdStmt,
 		getRoundsByResultIdStmt:           q.getRoundsByResultIdStmt,
 		getSessionByTokenStmt:             q.getSessionByTokenStmt,
 		getTeesByCourseStmt:               q.getTeesByCourseStmt,
-		getTokenStmt:                      q.getTokenStmt,
 		getUserByEmailStmt:                q.getUserByEmailStmt,
 		getUserByIdStmt:                   q.getUserByIdStmt,
 		getUsersStmt:                      q.getUsersStmt,
 		getWeekStmt:                       q.getWeekStmt,
 		getWeeksStmt:                      q.getWeeksStmt,
+		publishRoundStmt:                  q.publishRoundStmt,
 		updateCourseStmt:                  q.updateCourseStmt,
 		updateHolesStmt:                   q.updateHolesStmt,
 		updatePlayerStmt:                  q.updatePlayerStmt,

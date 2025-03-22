@@ -10,21 +10,73 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func ResetPassword() http.Handler {
+func ResetPassword(rps armadan.ResetPasswordService, v armadan.Validator) http.Handler {
 	type resetPasswordData struct {
+		ResetToken     string `json:"resetToken" validate:"required"`
 		NewPassword    string `json:"newPassword" validate:"required"`
 		RepeatPassword string `json:"repeatPassword" validate:"required"`
 	}
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		l := zerolog.Ctx(r.Context()).With().Str("location", "handlers:resetPassword").Logger()
+
+		data := &resetPasswordData{}
+		if err := v.Validate(r, data); err != nil {
+			l.Error().AnErr("raw_err", err).Msg("validation failed")
+			return
+		}
+
+		if data.NewPassword != data.RepeatPassword {
+			return
+		}
+
+		token, err := rps.Get(r.Context(), data.ResetToken)
+		if err != nil {
+			return
+		}
+
+		if token.IsExpired() {
+			l.Warn().Msg("reset password failed :: token expired")
+			return
+		}
+
+		if err = rps.UpdateUserPassword(r.Context(), token, data.NewPassword); err != nil {
+			l.Error().AnErr("raw_err", err).Msg("reset password failed :: could not set new password")
+			return
+		}
+
+		// return to login here with success toast?
+	})
 }
 
-func ForgotPassword() http.Handler {
+func ForgotPassword(us armadan.UserService, rps armadan.ResetPasswordService, v armadan.Validator) http.Handler {
 	type forgotPasswordData struct {
 		Email string `json:"email" validate:"required"`
 	}
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		l := zerolog.Ctx(r.Context()).With().Str("location", "handlers:forgotPassword").Logger()
+
+		data := &forgotPasswordData{}
+		if err := v.Validate(r, data); err != nil {
+			l.Error().AnErr("raw_err", err).Msg("validation failed")
+			return
+		}
+
+		user, err := us.GetByEmail(r.Context(), data.Email)
+		if err != nil {
+			// send success toast here to not leak email info
+			return
+		}
+
+		_, err = rps.Create(r.Context(), user.ID)
+		if err != nil {
+			l.Error().AnErr("raw_err", err).Msg("failed to create reset password token")
+			return
+		}
+
+		// return success toast and start separate go routine to send reset email
+	})
 }
 
 func Login(us armadan.UserService, ss armadan.SessionService, v armadan.Validator) http.Handler {
@@ -36,8 +88,8 @@ func Login(us armadan.UserService, ss armadan.SessionService, v armadan.Validato
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		l := zerolog.Ctx(r.Context()).With().Str("location", "handlers:Login").Logger()
-		data := &loginData{}
 
+		data := &loginData{}
 		if err := v.Validate(r, data); err != nil {
 			l.Error().AnErr("raw_err", err).Msg("validation failed")
 			response.LoginValidationError(w, r)
@@ -45,15 +97,13 @@ func Login(us armadan.UserService, ss armadan.SessionService, v armadan.Validato
 		}
 
 		user, err := us.GetByEmail(r.Context(), data.Email)
-
 		if err != nil {
-			l.Info().Str("email", data.Email).Msg("login failed :: invalid email")
+			l.Warn().Str("email", data.Email).AnErr("raw_err", err).Msg("login failed :: invalid email")
 			response.InvalidCredentialsError(w, r)
 			return
 		}
 
 		hash, err := utils.DecodeHash(user.Hash)
-
 		if err != nil {
 			l.Error().AnErr("raw_err", err).Msg("failed to decode password")
 			response.GeneralLoginError(w, r)
@@ -61,15 +111,12 @@ func Login(us armadan.UserService, ss armadan.SessionService, v armadan.Validato
 		}
 
 		match, _ := hash.Compare(data.Password)
-
 		if !match {
-			l.Info().Str("email", data.Email).Msg("login failed :: invalid password")
 			response.InvalidCredentialsError(w, r)
 			return
 		}
 
 		sess, err := ss.Create(r.Context(), user.ID, data.KeepLoggedIn)
-
 		if err != nil {
 			l.Error().
 				AnErr("raw_err", err).

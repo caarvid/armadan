@@ -9,18 +9,18 @@ import (
 	"context"
 )
 
-const createToken = `-- name: CreateToken :one
+const createResetPasswordToken = `-- name: CreateResetPasswordToken :one
 INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES (?, ?, ?) RETURNING id, token, expires_at, user_id
 `
 
-type CreateTokenParams struct {
+type CreateResetPasswordTokenParams struct {
 	Token     string `json:"token"`
 	UserID    string `json:"userId"`
 	ExpiresAt string `json:"expiresAt"`
 }
 
-func (q *Queries) CreateToken(ctx context.Context, arg *CreateTokenParams) (PasswordResetToken, error) {
-	row := q.queryRow(ctx, q.createTokenStmt, createToken, arg.Token, arg.UserID, arg.ExpiresAt)
+func (q *Queries) CreateResetPasswordToken(ctx context.Context, arg *CreateResetPasswordTokenParams) (PasswordResetToken, error) {
+	row := q.queryRow(ctx, q.createResetPasswordTokenStmt, createResetPasswordToken, arg.Token, arg.UserID, arg.ExpiresAt)
 	var i PasswordResetToken
 	err := row.Scan(
 		&i.ID,
@@ -31,21 +31,21 @@ func (q *Queries) CreateToken(ctx context.Context, arg *CreateTokenParams) (Pass
 	return i, err
 }
 
-const deleteToken = `-- name: DeleteToken :exec
-DELETE FROM password_reset_tokens WHERE user_id = ?
+const deleteResetPasswordToken = `-- name: DeleteResetPasswordToken :exec
+DELETE FROM password_reset_tokens WHERE token = ?
 `
 
-func (q *Queries) DeleteToken(ctx context.Context, userID string) error {
-	_, err := q.exec(ctx, q.deleteTokenStmt, deleteToken, userID)
+func (q *Queries) DeleteResetPasswordToken(ctx context.Context, token string) error {
+	_, err := q.exec(ctx, q.deleteResetPasswordTokenStmt, deleteResetPasswordToken, token)
 	return err
 }
 
-const getToken = `-- name: GetToken :one
+const getResetPasswordToken = `-- name: GetResetPasswordToken :one
 SELECT id, token, expires_at, user_id FROM password_reset_tokens WHERE token = ?
 `
 
-func (q *Queries) GetToken(ctx context.Context, token string) (PasswordResetToken, error) {
-	row := q.queryRow(ctx, q.getTokenStmt, getToken, token)
+func (q *Queries) GetResetPasswordToken(ctx context.Context, token string) (PasswordResetToken, error) {
+	row := q.queryRow(ctx, q.getResetPasswordTokenStmt, getResetPasswordToken, token)
 	var i PasswordResetToken
 	err := row.Scan(
 		&i.ID,

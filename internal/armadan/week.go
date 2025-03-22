@@ -15,12 +15,12 @@ type WeekService interface {
 }
 
 type WeekDates struct {
-	start time.Time
-	end   time.Time
+	Start time.Time
+	End   time.Time
 }
 
 func (wd *WeekDates) String() string {
-	return fmt.Sprintf("%s - %s", wd.start.Format("2/1"), wd.end.Format("2/1"))
+	return fmt.Sprintf("%s - %s", wd.Start.Format("2/1"), wd.End.Format("2/1"))
 }
 
 func getFirstOfJanuary() time.Time {
@@ -38,8 +38,8 @@ func GetWeekDates(nr int) WeekDates {
 	endDate := startDate.AddDate(0, 0, 5)
 
 	return WeekDates{
-		start: startDate,
-		end:   endDate,
+		Start: startDate,
+		End:   endDate,
 	}
 }
 
@@ -52,15 +52,20 @@ type Week struct {
 	CourseName string
 	TeeID      string
 	TeeName    string
-	Dates      WeekDates
+	StartDate  time.Time
+	EndDate    time.Time
+}
+
+func (w *Week) FormattedDate() string {
+	return fmt.Sprintf("%s - %s", w.StartDate.Format("2/1"), w.EndDate.Format("2/1"))
 }
 
 func (w *Week) IsCurrent() bool {
 	now := time.Now().YearDay()
 
-	return now >= w.Dates.start.YearDay() && now <= w.Dates.end.YearDay()
+	return now >= w.StartDate.YearDay() && now <= w.EndDate.YearDay()
 }
 
 func (w *Week) IsPrevious() bool {
-	return w.Dates.end.YearDay() < time.Now().YearDay()
+	return w.EndDate.YearDay() < time.Now().YearDay()
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
@@ -12,7 +13,7 @@ import (
 
 func toPlayer(entity any) *armadan.Player {
 	switch p := entity.(type) {
-	case schema.PlayersWithPoint:
+	case schema.PlayersExtended:
 		return &armadan.Player{
 			ID:        p.ID,
 			FirstName: p.FirstName,
@@ -23,6 +24,13 @@ func toPlayer(entity any) *armadan.Player {
 			Hcp:       p.Hcp,
 		}
 	case schema.Player:
+		return &armadan.Player{
+			ID:        p.ID,
+			FirstName: p.FirstName,
+			LastName:  p.LastName,
+			UserID:    p.UserID,
+		}
+	case schema.GetRemainingPlayersByResultIdRow:
 		return &armadan.Player{
 			ID:        p.ID,
 			FirstName: p.FirstName,
@@ -103,7 +111,17 @@ func (ps *players) Create(ctx context.Context, data *armadan.Player) (*armadan.P
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
 		UserID:    user.ID,
-		Hcp:       data.Hcp,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = qtx.CreateHcpChange(ctx, &schema.CreateHcpChangeParams{
+		OldHcp:    data.Hcp,
+		NewHcp:    data.Hcp,
+		ValidFrom: time.Now().Format(armadan.DEFAULT_TIME_FORMAT),
+		PlayerID:  sql.NullString{String: player.ID, Valid: true},
 	})
 
 	if err != nil {
@@ -120,7 +138,7 @@ func (ps *players) Create(ctx context.Context, data *armadan.Player) (*armadan.P
 		LastName:  player.LastName,
 		UserID:    player.UserID,
 		Email:     user.Email,
-		Hcp:       player.Hcp,
+		Hcp:       data.Hcp,
 	}, nil
 }
 
@@ -137,7 +155,6 @@ func (ps *players) Update(ctx context.Context, data *armadan.Player) (*armadan.P
 		ID:        data.ID,
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
-		Hcp:       data.Hcp,
 	})
 
 	if err != nil {
@@ -153,6 +170,21 @@ func (ps *players) Update(ctx context.Context, data *armadan.Player) (*armadan.P
 		return nil, err
 	}
 
+	currentHcp, _ := qtx.GetPlayerHcp(ctx, sql.NullString{String: player.ID, Valid: true})
+
+	if currentHcp != data.Hcp {
+		_, err = qtx.CreateHcpChange(ctx, &schema.CreateHcpChangeParams{
+			OldHcp:    currentHcp,
+			NewHcp:    data.Hcp,
+			ValidFrom: time.Now().Format(armadan.DEFAULT_TIME_FORMAT),
+			PlayerID:  sql.NullString{String: player.ID, Valid: true},
+		})
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -163,7 +195,7 @@ func (ps *players) Update(ctx context.Context, data *armadan.Player) (*armadan.P
 		LastName:  player.LastName,
 		UserID:    player.UserID,
 		Email:     user.Email,
-		Hcp:       player.Hcp,
+		Hcp:       data.Hcp,
 	}, nil
 }
 

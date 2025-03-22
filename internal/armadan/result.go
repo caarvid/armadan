@@ -2,19 +2,23 @@ package armadan
 
 import (
 	"context"
+	"time"
 )
 
 type ResultService interface {
 	Get(context.Context, string) (*Result, error)
 	GetRounds(context.Context, string) ([]Round, error)
+	GetRound(context.Context, string) (*Round, error)
 	Create(context.Context, string) (*Result, error)
 	CreateRound(context.Context, *Round, []Score) error
+	UpdateRound(context.Context, *Round, []Score) error
 	Delete(context.Context, string) error
 	DeleteRound(context.Context, string) error
 	Leaderboard(context.Context) ([]Leader, error)
 	LeaderboardSummary(context.Context, string) ([]LeaderSummary, error)
 	ManagementView(context.Context) ([]ResultDetail, error)
 	GetRemainingPlayers(context.Context, string) ([]Player, error)
+	Publish(context.Context, string) error
 }
 
 type Round struct {
@@ -32,6 +36,14 @@ type Round struct {
 	FirstName  string
 	LastName   string
 	Hcp        float64
+	Scores     []Score
+}
+
+type RoundSummary struct {
+	ID         string
+	PlayerName string
+	Total      int64
+	Points     int64
 }
 
 type Score struct {
@@ -40,16 +52,19 @@ type Score struct {
 	Strokes int64
 	Index   int64
 	Par     int64
+	Hole    Hole
 }
 
 type Result struct {
-	ID        string
-	Slope     int64
-	Cr        float64
-	WeekNr    int64
-	CourseID  string
-	WeekID    string
-	Published bool
+	ID            string
+	Slope         int64
+	Cr            float64
+	WeekNr        int64
+	WeekStartDate time.Time
+	WeekEndDate   time.Time
+	CourseID      string
+	WeekID        string
+	Published     bool
 }
 
 type ResultDetail struct {
@@ -63,6 +78,13 @@ type ResultDetail struct {
 	Participants       int64
 	Winners            int64
 	IsFirstUnpublished bool
+}
+
+type Winner struct {
+	ID       string
+	Points   int64
+	PlayerID string
+	WeekID   string
 }
 
 type Leader struct {

@@ -19,7 +19,7 @@ templ WeekCard(week armadan.Week) {
 				if week.IsFinals {
 					{ week.FinalsDate.Format("2/1") }
 				} else {
-					{ week.Dates.String() }
+					{ week.FormattedDate() }
 				}
 			</div>
 		</div>
@@ -116,7 +116,7 @@ templ WeekRow(week armadan.Week) {
 			if week.IsFinals {
 				{ week.FinalsDate.Format("2/1") }
 			} else {
-				{ week.Dates.String() }
+				{ week.FormattedDate() }
 			}
 		</td>
 		<td class="td">{ week.CourseName }</td>

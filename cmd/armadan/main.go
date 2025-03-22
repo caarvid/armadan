@@ -26,24 +26,20 @@ import (
 )
 
 var (
-	appEnv     string
-	logLevel   string
-	dbHost     string
-	dbPort     string
-	dbName     string
-	dbUser     string
-	dbPassword string
-	port       string
+	appEnv   string
+	logLevel string
+	dbPath   string
+	port     string
 )
 
 func run(
 	ctx context.Context,
-	args []string,
+	_ []string,
 ) error {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
-	readDB, writeDB, err := database.Create()
+	readDB, writeDB, err := database.Create(dbPath)
 	if err != nil {
 		return err
 	}
@@ -117,11 +113,7 @@ func init() {
 	flag.StringVar(&appEnv, "env", "development", "app environment")
 	flag.StringVar(&logLevel, "log_level", "INFO", "log level")
 
-	flag.StringVar(&dbHost, "db_host", os.Getenv("DB_HOST"), "db host, defaults to env.DB_HOST")
-	flag.StringVar(&dbPort, "db_port", os.Getenv("DB_PORT"), "db port, defaults to env.DB_PORT")
-	flag.StringVar(&dbName, "db_name", os.Getenv("DB_NAME"), "db name, defaults to env.DB_NAME")
-	flag.StringVar(&dbUser, "db_user", os.Getenv("DB_USER"), "db user, defaults to env.DB_USER")
-	flag.StringVar(&dbPassword, "db_password", os.Getenv("DB_PASSWORD"), "db password, defaults to env.DB_PASSWORD")
+	flag.StringVar(&dbPath, "dbPath", os.Getenv("DB_PATH"), "path to sqlite db")
 	flag.StringVar(&port, "port", os.Getenv("PORT"), "port, defaults to env.PORT")
 
 	flag.Parse()
