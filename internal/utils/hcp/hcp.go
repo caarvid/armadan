@@ -19,14 +19,14 @@ func getHcpGroup(hcp float64) float64 {
 	}
 }
 
-func GetNewHcp(hcp float64, par, total int32) float64 {
+func GetNewHcp(hcp float64, par, total int64) float64 {
 	hcpGroup := getHcpGroup(hcp)
 
 	if total < par {
 		return math.Round((hcp-float64(par-total)*hcpGroup)*10) / 10
 	}
 
-	if total > (par + int32(hcpGroup*10)) {
+	if total > (par + int64(hcpGroup*10)) {
 		return math.Round((hcp+0.1)*10) / 10
 	}
 

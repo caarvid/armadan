@@ -1,0 +1,25 @@
+package partials
+
+import "github.com/caarvid/armadan/internal/armadan"
+import "fmt"
+
+templ ResultSummaryTable(rounds []armadan.RoundSummary) {
+	@Table("rounds-table") {
+		<thead class="thead">
+			<tr class="tr">
+				<th class="th w-[40%]">Spelare</th>
+				<th class="th w-[10%]">Total</th>
+				<th class="th w-[10%]">Poäng</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, r := range rounds {
+				<tr class="tr">
+					<td class="td">{ r.PlayerName }</td>
+					<td class="td">{ fmt.Sprint(r.Total) }</td>
+					<td class="td">{ fmt.Sprint(r.Points) }</td>
+				</tr>
+			}
+		</tbody>
+	}
+}

@@ -7,56 +7,51 @@ package schema
 
 import (
 	"context"
-
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createToken = `-- name: CreateToken :one
-INSERT INTO password_reset_tokens (hash, user_id, expires_at) VALUES ($1, $2, $3) RETURNING id, user_id, hash, expires_at, is_valid
+const createResetPasswordToken = `-- name: CreateResetPasswordToken :one
+INSERT INTO password_reset_tokens (token, user_id, expires_at) VALUES (?, ?, ?) RETURNING id, token, expires_at, user_id
 `
 
-type CreateTokenParams struct {
-	Hash      string             `json:"hash"`
-	UserID    uuid.UUID          `json:"userId"`
-	ExpiresAt pgtype.Timestamptz `json:"expiresAt"`
+type CreateResetPasswordTokenParams struct {
+	Token     string `json:"token"`
+	UserID    string `json:"userId"`
+	ExpiresAt string `json:"expiresAt"`
 }
 
-func (q *Queries) CreateToken(ctx context.Context, arg *CreateTokenParams) (PasswordResetToken, error) {
-	row := q.db.QueryRow(ctx, createToken, arg.Hash, arg.UserID, arg.ExpiresAt)
+func (q *Queries) CreateResetPasswordToken(ctx context.Context, arg *CreateResetPasswordTokenParams) (PasswordResetToken, error) {
+	row := q.queryRow(ctx, q.createResetPasswordTokenStmt, createResetPasswordToken, arg.Token, arg.UserID, arg.ExpiresAt)
 	var i PasswordResetToken
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
-		&i.Hash,
+		&i.Token,
 		&i.ExpiresAt,
-		&i.IsValid,
+		&i.UserID,
 	)
 	return i, err
 }
 
-const deleteToken = `-- name: DeleteToken :exec
-DELETE FROM password_reset_tokens WHERE user_id = $1
+const deleteResetPasswordToken = `-- name: DeleteResetPasswordToken :exec
+DELETE FROM password_reset_tokens WHERE token = ?
 `
 
-func (q *Queries) DeleteToken(ctx context.Context, userID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteToken, userID)
+func (q *Queries) DeleteResetPasswordToken(ctx context.Context, token string) error {
+	_, err := q.exec(ctx, q.deleteResetPasswordTokenStmt, deleteResetPasswordToken, token)
 	return err
 }
 
-const getToken = `-- name: GetToken :one
-SELECT id, user_id, hash, expires_at, is_valid FROM password_reset_tokens WHERE hash = $1
+const getResetPasswordToken = `-- name: GetResetPasswordToken :one
+SELECT id, token, expires_at, user_id FROM password_reset_tokens WHERE token = ?
 `
 
-func (q *Queries) GetToken(ctx context.Context, hash string) (PasswordResetToken, error) {
-	row := q.db.QueryRow(ctx, getToken, hash)
+func (q *Queries) GetResetPasswordToken(ctx context.Context, token string) (PasswordResetToken, error) {
+	row := q.queryRow(ctx, q.getResetPasswordTokenStmt, getResetPasswordToken, token)
 	var i PasswordResetToken
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
-		&i.Hash,
+		&i.Token,
 		&i.ExpiresAt,
-		&i.IsValid,
+		&i.UserID,
 	)
 	return i, err
 }

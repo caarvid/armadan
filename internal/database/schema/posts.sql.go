@@ -7,22 +7,26 @@ package schema
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const createPost = `-- name: CreatePost :one
-INSERT INTO posts (title, body, author) VALUES ($1, $2, $3) RETURNING id, title, body, author, created_at
+INSERT INTO posts (id, title, body, author) VALUES (?, ?, ?, ?) RETURNING id, title, body, author, created_at
 `
 
 type CreatePostParams struct {
+	ID     string `json:"id"`
 	Title  string `json:"title"`
 	Body   string `json:"body"`
 	Author string `json:"author"`
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg *CreatePostParams) (Post, error) {
-	row := q.db.QueryRow(ctx, createPost, arg.Title, arg.Body, arg.Author)
+	row := q.queryRow(ctx, q.createPostStmt, createPost,
+		arg.ID,
+		arg.Title,
+		arg.Body,
+		arg.Author,
+	)
 	var i Post
 	err := row.Scan(
 		&i.ID,
@@ -35,20 +39,20 @@ func (q *Queries) CreatePost(ctx context.Context, arg *CreatePostParams) (Post, 
 }
 
 const deletePost = `-- name: DeletePost :exec
-DELETE FROM posts WHERE id = $1
+DELETE FROM posts WHERE id = ?
 `
 
-func (q *Queries) DeletePost(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deletePost, id)
+func (q *Queries) DeletePost(ctx context.Context, id string) error {
+	_, err := q.exec(ctx, q.deletePostStmt, deletePost, id)
 	return err
 }
 
 const getPost = `-- name: GetPost :one
-SELECT id, title, body, author, created_at FROM posts WHERE id = $1 LIMIT 1
+SELECT id, title, body, author, created_at FROM posts WHERE id = ? LIMIT 1
 `
 
-func (q *Queries) GetPost(ctx context.Context, id uuid.UUID) (Post, error) {
-	row := q.db.QueryRow(ctx, getPost, id)
+func (q *Queries) GetPost(ctx context.Context, id string) (Post, error) {
+	row := q.queryRow(ctx, q.getPostStmt, getPost, id)
 	var i Post
 	err := row.Scan(
 		&i.ID,
@@ -65,7 +69,7 @@ SELECT id, title, body, author, created_at FROM posts ORDER BY created_at DESC
 `
 
 func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {
-	rows, err := q.db.Query(ctx, getPosts)
+	rows, err := q.query(ctx, q.getPostsStmt, getPosts)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +88,9 @@ func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {
 		}
 		items = append(items, i)
 	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -91,18 +98,18 @@ func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {
 }
 
 const updatePost = `-- name: UpdatePost :one
-UPDATE posts SET title = $1, body = $2, author = $3 WHERE id = $4 RETURNING id, title, body, author, created_at
+UPDATE posts SET title = ?, body = ?, author = ? WHERE id = ? RETURNING id, title, body, author, created_at
 `
 
 type UpdatePostParams struct {
-	Title  string    `json:"title"`
-	Body   string    `json:"body"`
-	Author string    `json:"author"`
-	ID     uuid.UUID `json:"id"`
+	Title  string `json:"title"`
+	Body   string `json:"body"`
+	Author string `json:"author"`
+	ID     string `json:"id"`
 }
 
 func (q *Queries) UpdatePost(ctx context.Context, arg *UpdatePostParams) (Post, error) {
-	row := q.db.QueryRow(ctx, updatePost,
+	row := q.queryRow(ctx, q.updatePostStmt, updatePost,
 		arg.Title,
 		arg.Body,
 		arg.Author,

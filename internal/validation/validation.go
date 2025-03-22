@@ -24,26 +24,26 @@ func New() *customValidator {
 	}
 }
 
-func (cv *customValidator) ValidateIdParam(r *http.Request) (*uuid.UUID, error) {
-	v := r.PathValue("id")
+func (cv *customValidator) ValidateIdParam(r *http.Request, name string) (string, error) {
+	v := r.PathValue(name)
 
 	if v == "" {
-		return nil, errors.New("could not find id param")
+		return "", errors.New("could not find id param")
 	}
 
 	err := cv.validator.Var(v, "required,uuid4")
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	val, err := uuid.Parse(v)
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return &val, nil
+	return val.String(), nil
 }
 
 func (cv *customValidator) Validate(r *http.Request, i interface{}) error {
@@ -61,7 +61,6 @@ func (cv *customValidator) Validate(r *http.Request, i interface{}) error {
 	if err := cv.validator.Struct(i); err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
 			return errors.New("invalid data")
-			// return echo.NewHTTPError(http.StatusBadRequest, "invalid data")
 		}
 
 		var vErr validationErrors
@@ -84,9 +83,6 @@ func (cv *customValidator) Validate(r *http.Request, i interface{}) error {
 		}
 
 		return errors.New("validation failed")
-		// return echo.NewHTTPError(http.StatusBadRequest, map[string]validationErrors{
-		// 	"errors": vErr,
-		// })
 	}
 
 	return nil

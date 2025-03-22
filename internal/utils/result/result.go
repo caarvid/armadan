@@ -3,6 +3,8 @@ package result
 import (
 	"math"
 	"slices"
+
+	"github.com/caarvid/armadan/internal/armadan"
 )
 
 func getPricePool(players int) int {
@@ -22,24 +24,14 @@ func getNrOfWinners(players int) int {
 	}
 }
 
-type Player struct {
-	Id    string
-	Score int
-}
+func groupByPlacement(rounds []armadan.Round) ([]armadan.Round, []armadan.Round, []armadan.Round, []armadan.Round) {
+	m := make(map[int64][]armadan.Round)
 
-type Winner struct {
-	Id     string
-	Points int
-}
-
-func groupByPlacement(players []Player) ([]Player, []Player, []Player, []Player) {
-	m := make(map[int][]Player)
-
-	for _, p := range players {
-		m[p.Score] = append(m[p.Score], p)
+	for _, r := range rounds {
+		m[r.NetTotal] = append(m[r.NetTotal], r)
 	}
 
-	res := make([][]Player, 0, len(m))
+	res := make([][]armadan.Round, 0, len(m))
 
 	for _, v := range m {
 		res = append(res, v)
@@ -48,37 +40,38 @@ func groupByPlacement(players []Player) ([]Player, []Player, []Player, []Player)
 	if len(res) < 4 {
 		l := 4 - len(res)
 
-		for i := 0; i < l; i++ {
-			res = append(res, make([]Player, 0))
+		for range l {
+			res = append(res, make([]armadan.Round, 0))
 		}
 	}
 
-	slices.SortFunc(res, func(a, b []Player) int {
+	slices.SortFunc(res, func(a, b []armadan.Round) int {
 		if len(a) == 0 || len(b) == 0 {
 			return len(b) - len(a)
 		}
 
-		return a[0].Score - b[0].Score
+		return int(a[0].NetTotal) - int(b[0].NetTotal)
 	})
 
 	return res[0], res[1], res[2], res[3]
 }
 
-func createWinners(players []Player, points float64) []Winner {
-	winners := make([]Winner, len(players))
+func createWinners(rounds []armadan.Round, points float64) []armadan.Winner {
+	winners := make([]armadan.Winner, len(rounds))
 
-	for i, p := range players {
-		winners[i].Id = p.Id
-		winners[i].Points = int(points)
+	for i, r := range rounds {
+		winners[i].ID = armadan.GetId()
+		winners[i].Points = int64(points)
+		winners[i].PlayerID = r.PlayerID
 	}
 
 	return winners
 }
 
-func GetWinners(players []Player) []Winner {
-	nrOfWinners := getNrOfWinners(len(players))
-	pool := float64(getPricePool(len(players)))
-	first, second, third, fourth := groupByPlacement(players)
+func GetWinners(rounds []armadan.Round) []armadan.Winner {
+	nrOfWinners := getNrOfWinners(len(rounds))
+	pool := float64(getPricePool(len(rounds)))
+	first, second, third, fourth := groupByPlacement(rounds)
 
 	if nrOfWinners == 1 || len(first) >= nrOfWinners {
 		return createWinners(first, math.Round(pool/float64(len(first))))

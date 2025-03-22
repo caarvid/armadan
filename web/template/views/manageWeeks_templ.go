@@ -66,7 +66,7 @@ func ManageWeeks(weeks []armadan.Week, courses []armadan.Course) templ.Component
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <div class=\"flex flex-col gap-2\"><form class=\"flex gap-3\" hx-post=\"/api/weeks\" hx-target=\"#week-list\" hx-swap=\"outerHTML\" hx-ext=\"json-form\" _=\"on htmx:afterRequest(detail) if detail.successful and target is me then reset() me then hide #finals-date\"><input min=\"1\" max=\"52\" name=\"nr\" type=\"number\" class=\"input grow\" placeholder=\"Vecka\" required> <input id=\"finals-date\" name=\"finalsDate\" type=\"date\" class=\"input grow flex-auto w-auto shrink-0\" style=\"display: none;\"><div class=\"select-wrapper\"><select name=\"courseId\" class=\"select\" hx-get=\"/admin/weeks/tees\" hx-target=\"#tees\" hx-swap=\"outerHTML\" required><option hidden disabled selected value>Bana</option> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <div class=\"flex flex-col gap-2\"><form class=\"flex gap-3\" hx-post=\"/api/weeks\" hx-target=\"#week-list\" hx-swap=\"outerHTML\" hx-ext=\"json-form\"><script>\n\t\t\t\t\tme().onHtmxSuccess((e, el) => {\n\t\t\t\t\t\tif (e.target === el) {\n\t\t\t\t\t\t\tel.reset();\n\t\t\t\t\t\t\tme('#finals-date').hide();\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t</script><input min=\"1\" max=\"52\" name=\"nr\" type=\"number\" class=\"input-number grow\" placeholder=\"Vecka\" required> <input id=\"finals-date\" name=\"finalsDate\" type=\"date\" class=\"input grow flex-auto w-auto shrink-0\" style=\"display: none;\"><div class=\"select-wrapper\"><select name=\"courseId\" class=\"select\" hx-get=\"/admin/weeks/tees\" hx-target=\"#tees\" hx-swap=\"outerHTML\" required><option hidden disabled selected value>Bana</option> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -76,9 +76,9 @@ func ManageWeeks(weeks []armadan.Week, courses []armadan.Course) templ.Component
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(course.ID.String())
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(course.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageWeeks.templ`, Line: 32, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageWeeks.templ`, Line: 39, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -91,7 +91,7 @@ func ManageWeeks(weeks []armadan.Week, courses []armadan.Course) templ.Component
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(course.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageWeeks.templ`, Line: 32, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/manageWeeks.templ`, Line: 39, Col: 48}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -102,7 +102,7 @@ func ManageWeeks(weeks []armadan.Week, courses []armadan.Course) templ.Component
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</select></div><div class=\"select-wrapper\"><select id=\"tees\" class=\"select\" name=\"teeId\" disabled=\"disabled\" required><option value>Tee</option></select></div><label for=\"is-finals\" class=\"flex items-center gap-2 cursor-pointer selection:bg-transparent\"><input id=\"is-finals\" name=\"isFinalsWeek\" type=\"checkbox\" _=\"on change(target) if target.checked then show #finals-date else hide #finals-date\"> Finalvecka</label> <button type=\"submit\" class=\"btn-default\">Lägg till\t</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</select></div><div class=\"select-wrapper\"><select id=\"tees\" class=\"select\" name=\"teeId\" disabled=\"disabled\" required><option value>Tee</option></select></div><label for=\"is-finals\" class=\"flex items-center gap-2 cursor-pointer selection:bg-transparent\"><input id=\"is-finals\" name=\"isFinalsWeek\" type=\"checkbox\"> Finalvecka<script>\n\t\t\t\t\t\tme('#is-finals').on('change', (ev) => { \n\t\t\t\t\t\t\tme('#finals-date').toggle(ev.target.checked); \n\t\t\t\t\t\t});\n\t\t\t\t\t</script></label> <button type=\"submit\" class=\"btn-default\">Lägg till\t</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

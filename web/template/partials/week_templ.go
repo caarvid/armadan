@@ -108,9 +108,9 @@ func WeekCard(week armadan.Week) templ.Component {
 			}
 		} else {
 			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(week.Dates.String())
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(week.FormattedDate())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 22, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 22, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -221,9 +221,9 @@ func EditWeekRow(week armadan.Week, courses []armadan.Course, tees []armadan.Tee
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(course.ID.String())
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(course.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 61, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 61, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -262,9 +262,9 @@ func EditWeekRow(week armadan.Week, courses []armadan.Course, tees []armadan.Tee
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(week.TeeID.String())
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(week.TeeID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 74, Col: 76}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 74, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -280,9 +280,9 @@ func EditWeekRow(week armadan.Week, courses []armadan.Course, tees []armadan.Tee
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var18 string
-			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(tee.ID.String())
+			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(tee.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 77, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 77, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -451,9 +451,9 @@ func WeekRow(week armadan.Week) templ.Component {
 			}
 		} else {
 			var templ_7745c5c3_Var29 string
-			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(week.Dates.String())
+			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(week.FormattedDate())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 119, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/week.templ`, Line: 119, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {

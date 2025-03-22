@@ -312,7 +312,7 @@ func EditPost(post armadan.Post) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"><div class=\"flex justify-between\"><div class=\"flex gap-1\"><span class=\"p-1 hover:bg-slate-200/60 cursor-pointer\" _=\"on click call textAction(#post-body, surround(&#39;**&#39;))\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"><div class=\"flex justify-between\"><div class=\"flex gap-1\"><span class=\"p-1 hover:bg-slate-200/60 cursor-pointer\" data-surround=\"**\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -320,7 +320,7 @@ func EditPost(post armadan.Post) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span> <span class=\"p-1 hover:bg-slate-200/60 cursor-pointer\" _=\"on click call textAction(#post-body, surround(&#39;_&#39;))\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span> <span class=\"p-1 hover:bg-slate-200/60 cursor-pointer\" data-surround=\"_\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -328,7 +328,7 @@ func EditPost(post armadan.Post) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span> <span class=\"p-1 hover:bg-slate-200/60 cursor-pointer\" _=\"on click call textAction(#post-body, surround(&#39;~~&#39;))\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span> <span class=\"p-1 hover:bg-slate-200/60 cursor-pointer\" data-surround=\"~~\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -336,33 +336,33 @@ func EditPost(post armadan.Post) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</span></div><div class=\"flex items-center space-x-2\"><button id=\"preview\" class=\"peer switch switch-target\" hx-post=\"/api/posts/preview\" hx-trigger=\"preview\" hx-select=\"unset\" hx-target=\"#preview-body\" hx-swap=\"innerHTML\" type=\"button\" _=\"\n\t\t\t\t\t\t\ton input(target) from #post-body if target.value.length is not 0 then remove @disabled else add @disabled end \n\t\t\t\t\t\t\ton click toggle [@data-state=checked] on .switch-target \t\n\t\t\t\t\t\t\t\tif @data-state is &#39;checked&#39; then\n\t\t\t\t\t\t\t\t\ttrigger preview\n\t\t\t\t\t\t\t\t\thide #post-body then show #preview-body\n\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\tshow #post-body then hide #preview-body\n\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\"><span class=\"switch-target switch-thumb\"></span></button> <label for=\"preview\" class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\">Förhandsvisa</label></div></div><textarea id=\"post-body\" required name=\"body\" rows=\"12\" class=\"flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</span><script>\n\t\t\t\t\t\tany('div > span', me()).on('click', (ev) => { \n\t\t\t\t\t\t\ttextAction(me(\"#post-body\"), surround(me(ev).attribute(\"data-surround\")))\n\t\t\t\t\t\t});\t\n\t\t\t\t\t</script></div><div class=\"flex items-center space-x-2\"><button id=\"preview\" class=\"peer switch switch-target\" hx-post=\"/api/posts/preview\" hx-trigger=\"preview\" hx-select=\"unset\" hx-target=\"#preview-body\" hx-swap=\"innerHTML\" type=\"button\"><span class=\"switch-target switch-thumb\"></span></button><script>\n\t\t\t\t\t\tme('-').on('click', (ev) => {\n\t\t\t\t\t\t\tif (me('span', me(ev)).setAttr(\"data-checked\", (v) => v !== \"true\") === \"true\") {\n\t\t\t\t\t\t\t\tme(ev).send(\"preview\");\t\n\t\t\t\t\t\t\t\tme(\"#post-body\").hide();\n\t\t\t\t\t\t\t\tme(\"#preview-body\").show();\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tme(\"#post-body\").show();\n\t\t\t\t\t\t\t\tme(\"#preview-body\").hide();\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t</script><label for=\"preview\" class=\"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70\">Förhandsvisa</label></div></div><textarea id=\"post-body\" required name=\"body\" rows=\"12\" class=\"flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(post.Body)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/post.templ`, Line: 123, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/post.templ`, Line: 130, Col: 15}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</textarea><div id=\"preview-body\" style=\"display: none\" class=\"flex flex-col gap-4 mb-4\"></div><input type=\"text\" required class=\"input\" name=\"author\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</textarea><script>\n\t\t\t\tme(\"-\").on('input', (ev) => { me(\"#preview\").disabled = me(ev).value.length === 0; })\n\t\t\t</script><div id=\"preview-body\" style=\"display: none\" class=\"flex flex-col gap-4 mb-4\"></div><input type=\"text\" required class=\"input\" name=\"author\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(post.Author)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/post.templ`, Line: 125, Col: 78}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/post.templ`, Line: 135, Col: 78}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\"></form><span class=\"flex justify-end gap-3\"><button form=\"edit-post-form\" class=\"btn-default\" type=\"submit\" _=\"on click wait for htmx:afterRequest(successful) from #edit-post-form if successful trigger closeModal\">Spara</button></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\"></form><span class=\"flex justify-end gap-3\"><button form=\"edit-post-form\" class=\"btn-default\" type=\"submit\">Spara</button></span><script>\n\t\t\tme(\"#edit-post-form\").onHtmxSuccess(() => me(\"#modal\").send(\"closeModal\"));\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -29,20 +29,20 @@ func SuccessToast(text string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"toast-list\" hx-swap-oob=\"afterbegin\"><div class=\"toast z-60 flex items-center gap-3 py-2 px-5 bg-green-600 text-primary-foreground rounded shadow-md\" _=\"init wait for closeToast or 4s then add .removing then wait for animationend then remove me\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"toast-list\" hx-swap-oob=\"innerHTML\"><div class=\"toast z-60 flex items-center gap-3 py-2 px-5 bg-green-600 text-primary-foreground rounded shadow-md\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/toast.templ`, Line: 9, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/toast.templ`, Line: 8, Col: 9}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <span class=\"cursor-pointer\" _=\"on click trigger closeToast\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <span class=\"cursor-pointer flex\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +50,7 @@ func SuccessToast(text string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span><script>\n\t\t\t\t{\n\t\t\t\t\t me('-').on('click', (ev) => me(ev).send('closeToast'));\n\t\t\t\t\t let target = me();\n\t\t\t\t\t let timeout = setTimeout(() => { target.removeAfterEvent('removing', 'animationend') }, 4000);\n\t\t\t\t\t target.on('closeToast', (ev) => { clearTimeout(timeout); target.removeAfterEvent('removing', 'animationend') });\n\t\t\t\t}\n\t\t\t</script></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -79,20 +79,20 @@ func ErrorToast(text string) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div id=\"toast-list\" hx-swap-oob=\"afterbegin\"><div class=\"toast z-60 flex items-center gap-3 py-2 px-5 bg-red-600 text-primary-foreground rounded shadow-md\" _=\"init wait for closeToast or 4s then add .removing then wait for animationend then remove me\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div id=\"toast-list\" hx-swap-oob=\"afterbegin\"><div class=\"toast z-60 flex items-center gap-3 py-2 px-5 bg-red-600 text-primary-foreground rounded shadow-md\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/toast.templ`, Line: 23, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/toast.templ`, Line: 29, Col: 9}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " <span class=\"cursor-pointer\" _=\"on click trigger closeToast\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " <span class=\"cursor-pointer flex\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -100,7 +100,7 @@ func ErrorToast(text string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span><script>\n\t\t\t\t{\n\t\t\t\t\t me('-').on('click', (ev) => me(ev).send('closeToast'));\n\t\t\t\t\t let target = me();\n\t\t\t\t\t let timeout = setTimeout(() => { target.removeAfterEvent('removing', 'animationend') }, 4000);\n\t\t\t\t\t target.on('closeToast', (ev) => { clearTimeout(timeout); target.removeAfterEvent('removing', 'animationend') });\n\t\t\t\t}\n\t\t\t</script></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

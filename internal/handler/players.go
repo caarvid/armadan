@@ -1,13 +1,13 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/utils/response"
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/web/template/views"
-	"github.com/shopspring/decimal"
 )
 
 // TODO: Error handling!
@@ -32,12 +32,12 @@ func NewPlayer() http.Handler {
 
 func EditPlayer(ps armadan.PlayerService, v armadan.Validator) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
 
-		player, err := ps.Get(r.Context(), *id)
+		player, err := ps.Get(r.Context(), id)
 		if err != nil {
 			return
 		}
@@ -48,13 +48,13 @@ func EditPlayer(ps armadan.PlayerService, v armadan.Validator) http.HandlerFunc 
 
 func CancelEditPlayer(ps armadan.PlayerService, v armadan.Validator) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 
 		if err != nil {
 			return
 		}
 
-		player, err := ps.Get(r.Context(), *id)
+		player, err := ps.Get(r.Context(), id)
 
 		if err != nil {
 			return
@@ -66,10 +66,10 @@ func CancelEditPlayer(ps armadan.PlayerService, v armadan.Validator) http.Handle
 
 func InsertPlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 	type createPlayerData struct {
-		FirstName string          `json:"firstName" validate:"required"`
-		LastName  string          `json:"lastName" validate:"required"`
-		Email     string          `json:"email" validate:"required,email"`
-		HCP       decimal.Decimal `json:"hcp" validate:"required"`
+		FirstName string  `json:"firstName" validate:"required"`
+		LastName  string  `json:"lastName" validate:"required"`
+		Email     string  `json:"email" validate:"required,email"`
+		HCP       float64 `json:"hcp" validate:"required"`
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -86,6 +86,7 @@ func InsertPlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 		})
 
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
 
@@ -103,14 +104,14 @@ func InsertPlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 
 func UpdatePlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 	type updatePlayerData struct {
-		FirstName string          `json:"firstName" validate:"required"`
-		LastName  string          `json:"lastName" validate:"required"`
-		Email     string          `json:"email" validate:"required,email"`
-		HCP       decimal.Decimal `json:"hcp" validate:"required"`
+		FirstName string  `json:"firstName" validate:"required"`
+		LastName  string  `json:"lastName" validate:"required"`
+		Email     string  `json:"email" validate:"required,email"`
+		HCP       float64 `json:"hcp" validate:"required"`
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -122,7 +123,7 @@ func UpdatePlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 		}
 
 		_, err = ps.Update(r.Context(), &armadan.Player{
-			ID:        *id,
+			ID:        id,
 			FirstName: data.FirstName,
 			LastName:  data.LastName,
 			Email:     data.Email,
@@ -130,6 +131,7 @@ func UpdatePlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 		})
 
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
 
@@ -147,12 +149,12 @@ func UpdatePlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 
 func DeletePlayer(ps armadan.PlayerService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
 
-		err = ps.Delete(r.Context(), *id)
+		err = ps.Delete(r.Context(), id)
 
 		if err != nil {
 			return

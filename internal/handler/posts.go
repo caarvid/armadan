@@ -38,14 +38,14 @@ func CreatePostView() http.Handler {
 
 func EditPost(ps armadan.PostService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 
 		if err != nil {
 			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}
 
-		post, err := ps.Get(r.Context(), *id)
+		post, err := ps.Get(r.Context(), id)
 
 		if err != nil {
 			http.Error(w, "", http.StatusInternalServerError)
@@ -116,7 +116,7 @@ func UpdatePost(ps armadan.PostService, v armadan.Validator) http.Handler {
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -128,7 +128,7 @@ func UpdatePost(ps armadan.PostService, v armadan.Validator) http.Handler {
 		}
 
 		_, err = ps.Update(r.Context(), &armadan.Post{
-			ID:     *id,
+			ID:     id,
 			Title:  data.Title,
 			Body:   data.Body,
 			Author: data.Author,
@@ -152,12 +152,12 @@ func UpdatePost(ps armadan.PostService, v armadan.Validator) http.Handler {
 
 func DeletePost(ps armadan.PostService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
 
-		err = ps.Delete(r.Context(), *id)
+		err = ps.Delete(r.Context(), id)
 		if err != nil {
 			return
 		}

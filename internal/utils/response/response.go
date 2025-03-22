@@ -26,6 +26,12 @@ func New(res http.ResponseWriter, req *http.Request, comp templ.Component) *Resp
 	}
 }
 
+func (rb *ResponseBuilder) WithPartial(comp templ.Component) *ResponseBuilder {
+	comp.Render(rb.req.Context(), rb.buf)
+
+	return rb
+}
+
 func (rb *ResponseBuilder) WithSuccess(msg string) *ResponseBuilder {
 	partials.SuccessToast(msg).Render(rb.req.Context(), rb.buf)
 
@@ -66,8 +72,12 @@ func GeneralLoginError(w http.ResponseWriter, r *http.Request) {
 	partials.LoginError("Något gick fel, försök igen senare").Render(r.Context(), w)
 }
 
-func GeneralError(w http.ResponseWriter, r *http.Request) {
+func ErrorMessage(w http.ResponseWriter, r *http.Request, msg string) {
 	w.WriteHeader(http.StatusInternalServerError)
 
-	partials.ErrorToast("Något gick fel").Render(r.Context(), w)
+	partials.ErrorToast(msg).Render(r.Context(), w)
+}
+
+func GeneralError(w http.ResponseWriter, r *http.Request) {
+	ErrorMessage(w, r, "Något gick fel")
 }

@@ -234,7 +234,7 @@ func AddPlayer() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " <input id=\"hcp\" name=\"hcp\" type=\"number\" step=\"0.1\" class=\"input col-span-3\" required autocomplete=\"off\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " <input id=\"hcp\" name=\"hcp\" type=\"number\" step=\"0.1\" class=\"input-number col-span-3\" required autocomplete=\"off\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -244,7 +244,7 @@ func AddPlayer() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</form><div class=\"flex justify-end gap-3\"><button type=\"submit\" class=\"btn-secondary\" form=\"new-player-form\" _=\"on click wait for htmx:afterRequest(successful) from #new-player-form if successful reset() the #new-player-form\">Lägg till fler</button> <button type=\"submit\" class=\"btn-default\" form=\"new-player-form\" _=\"on click wait for htmx:afterRequest(successful) from #new-player-form if successful trigger closeModal\">Spara</button></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</form><div class=\"flex justify-end gap-3\"><button id=\"add-more-players\" type=\"submit\" class=\"btn-secondary\" form=\"new-player-form\">Lägg till fler</button> <button id=\"save-player\" type=\"submit\" class=\"btn-default\" form=\"new-player-form\">Spara</button></div><script>\n\t\t\t{\n\t\t\t\tlet form = me(\"#new-player-form\");\n\t\t\t\tme(\"#add-more-players\").on(\"click\", () => form.onHtmxSuccess(() => form.reset()));\n\t\t\t\tme(\"#save-player\").on(\"click\", () => form.onHtmxSuccess(() => form.send(\"closeModal\")));\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -286,7 +286,7 @@ func EditPlayer(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/players/%s", player.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 72, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 79, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -299,7 +299,7 @@ func EditPlayer(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("click from:#save-%s", player.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 73, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 80, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -312,7 +312,7 @@ func EditPlayer(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(player.FirstName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 76, Col: 128}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 83, Col: 128}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -325,7 +325,7 @@ func EditPlayer(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(player.LastName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 79, Col: 127}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 86, Col: 127}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -338,7 +338,7 @@ func EditPlayer(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(player.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 82, Col: 118}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 89, Col: 118}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -349,9 +349,9 @@ func EditPlayer(player armadan.Player) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(player.Hcp.String())
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%2.1f", player.Hcp))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 85, Col: 122}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 92, Col: 135}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -364,7 +364,7 @@ func EditPlayer(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/admin/players/%s/edit/cancel", player.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 93, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 100, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -377,7 +377,7 @@ func EditPlayer(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("save-%s", player.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 99, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 106, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -419,7 +419,7 @@ func Player(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(player.FirstName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 109, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 116, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -432,7 +432,7 @@ func Player(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(player.LastName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 110, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 117, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -445,7 +445,7 @@ func Player(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(player.Email)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 111, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 118, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -456,9 +456,9 @@ func Player(player armadan.Player) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 string
-		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(player.Hcp.String())
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%2.1f", player.Hcp))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 112, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 119, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -471,7 +471,7 @@ func Player(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/admin/players/%s/edit", player.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 117, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 124, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -484,7 +484,7 @@ func Player(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/players/%s", player.UserID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 125, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 132, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -497,7 +497,7 @@ func Player(player armadan.Player) templ.Component {
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Ta bort '%s %s'?", player.FirstName, player.LastName))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 126, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/player.templ`, Line: 133, Col: 84}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {

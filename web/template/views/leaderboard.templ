@@ -26,20 +26,21 @@ templ Leaderboard(players []armadan.Leader) {
 								hx-target="this"
 								hx-swap="afterend"
 								hx-trigger="show"
-								_="
-									on click 
-										if @data-open is 'false' then
-											trigger show
-											set @data-open to true
-										else
-											remove next <tr/>
-											set @data-open to false
-										end
-								"
 							>
 								<td class="td">{ player.Name }</td>
 								<td class="td text-center">{ fmt.Sprint(player.NrOfRounds) }</td>
 								<td class="td text-center">{ fmt.Sprint(player.Points) }</td>
+								<script>
+									me().on('click', (ev) => {
+										if (me(ev).dataset.open === 'false') {
+											me(ev).send('show');
+											me(ev).dataset.open = true;
+										} else {
+											me(ev).dataset.open = false;
+											me(ev).nextSibling.remove();
+										}
+									})
+								</script>
 							</tr>
 						}
 					</tbody>

@@ -1,28 +1,78 @@
 package views
 
 templ document(title string) {
-	<html>
+	<!DOCTYPE html>
+	<html lang="se">
 		<head>
 			<title>{ title }</title>
 			<meta charset="UTF-8"/>
+			<meta name="description" content="Sign in to your Armadan account and access the latest results, see the leaderboard and more."/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<link rel="icon" type="image/svg+xml" href="/public/assets/favicon.svg"/>
-			<script src="/public/scripts/hyperscript.js"></script>
 			<script src="/public/scripts/htmx.min.js"></script>
+			<script src="/public/scripts/surreal.min.js"></script>
 			<script src="/public/scripts/json-form.js" defer></script>
 			<script src="/public/scripts/editor-utils.js" defer></script>
 			<link rel="stylesheet" href="/public/main.css"/>
 			<script>
+				htmx.config.allowNestedOobSwaps = false;
 				htmx.config.responseHandling.unshift({ code: "422", swap: true });
+				function customPlugin(e) {
+					function toggle(e, val) {
+						e.style.display = val ? null : 'none';
+						return e;
+					}
+					function toggleAttr(e, key, fn) {
+						e.attr(key, fn(e.attr(key)));
+						return e.attr(key);
+					}
+					function once(e, name, fn) {
+						e.addEventListener(name, fn, { once: true });
+						return e;
+					}
+					function onHtmxSuccess(e, fn) {
+						e.on('htmx:afterRequest', (ev) => {
+							if (ev.detail.successful) {
+								fn(ev, e);
+							}
+						});
+						return e;
+					}
+					function removeAfterEvent(e, cl, ev) {
+						e.addClass(cl).once(ev, () => e.remove());
+						return e
+					}
+					function onMutation(e, fn) {
+						let observer = new MutationObserver((list) => {
+							for (const mutation of list) {
+								if (mutation.type === "childList") { 
+									fn(e); 
+								}
+							}
+						});
+						observer.observe(e, { childList: true } );
+						return e;
+					}
+
+					e.toggle = (val) => toggle(e, val);
+					e.hide = () => toggle(e, false);
+					e.show = () => toggle(e, true);
+					e.setAttr = (k, fn) => toggleAttr(e, k, fn);
+					e.once = (name, fn) => once(e, name, fn);
+					e.onHtmxSuccess = (fn) => onHtmxSuccess(e, fn);
+					e.removeAfterEvent = (cl, ev) => removeAfterEvent(e, cl, ev);
+					e.onMutation = (fn) => onMutation(e, fn);
+				}
+				surreal.plugins.push(customPlugin);
 			</script>
 		</head>
 		<body class="overflow-y-hidden">
-			<section class="overflow-y-hidden flex flex-auto flex-col min-h-screen max-h-screen">
+			<section class="overflow-y-hidden flex flex-auto flex-col min-h-dvh max-h-dvh">
 				{ children... }
 			</section>
 			<div
 				id="toast-list"
-				class="absolute flex flex-col bottom-8 right-6 gap-3"
+				class="absolute flex flex-col top-2 left-[50%] translate-x-[-50%] gap-3"
 			></div>
 		</body>
 	</html>
