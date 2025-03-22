@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "tailwindcss": "latest",
+    "tailwindcss": "^4.0.0",
     "tailwindcss-animate": "^1.0.7"
   }
 }

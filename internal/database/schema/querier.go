@@ -6,57 +6,63 @@ package schema
 
 import (
 	"context"
-
-	"github.com/google/uuid"
+	"database/sql"
 )
 
 type Querier interface {
 	CreateCourse(ctx context.Context, arg *CreateCourseParams) (Course, error)
-	CreateHoles(ctx context.Context, arg []*CreateHolesParams) (int64, error)
+	CreateHcpChange(ctx context.Context, arg *CreateHcpChangeParams) (HcpChange, error)
+	CreateHoles(ctx context.Context, arg *CreateHolesParams) (Hole, error)
 	CreatePlayer(ctx context.Context, arg *CreatePlayerParams) (Player, error)
 	CreatePost(ctx context.Context, arg *CreatePostParams) (Post, error)
-	CreateResult(ctx context.Context, weekID uuid.UUID) (Result, error)
+	CreateResetPasswordToken(ctx context.Context, arg *CreateResetPasswordTokenParams) (PasswordResetToken, error)
+	CreateResult(ctx context.Context, arg *CreateResultParams) (Result, error)
 	CreateRound(ctx context.Context, arg *CreateRoundParams) (Round, error)
-	CreateScores(ctx context.Context, arg []*CreateScoresParams) (int64, error)
-	CreateSession(ctx context.Context, arg *CreateSessionParams) (UserSession, error)
-	CreateTees(ctx context.Context, arg []*CreateTeesParams) (int64, error)
-	CreateToken(ctx context.Context, arg *CreateTokenParams) (PasswordResetToken, error)
+	CreateRoundDetail(ctx context.Context, arg *CreateRoundDetailParams) (RoundDetail, error)
+	CreateScores(ctx context.Context, arg *CreateScoresParams) (Score, error)
+	CreateSession(ctx context.Context, arg *CreateSessionParams) (Session, error)
+	CreateTees(ctx context.Context, arg *CreateTeesParams) (Tee, error)
 	CreateUser(ctx context.Context, arg *CreateUserParams) (User, error)
 	CreateWeek(ctx context.Context, arg *CreateWeekParams) (Week, error)
-	DeleteCourse(ctx context.Context, id uuid.UUID) error
-	DeletePlayer(ctx context.Context, id uuid.UUID) error
-	DeletePost(ctx context.Context, id uuid.UUID) error
-	DeleteResult(ctx context.Context, id uuid.UUID) error
-	DeleteRound(ctx context.Context, id uuid.UUID) error
+	CreateWinner(ctx context.Context, arg *CreateWinnerParams) (Winner, error)
+	DeleteCourse(ctx context.Context, id string) error
+	DeletePost(ctx context.Context, id string) error
+	DeleteResetPasswordToken(ctx context.Context, token string) error
+	DeleteResult(ctx context.Context, id string) error
+	DeleteRound(ctx context.Context, id string) error
 	DeleteSession(ctx context.Context, token string) error
-	DeleteTee(ctx context.Context, id uuid.UUID) error
-	DeleteToken(ctx context.Context, userID uuid.UUID) error
-	DeleteUser(ctx context.Context, id uuid.UUID) error
-	DeleteWeek(ctx context.Context, id uuid.UUID) error
-	GetCourse(ctx context.Context, id uuid.UUID) (GetCourseRow, error)
-	GetCourses(ctx context.Context) ([]GetCoursesRow, error)
+	DeleteTee(ctx context.Context, id string) error
+	DeleteUser(ctx context.Context, id string) error
+	DeleteWeek(ctx context.Context, id string) error
+	DeleteWinnersByWeek(ctx context.Context, weekID string) error
+	GetCourse(ctx context.Context, id string) (CourseDetail, error)
+	GetCourses(ctx context.Context) ([]CourseDetail, error)
 	GetLeaderboard(ctx context.Context) ([]GetLeaderboardRow, error)
-	GetLeaderboardSummary(ctx context.Context, dollar_1 uuid.UUID) ([]GetLeaderboardSummaryRow, error)
+	GetLeaderboardSummary(ctx context.Context, playerID string) ([]GetLeaderboardSummaryRow, error)
 	GetManageResultView(ctx context.Context) ([]GetManageResultViewRow, error)
-	GetPlayer(ctx context.Context, dollar_1 uuid.UUID) (GetPlayerRow, error)
-	GetPlayers(ctx context.Context) ([]GetPlayersRow, error)
-	GetPost(ctx context.Context, id uuid.UUID) (Post, error)
+	GetPlayer(ctx context.Context, id string) (PlayersExtended, error)
+	GetPlayerHcp(ctx context.Context, playerID sql.NullString) (float64, error)
+	GetPlayers(ctx context.Context) ([]PlayersExtended, error)
+	GetPost(ctx context.Context, id string) (Post, error)
 	GetPosts(ctx context.Context) ([]Post, error)
-	GetResultById(ctx context.Context, id uuid.UUID) (GetResultByIdRow, error)
-	GetRoundsByResultId(ctx context.Context, resultID uuid.UUID) ([]GetRoundsByResultIdRow, error)
+	GetRemainingPlayersByResultId(ctx context.Context, resultID string) ([]GetRemainingPlayersByResultIdRow, error)
+	GetResetPasswordToken(ctx context.Context, token string) (PasswordResetToken, error)
+	GetResultById(ctx context.Context, id string) (GetResultByIdRow, error)
+	GetRoundById(ctx context.Context, id string) (FullRound, error)
+	GetRoundsByResultId(ctx context.Context, resultID string) ([]GetRoundsByResultIdRow, error)
 	GetSessionByToken(ctx context.Context, token string) (GetSessionByTokenRow, error)
-	GetTeesByCourse(ctx context.Context, courseID uuid.UUID) ([]Tee, error)
-	GetToken(ctx context.Context, hash string) (PasswordResetToken, error)
+	GetTeesByCourse(ctx context.Context, courseID string) ([]Tee, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
-	GetUserById(ctx context.Context, id uuid.UUID) (User, error)
+	GetUserById(ctx context.Context, id string) (User, error)
 	GetUsers(ctx context.Context) ([]User, error)
-	GetWeek(ctx context.Context, dollar_1 uuid.UUID) (WeekDetail, error)
+	GetWeek(ctx context.Context, id string) (WeekDetail, error)
 	GetWeeks(ctx context.Context) ([]WeekDetail, error)
+	PublishRound(ctx context.Context, id string) error
 	UpdateCourse(ctx context.Context, arg *UpdateCourseParams) (Course, error)
-	UpdateHoles(ctx context.Context, arg []*UpdateHolesParams) *UpdateHolesBatchResults
+	UpdateHoles(ctx context.Context, arg *UpdateHolesParams) error
 	UpdatePlayer(ctx context.Context, arg *UpdatePlayerParams) (Player, error)
 	UpdatePost(ctx context.Context, arg *UpdatePostParams) (Post, error)
-	UpdateTees(ctx context.Context, arg []*UpdateTeesParams) *UpdateTeesBatchResults
+	UpdateTees(ctx context.Context, arg *UpdateTeesParams) error
 	UpdateUserEmail(ctx context.Context, arg *UpdateUserEmailParams) (User, error)
 	UpdateUserPassword(ctx context.Context, arg *UpdateUserPasswordParams) (User, error)
 	UpdateUserRole(ctx context.Context, arg *UpdateUserRoleParams) (User, error)

@@ -24,7 +24,7 @@ dev/templ:
 
 .PHONY: dev/css
 dev/css:
-	@npx tailwindcss -i ./web/css/style.css -o ./web/static/main.css --minify --watch
+	@npx --yes @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify --watch
 
 .PHONY: dev/sql
 dev/sql:
@@ -69,19 +69,23 @@ dev:
 ### BUILD ###
 .PHONY: build/css
 build/css: 
-	@npx tailwindcss -i ./web/css/style.css -o ./web/static/main.css --minify
+	@npx --yes @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify
 
 .PHONY: build/templ
 build/templ:  
-	@templ generate
+	@go run github.com/a-h/templ/cmd/templ@latest generate
 
 .PHONY: build/sql
 build/sql: 
-	@sqlc generate 
+	@go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate 
 
-.PHONY: build
+.PHONY: build/armadan
 build: clean build/css build/templ build/sql
 	@GOOS=linux GOARCH=amd64 go build -o ./dist/armadan ./cmd/armadan/main.go	
+
+.PHONY: build/usertool
+build/usertool: 
+	@go build -o ./dist/usertool ./cmd/usertool/main.go	
 
 ### DOCKER ###
 .PHONY: docker/build
@@ -100,23 +104,13 @@ ci/build: clean install
 ### MIGRATIONS ###
 .PHONY: migrate/new
 migrate/new:
-	@goose -dir ./db/migrations create $(name) sql
+	@goose -dir ./db/migrations sqlite3 $(DB_PATH) create $(name) sql
 
 .PHONY: migrate/up
 migrate/up:
-	@goose -dir ./db/migrations postgres "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}" up
+	@goose -dir ./db/migrations sqlite3 $(DB_PATH) up
 
 .PHONY: migrate/down
 migrate/down:
-	@goose -dir ./db/migrations postgres "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}" down
-
-### DATABASE ###
-.PHONY: db/start
-db/start: 
-	@docker compose --file ./docker/db.yml --env-file ./.env up --detach
-
-.PHONY: db/stop
-db/stop: 
-	@docker compose --file ./docker/db.yml --env-file ./.env down 
-
+	@goose -dir ./db/migrations sqlite3 $(DB_PATH) down
 

@@ -3,20 +3,18 @@ package armadan
 import (
 	"context"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type PostService interface {
 	All(context.Context) ([]Post, error)
-	Get(context.Context, uuid.UUID) (*Post, error)
+	Get(context.Context, string) (*Post, error)
 	Create(context.Context, *Post) (*Post, error)
 	Update(context.Context, *Post) (*Post, error)
-	Delete(context.Context, uuid.UUID) error
+	Delete(context.Context, string) error
 }
 
 type Post struct {
-	ID        uuid.UUID
+	ID        string
 	Title     string
 	Body      string
 	Author    string

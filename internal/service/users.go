@@ -5,7 +5,6 @@ import (
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
-	"github.com/google/uuid"
 )
 
 func toUser(entity any) *armadan.User {
@@ -13,7 +12,7 @@ func toUser(entity any) *armadan.User {
 	case schema.User:
 		return &armadan.User{
 			ID:    u.ID,
-			Role:  armadan.Role(u.Role),
+			Role:  armadan.Role(u.UserRole),
 			Hash:  u.Password,
 			Email: u.Email,
 		}
@@ -23,17 +22,19 @@ func toUser(entity any) *armadan.User {
 }
 
 type users struct {
-	db schema.Querier
+	dbReader schema.Querier
+	dbWriter schema.Querier
 }
 
-func NewUserService(db schema.Querier) *users {
+func NewUserService(reader, writer schema.Querier) *users {
 	return &users{
-		db: db,
+		dbReader: reader,
+		dbWriter: writer,
 	}
 }
 
 func (s *users) All(ctx context.Context) ([]armadan.User, error) {
-	users, err := s.db.GetUsers(ctx)
+	users, err := s.dbReader.GetUsers(ctx)
 
 	if err != nil {
 		return nil, err
@@ -42,8 +43,8 @@ func (s *users) All(ctx context.Context) ([]armadan.User, error) {
 	return armadan.MapEntities(users, toUser), nil
 }
 
-func (s *users) Get(ctx context.Context, id uuid.UUID) (*armadan.User, error) {
-	user, err := s.db.GetUserById(ctx, id)
+func (s *users) Get(ctx context.Context, id string) (*armadan.User, error) {
+	user, err := s.dbReader.GetUserById(ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -53,7 +54,7 @@ func (s *users) Get(ctx context.Context, id uuid.UUID) (*armadan.User, error) {
 }
 
 func (s *users) GetByEmail(ctx context.Context, email string) (*armadan.User, error) {
-	user, err := s.db.GetUserByEmail(ctx, email)
+	user, err := s.dbReader.GetUserByEmail(ctx, email)
 
 	if err != nil {
 		return nil, err
@@ -64,12 +65,12 @@ func (s *users) GetByEmail(ctx context.Context, email string) (*armadan.User, er
 
 func (s *users) UpdateRole(
 	ctx context.Context,
-	id uuid.UUID,
-	role armadan.Role,
+	id string,
+	role string,
 ) (*armadan.User, error) {
-	user, err := s.db.UpdateUserRole(ctx, &schema.UpdateUserRoleParams{
-		ID:   id,
-		Role: schema.UsersRoleEnum(role),
+	user, err := s.dbWriter.UpdateUserRole(ctx, &schema.UpdateUserRoleParams{
+		ID:       id,
+		UserRole: role,
 	})
 
 	if err != nil {

@@ -1,14 +1,85 @@
 package views
 
 import "fmt"
-import "github.com/google/uuid"
 import "github.com/caarvid/armadan/web/template/partials"
 import "github.com/caarvid/armadan/internal/armadan"
 
+templ EditResult(result *armadan.Result, rounds []armadan.Round, players []armadan.Player) {
+	@document("Armadan") {
+		@partials.Header()
+		@partials.Content("content") {
+			<section class="overflow-y-hidden flex flex-auto max-h-screen min-h-0">
+				@partials.Content("admin-content") {
+					<div class="relative flex flex-col flex-1 px-5">
+						@adminHeader() {
+							<h3 class="font-semibold leading-none tracking-tight text-2xl">
+								{ fmt.Sprintf("Resultat - v.%d", result.WeekNr) }
+							</h3>
+							<button
+								type="button"
+								class="btn-default"
+								hx-get={ fmt.Sprintf("/admin/results/%s/publish", result.ID) }
+								hx-confirm="Är alla rundor korrekta?"
+								hx-swap="outerHTML"
+								hx-select="#content"
+								hx-target="#content"
+							>Nästa</button>
+						}
+						@partials.RoundTable(rounds)
+					</div>
+					@partials.NewRoundPanel(result, players)
+				}
+			</section>
+		}
+	}
+}
+
+templ PublishResult(result *armadan.Result, rounds []armadan.RoundSummary) {
+	@document("Armadan") {
+		@partials.Header()
+		@partials.Content("content") {
+			<section class="overflow-y-hidden flex flex-auto max-h-screen min-h-0">
+				@partials.Content("admin-content") {
+					<div class="relative flex flex-col flex-1 px-5">
+						@adminHeader() {
+							<div class="flex gap-3 items-center">
+								<button
+									type="button"
+									class="btn-ghost px-2 text-lg"
+									hx-get={ fmt.Sprintf("/admin/results/%s", result.ID) }
+									hx-swap="outerHTML"
+									hx-select="#content"
+									hx-target="#content"
+								>
+									@partials.BackIcon()
+								</button>
+								<h3 class="font-semibold leading-none tracking-tight text-2xl">
+									{ fmt.Sprintf("Resultat - v.%d", result.WeekNr) }
+								</h3>
+							</div>
+							<button
+								type="button"
+								class="btn-default"
+								hx-post={ fmt.Sprintf("/api/results/%s/publish", result.ID) }
+								hx-swap="outerHTML"
+								hx-select="#content"
+								hx-target="#content"
+							>
+								Publicera
+							</button>
+						}
+						@partials.ResultSummaryTable(rounds)
+					</div>
+				}
+			</section>
+		}
+	}
+}
+
 templ resultRow(week armadan.ResultDetail) {
-	<tr class={ "tr group", templ.KV("opacity-50", week.ResultID.Variant() == uuid.Reserved && !week.IsFirstUnpublished) }>
+	<tr class={ "tr group", templ.KV("opacity-50", len(week.ResultID) > 0 && !week.IsFirstUnpublished) }>
 		<td class="td">
-			if week.ResultID.Variant() != uuid.Reserved && !week.Published {
+			if len(week.ResultID) > 0 && !week.Published {
 				{ fmt.Sprintf("%d*", week.Nr) }
 			} else {
 				{ fmt.Sprintf("%d", week.Nr) }
@@ -32,13 +103,13 @@ templ resultRow(week armadan.ResultDetail) {
 		</td>
 		<td class="td">
 			<div class="flex gap-3 ml-auto justify-end">
-				if week.Published || week.ResultID.Variant() != uuid.Reserved {
+				if week.Published || len(week.ResultID) > 0 {
 					<button
 						class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
 						hx-get={ fmt.Sprintf("/admin/results/%s", week.ResultID) }
 						hx-swap="outerHTML"
-						hx-select="#admin-content"
-						hx-target="#admin-content"
+						hx-select="#content"
+						hx-target="#content"
 					>
 						Ändra	
 					</button>
@@ -47,8 +118,8 @@ templ resultRow(week armadan.ResultDetail) {
 						class="btn-link p-0 h-auto text-primary/60 hover:text-primary"
 						hx-get={ fmt.Sprintf("/admin/results/week/%s/new", week.ID) }
 						hx-swap="outerHTML"
-						hx-select="#admin-content"
-						hx-target="#admin-content"
+						hx-select="#content"
+						hx-target="#content"
 					>
 						Lägg till	
 					</button>
@@ -56,31 +127,6 @@ templ resultRow(week armadan.ResultDetail) {
 			</div>
 		</td>
 	</tr>
-}
-
-templ EditResult(result *armadan.Result, rounds []armadan.Round) {
-	@AdminLayout() {
-		@adminHeader() {
-			<h3
-				class="font-semibold leading-none tracking-tight text-2xl"
-			>
-				{ fmt.Sprintf("Resultat - v.%d", result.WeekNr) }
-			</h3>
-			<button
-				class="btn-default"
-				hx-get={ fmt.Sprintf("/admin/results/%s/round", result.ID) }
-				hx-target="body"
-				hx-swap="beforeend"
-			>
-				Lägg till runda
-			</button>
-		}
-		if len(rounds) > 0 {
-			@partials.RoundTable(rounds)
-		} else {
-			@partials.NoData("Rundorna kommer synas här")
-		}
-	}
 }
 
 templ ManageResults(weeks []armadan.ResultDetail) {

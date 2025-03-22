@@ -40,35 +40,31 @@ templ sidebarItem(i item) {
 templ sidebarList() {
 	<ul
 		class="m-0 text-lg"
-		_="
-			init
-				for x in (<li /> in me)
-					if @hx-get of x is pathname of the location of the window
-					 	remove .hidden from first <span /> in x
-					end
-				end
-			on click
-				if target matches <li />
-					for elem in (<li /> in me)
-						add .hidden to first <span /> in elem
-					end
-					remove .hidden from first <span /> in target
-				end
-		"
 	>
 		{ children... }
+		<script>
+			any('li', me()).run((el) => {
+				if (me(el).attr("hx-get") === window.location.pathname) {
+					me('span:first-child', el).removeClass('hidden');
+				}
+			});
+			any('li', me()).on('click', (el) => {
+				any('li', me(el).parentNode).run((e) => me('span:first-child', e).addClass('hidden'));
+				me('span:first-child', me(el)).removeClass('hidden');
+			});
+		</script>
 	</ul>
 }
 
 templ adminSidebar() {
-	<aside class="relative flex min-w-0 flex-shrink-0 flex-grow-0 basis-48 border-r-2">
+	<aside class="relative flex min-w-0 shrink-0 grow-0 basis-48 border-r">
 		<div class="flex pt-6 flex-col w-full">
 			@sidebarList() {
 				for _, i := range items {
 					@sidebarItem(i)
 				}
 				if user.IsAdmin(ctx) {
-					<div class="text-red-500 pb-8 border-t-2">
+					<div class="text-red-500 pb-8 border-t-1">
 						for _, i := range dangerZone {
 							@sidebarItem(i)
 						}

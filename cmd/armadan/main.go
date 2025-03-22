@@ -26,39 +26,39 @@ import (
 )
 
 var (
-	appEnv     string
-	logLevel   string
-	dbHost     string
-	dbPort     string
-	dbName     string
-	dbUser     string
-	dbPassword string
-	port       string
+	appEnv   string
+	logLevel string
+	dbPath   string
+	port     string
 )
 
 func run(
 	ctx context.Context,
-	args []string,
+	_ []string,
 ) error {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
-	dbPool, err := database.CreatePool(ctx, dbHost, dbPort, dbName, dbUser, dbPassword)
+	readDB, writeDB, err := database.Create(dbPath)
 	if err != nil {
 		return err
 	}
 
-	db := schema.New(dbPool)
+	defer readDB.Close()
+	defer writeDB.Close()
+
+	dbReader := schema.New(readDB)
+	dbWriter := schema.New(writeDB)
 	cache := cache.New(30*time.Minute, 15*time.Minute)
 
 	srv := server.New(
-		service.NewPostService(db, cache),
-		service.NewWeekService(db, cache),
-		service.NewUserService(db),
-		service.NewPlayerService(db, dbPool),
-		service.NewSessionService(db),
-		service.NewCourseService(db, dbPool, cache),
-		service.NewResultService(db, dbPool),
+		service.NewPostService(dbReader, dbWriter, cache),
+		service.NewWeekService(dbReader, dbWriter, cache),
+		service.NewUserService(dbReader, dbWriter),
+		service.NewPlayerService(dbReader, dbWriter, writeDB),
+		service.NewSessionService(dbReader, dbWriter),
+		service.NewCourseService(dbReader, dbWriter, writeDB, cache),
+		service.NewResultService(dbReader, dbWriter, writeDB),
 		validation.New(),
 	)
 
@@ -113,11 +113,7 @@ func init() {
 	flag.StringVar(&appEnv, "env", "development", "app environment")
 	flag.StringVar(&logLevel, "log_level", "INFO", "log level")
 
-	flag.StringVar(&dbHost, "db_host", os.Getenv("DB_HOST"), "db host, defaults to env.DB_HOST")
-	flag.StringVar(&dbPort, "db_port", os.Getenv("DB_PORT"), "db port, defaults to env.DB_PORT")
-	flag.StringVar(&dbName, "db_name", os.Getenv("DB_NAME"), "db name, defaults to env.DB_NAME")
-	flag.StringVar(&dbUser, "db_user", os.Getenv("DB_USER"), "db user, defaults to env.DB_USER")
-	flag.StringVar(&dbPassword, "db_password", os.Getenv("DB_PASSWORD"), "db password, defaults to env.DB_PASSWORD")
+	flag.StringVar(&dbPath, "dbPath", os.Getenv("DB_PATH"), "path to sqlite db")
 	flag.StringVar(&port, "port", os.Getenv("PORT"), "port, defaults to env.PORT")
 
 	flag.Parse()

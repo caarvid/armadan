@@ -1,88 +1,106 @@
 -- name: GetLeaderboardSummary :many 
-WITH winner_data AS (
-  SELECT w.id, w.points, w.player_id, w.result_id FROM winners w
-), result_data AS (
-  SELECT r.id, r.week_id, r.published FROM results r
-)
-SELECT wk.id, wk.nr, COALESCE(wd.points, 0) AS points, COALESCE(rd.published, false) as has_results FROM weeks wk
-LEFT JOIN result_data rd ON rd.week_id = wk.id 
-LEFT JOIN winner_data wd ON rd.id = wd.result_id AND wd.player_id = $1::UUID 
-GROUP BY wk.id, wd.points, rd.published
-ORDER BY wk.nr ASC;
+SELECT
+  weeks.*,
+  coalesce(w.points, 0) AS points,
+  coalesce(r.is_published, FALSE) AS has_results
+FROM weeks
+JOIN results r ON r.week_id = weeks.id
+JOIN winners w ON w.week_id = weeks.id AND w.player_id = ?
+ORDER BY weeks.nr;
 
 -- name: GetManageResultView :many
-WITH result_data AS (
-  SELECT r.id, r.published, r.week_id 
-  FROM results r
-), participant_counts AS (
-  SELECT r.result_id, COUNT(r.id) AS participants
-  FROM rounds r
-  GROUP BY r.result_id
-), winner_counts AS (
-  SELECT w.result_id, COUNT(w.id) AS winners
-  FROM winners w
-  GROUP BY w.result_id
-)
-SELECT 
-  wd.id,
-  wd.nr,
-  wd.is_finals,
-  wd.course_name,
-  wd.tee_name,
-  rd.id::UUID AS result_id,
-  COALESCE(rd.published, false) AS published,
-  COALESCE(pc.participants, 0) AS participants,
-  COALESCE(wc.winners, 0) AS winners
-FROM week_details wd
-LEFT JOIN result_data rd ON rd.week_id = wd.id
-LEFT JOIN participant_counts pc ON pc.result_id = rd.id
-LEFT JOIN winner_counts wc ON wc.result_id = rd.id
-ORDER BY wd.nr ASC;
+SELECT
+  w.id,
+  w.nr,
+  w.is_finals,
+  w.course_name,
+  w.tee_name,
+  r.id AS result_id,
+  coalesce(r.is_published, FALSE) as is_published,
+  coalesce(rd.participants, 0) AS participants,
+  coalesce(win.winners, 0) as winners
+FROM week_details w
+LEFT JOIN results r ON r.week_id = w.id
+LEFT JOIN  (
+  SELECT result_id, COUNT(*) as participants FROM rounds GROUP BY result_id
+) rd ON rd.result_id = r.id
+LEFT JOIN (
+    SELECT week_id, COUNT(*) AS winners FROM winners GROUP BY week_id
+) win ON win.week_id = w.id
+GROUP BY w.id, r.id, win.winners
+ORDER BY w.nr ASC;
 
 -- name: GetResultById :one
-WITH week_data AS (
-  SELECT w.id, w.nr, w.course_id, w.tee_id FROM weeks w
-), tee_data AS (
-  SELECT t.id, t.slope, t.cr FROM tees t
-)
 SELECT
-  r.id,
-  td.slope,
-  td.cr,
-  wd.nr::integer as week_nr,
-  wd.course_id::UUID as course_id
+  r.*,
+  w.nr as week_nr,
+  w.start_date as week_start_date,
+  w.end_date as week_end_date,
+  w.course_id,
+  t.slope,
+  t.cr
 FROM results r
-LEFT JOIN week_data wd ON wd.id = r.week_id
-LEFT JOIN tee_data td ON td.id = wd.tee_id
-WHERE r.id = $1;
+JOIN weeks w ON w.id = r.week_id
+JOIN tees t ON t.id = w.tee_id
+WHERE r.id = ?;
 
 -- name: GetRoundsByResultId :many
-WITH player_data AS (
-  SELECT p.id, p.first_name, p.last_name, p.hcp FROM players p
-)
+SELECT
+  r.*,
+  p.first_name,
+  p.last_name
+FROM full_rounds r
+JOIN players p ON p.id = r.player_id
+WHERE r.result_id = ?
+ORDER BY r.net_total ASC;
+
+-- name: GetRoundById :one
+SELECT * FROM full_rounds WHERE id = ?;
+
+-- name: GetRemainingPlayersByResultId :many
 SELECT 
-  r.*, 
-  r.net_in + r.net_out AS net_total,
-  r.gross_in + r.gross_out AS gross_total,
-  p.first_name, 
-  p.last_name, 
-  p.hcp
-FROM rounds r
-LEFT JOIN player_data p ON p.id = r.player_id
-WHERE r.result_id = $1
-ORDER BY net_total ASC;
+  p.*,
+  cast(coalesce((
+      SELECT h.new_hcp FROM hcp_changes h
+      WHERE h.player_id = p.id AND datetime(h.valid_from) < datetime(w.end_date)
+      ORDER BY datetime(h.valid_from) DESC
+      LIMIT 1
+  ), (
+      SELECT h.new_hcp FROM hcp_changes h 
+      WHERE h.player_id = p.id 
+      ORDER BY datetime(h.valid_from) ASC
+      LIMIT 1
+  ), 36.0) as real) AS hcp
+FROM players p
+LEFT JOIN rounds r ON r.player_id = p.id AND r.result_id = ?
+LEFT JOIN results res ON res.id = r.result_id
+LEFT JOIN weeks w ON w.id = res.week_id
+WHERE r.player_id IS NULL
+ORDER BY p.last_name ASC, p.first_name ASC;
 
 -- name: CreateResult :one 
-INSERT INTO results (week_id) VALUES ($1) RETURNING *;
+INSERT INTO results (id, week_id) VALUES (?, ?) RETURNING *;
 
 -- name: CreateRound :one
-INSERT INTO rounds (player_id, result_id, net_in, net_out, gross_in, gross_out, new_hcp, old_hcp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;
+INSERT INTO rounds (id, player_id, result_id) VALUES (?, ?, ?) RETURNING *;
 
--- name: CreateScores :copyfrom
-INSERT INTO scores (round_id, hole_id, strokes) VALUES ($1, $2, $3);
+-- name: CreateRoundDetail :one 
+INSERT INTO round_details (net_in, net_out, gross_in, gross_out, round_id) VALUES (?, ?, ?, ?, ?) RETURNING *;
+
+-- name: CreateScores :one
+INSERT INTO scores (round_id, hole_id, strokes) VALUES (?, ?, ?) RETURNING *;
+
+-- name: CreateWinner :one
+INSERT INTO winners (id, points, player_id, week_id) VALUES (?, ?, ?, ?) RETURNING *;
+
+-- name: PublishRound :exec
+UPDATE results SET is_published = TRUE WHERE id = ?;
 
 -- name: DeleteResult :exec
-DELETE FROM results WHERE id = $1;
+DELETE FROM results WHERE id = ?;
 
 -- name: DeleteRound :exec
-DELETE FROM rounds WHERE id = $1;
+DELETE FROM rounds WHERE id = ?;
+
+-- name: DeleteWinnersByWeek :exec
+DELETE FROM winners WHERE week_id = ?;

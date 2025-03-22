@@ -1,14 +1,13 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/utils/response"
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/web/template/views"
-	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 // TODO: error handling
@@ -45,12 +44,12 @@ func RemoveEmptyTeeForm() http.Handler {
 
 func RemoveTee(cs armadan.CourseService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
 
-		if err := cs.DeleteTee(r.Context(), *id); err != nil {
+		if err := cs.DeleteTee(r.Context(), id); err != nil {
 			return
 		}
 
@@ -60,12 +59,12 @@ func RemoveTee(cs armadan.CourseService, v armadan.Validator) http.Handler {
 
 func EditCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
 
-		course, err := cs.Get(r.Context(), *id)
+		course, err := cs.Get(r.Context(), id)
 		if err != nil {
 			return
 		}
@@ -76,15 +75,15 @@ func EditCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 
 func InsertCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 	type newHole struct {
-		Nr    int32 `json:"nr" validate:"required"`
-		Par   int32 `json:"par" validate:"requried"`
-		Index int32 `json:"index" validate:"required"`
+		Nr    int64 `json:"nr" validate:"required"`
+		Par   int64 `json:"par" validate:"required"`
+		Index int64 `json:"index" validate:"required"`
 	}
 
 	type newTee struct {
-		Name  string          `json:"name" validate:"required"`
-		Slope int32           `json:"slope" validate:"requried"`
-		CR    decimal.Decimal `json:"cr" validate:"required"`
+		Name  string  `json:"name" validate:"required"`
+		Slope int64   `json:"slope" validate:"required"`
+		CR    float64 `json:"cr" validate:"required"`
 	}
 
 	type createCourseData struct {
@@ -145,17 +144,17 @@ func InsertCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 
 func UpdateCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 	type updatedHole struct {
-		ID    uuid.UUID `json:"id" validate:"required,uuid4"`
-		Nr    int32     `json:"nr" validate:"required"`
-		Par   int32     `json:"par" validate:"requried"`
-		Index int32     `json:"index" validate:"required"`
+		ID    string `json:"id" validate:"required,uuid4"`
+		Nr    int64  `json:"nr" validate:"required"`
+		Par   int64  `json:"par" validate:"required"`
+		Index int64  `json:"index" validate:"required"`
 	}
 
 	type updatedTee struct {
-		ID    uuid.UUID       `json:"id"`
-		Name  string          `json:"name" validate:"required"`
-		Slope int32           `json:"slope" validate:"requried"`
-		CR    decimal.Decimal `json:"cr" validate:"required"`
+		ID    string  `json:"id"`
+		Name  string  `json:"name" validate:"required"`
+		Slope int64   `json:"slope" validate:"required"`
+		CR    float64 `json:"cr" validate:"required"`
 	}
 
 	type updateCourseData struct {
@@ -165,7 +164,7 @@ func UpdateCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
@@ -173,6 +172,7 @@ func UpdateCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 		data := updateCourseData{}
 
 		if err := v.Validate(r, &data); err != nil {
+			fmt.Println(err)
 			return
 		}
 
@@ -200,7 +200,7 @@ func UpdateCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 		}
 
 		_, err = cs.Update(r.Context(), &armadan.Course{
-			ID:    *id,
+			ID:    id,
 			Name:  data.Name,
 			Holes: holes,
 			Tees:  tees,
@@ -216,7 +216,7 @@ func UpdateCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 		}
 
 		response.
-			New(w, r, views.ManageCourses(courses)).
+			New(w, r, partials.CourseList(courses)).
 			WithSuccess("Bana uppdaterad").
 			HTML()
 	})
@@ -224,12 +224,12 @@ func UpdateCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 
 func DeleteCourse(cs armadan.CourseService, v armadan.Validator) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id, err := v.ValidateIdParam(r)
+		id, err := v.ValidateIdParam(r, "id")
 		if err != nil {
 			return
 		}
 
-		if err = cs.Delete(r.Context(), *id); err != nil {
+		if err = cs.Delete(r.Context(), id); err != nil {
 			return
 		}
 

@@ -2,52 +2,89 @@ package partials
 
 import "github.com/caarvid/armadan/internal/utils/user"
 
-templ tab(path, text string) {
-	<li hx-get={ path } class="cursor-pointer px-1 text-md h-16 flex justify-center items-center underline-offset-8 hover:opacity-50">{ text }</li>
+templ tab(path, text string, hideOnSmallScreen bool) {
+	<li
+		hx-get={ path }
+		class={ "cursor-pointer px-1 text-md h-16 justify-center items-center underline-offset-8 hover:opacity-50", 
+			templ.KV("flex", !hideOnSmallScreen),
+			templ.KV("hidden md:flex", hideOnSmallScreen) }
+	>{ text }</li>
+}
+
+templ HamburgerMenu() {
+	<div id="hamburger-menu" class="group h-full flex w-6 gap-2 flex-col justify-center md:hidden">
+		<div class="border border-foreground w-full group-data-open:rotate-[-45deg] group-data-open:translate-y-[calc(0.25rem+1px)]"></div>
+		<div class="border border-foreground w-full group-data-open:rotate-[45deg] group-data-open:translate-y-[calc(-0.25rem-1px)]"></div>
+		<script>
+			me().on('close', (ev) => { me(ev).attr('data-open', null) });
+			me().on('click', (ev) => {
+				me(ev).setAttr('data-open', (v) => v ? null : true);
+				me('#tab-list').send('toggle');
+			});
+		</script>
+	</div>
 }
 
 templ tabs() {
+	if user.IsLoggedIn(ctx) {
+		@HamburgerMenu()
+	}
 	<ul
-		class="flex gap-3 items-center min-h-full"
+		id="tab-list"
+		class="absolute top-14 right-0 h-0 w-dvw bg-white z-10 gap-3 items-center overflow-hidden md:flex md:z-0 md:static md:h-full md:w-auto"
 		hx-target="#content"
 		hx-select="#content"
 		hx-swap="outerHTML"
-		_="
-		init
-		for x in <li /> in me
-			set p to pathname of the location of the window
-			set route to @hx-get of x
-
-			if (route is not '/' and p.startsWith(route)) or (route is '/' and p is '/')
-				add .underline to x
-			end
-		end
-		on click
-			if target matches <li />
-				take .underline from <li /> for the event's target
-			end
-		"
 	>
 		if user.IsLoggedIn(ctx) {
-			@tab("/", "Hem")
-			@tab("/schedule", "Schema")
-			@tab("/leaderboard", "Ledartavla")
-			@tab("/results", "Resultat")
+			@tab("/", "Hem", false)
+			@tab("/schedule", "Schema", false)
+			@tab("/leaderboard", "Ledartavla", false)
+			@tab("/results", "Resultat", false)
 			if user.IsModerator(ctx) {
-				@tab("/admin", "Admin")
+				@tab("/admin", "Admin", true)
 			}
-			@tab("/auth/logout", "Logga ut")
+			@tab("/auth/logout", "Logga ut", false)
 		}
+		<script>
+			any('li', me())?.run((el) => {
+				let { pathname } = window.location;
+				let route = me(el).attr('hx-get');
+				if ((route !== '/' && pathname.startsWith(route)) || (route === '/' && pathname === '/')) {
+					me(el).addClass('underline');
+				}
+			});
+			any('li', me())?.on('click', (el) => {
+				let elem = me(el);
+				let list = any('li', elem.parentNode);
+				window.addEventListener('htmx:afterSwap', (ev) => {
+					if (ev.target === me('#content')) {
+						me('#hamburger-menu').send('close');
+						me('#tab-list').send('toggle');
+						list.run((e) => me(e).removeClass('underline'));
+						elem.addClass('underline');
+					}
+				}, { once: true });
+			});
+			me().on('toggle', (ev) => {
+				me(ev).classToggle('h-0');
+				me(ev).classToggle('h-dvh');
+			});
+		</script>
 	</ul>
 }
 
 templ Header() {
 	<header
-		class={ "relative h-16 px-3 md:px-8 flex items-center shadow-md", 
+		class={ "relative h-14 px-3 md:px-8 flex items-center border", 
 		templ.KV("justify-between", user.IsLoggedIn(ctx)), 
 		templ.KV("justify-center", !user.IsLoggedIn(ctx)) }
 	>
-		<img src="/public/assets/armadan.svg" alt="armadan" class={ "w-36" }/>
+		<img
+			src="/public/assets/armadan.svg"
+			alt="armadan"
+			class={ "absolute translate-[-50%] left-[50%] top-[50%] w-36 md:static md:translate-0 md:top-0 md:left-0" }
+		/>
 		@tabs()
 	</header>
 }

@@ -1,110 +1,81 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-@layer components {
-  .btn-base {
-    @apply h-9 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+@theme {
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(240 10% 3.9%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(240 10% 3.9%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(240 10% 3.9%);
+  --color-primary: hsl(240 5.9% 10%);
+  --color-primary-foreground: hsl(0 0% 98%);
+  --color-secondary: hsl(240 4.8% 95.9%);
+  --color-secondary-foreground: hsl(240 5.9% 10%);
+  --color-muted: hsl(240 4.8% 95.9%);
+  --color-muted-foreground: hsl(240 3.8% 46.1%);
+  --color-accent: hsl(240 4.8% 95.9%);
+  --color-accent-foreground: hsl(240 5.9% 10%);
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-border: hsl(240 5.9% 90%);
+  --color-input: hsl(240 5.9% 90%);
+  --color-ring: hsl(240 5.9% 10%);
+  --radius: 0.2rem;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --breakpoint-2xl: 1400px;
+}
+
+@custom-variant htmx-settling {
+
+  &.htmx-settling,
+  .htmx-settling & {
+    @slot;
   }
+}
 
-  .btn-default {
-    @apply btn-base bg-primary text-primary-foreground shadow hover:bg-primary/90;
+@custom-variant htmx-request {
+
+  &.htmx-request,
+  .htmx-request & {
+    @slot;
   }
+}
 
-  .btn-link {
-    @apply btn-base text-primary underline-offset-4 hover:underline;
+@custom-variant htmx-swapping {
+
+  &.htmx-swapping,
+  .htmx-swapping & {
+    @slot;
   }
+}
 
-  .btn-secondary {
-    @apply btn-base bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80;
+@custom-variant htmx-added {
+
+  &.htmx-added,
+  .htmx-added & {
+    @slot;
   }
+}
 
-  .btn-ghost {
-    @apply btn-base hover:bg-accent hover:text-accent-foreground;
-  }
-
-  .input {
-    @apply flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
-  }
-
-  .input-number {
-    @apply input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none;
-  }
-
-  .select {
-    @apply appearance-none relative flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
-  }
-
-  .switch {
-    @apply inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 bg-input data-[state=checked]:bg-primary;
-  }
-
-  .switch-thumb {
-    @apply pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform translate-x-0 data-[state=checked]:translate-x-4;
-  }
-
-  .table {
-    @apply w-full caption-bottom text-sm;
-  }
-
-  .thead {
-    @apply [&_tr]:border-b;
-  }
-
-  .tbody {
-    @apply [&_tr:last-child]:border-0;
-  }
-
-  .tr {
-    @apply border-b transition-colors hover:bg-muted/50;
-  }
-
-  .th {
-    @apply h-10 px-2 text-left align-middle font-medium text-muted-foreground;
-  }
-
-  .td {
-    @apply p-2 align-middle;
+@custom-variant tight {
+  &.tight {
+    @slot;
+    padding: 0;
   }
 }
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 210 40% 98%;
-    --destructive-background: 0 100% 50% / 0.1;
-
-    --ring: 215 20.2% 65.1%;
-
-    --radius: 0.2rem;
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
@@ -112,5 +83,225 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@utility container {
+  padding-inline: "2rem";
+}
+
+@utility btn-base {
+  @apply h-9 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+}
+
+@utility btn-default {
+  @apply btn-base bg-primary text-primary-foreground shadow-sm hover:bg-primary/90;
+}
+
+@utility btn-link {
+  @apply btn-base text-primary underline-offset-4 hover:underline;
+}
+
+@utility btn-secondary {
+  @apply btn-base bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80;
+}
+
+@utility btn-ghost {
+  @apply btn-base hover:bg-accent hover:text-accent-foreground;
+}
+
+@utility input {
+  @apply flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility input-number {
+  @apply input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none;
+}
+
+@utility select {
+  @apply appearance-none relative flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs ring-offset-background placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility switch {
+  @apply inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 bg-input data-[checked=true]:bg-primary;
+}
+
+@utility switch-thumb {
+  @apply pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform translate-x-0 data-[state=checked]:translate-x-4;
+}
+
+@utility table {
+  @apply w-full caption-bottom text-sm;
+}
+
+@utility thead {
+  @apply [&_tr]:border-b [&.tight>.th]:h-7;
+}
+
+@utility tbody {
+  @apply [&_tr:last-child]:border-0 border-border [&_tr]:border-border/40;
+}
+
+@utility tr {
+  @apply border-b transition-colors hover:bg-muted/50;
+}
+
+@utility th {
+  @apply h-10 px-2 text-left align-middle font-medium text-muted-foreground;
+}
+
+@utility td {
+  @apply p-2 align-middle;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+select {
+  cursor: pointer;
+}
+
+.select-wrapper {
+  width: 100%;
+  position: relative;
+}
+
+.select-wrapper::after {
+  content: url("/public/assets/chevron_down.svg");
+  position: absolute;
+  right: 0.75rem;
+  height: 1em;
+  width: 1em;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+#login-form {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition: transform 200ms, opacity 200ms;
+}
+
+#login-form.htmx-swapping,
+#login-form.htmx-added {
+  opacity: 0;
+  transform: translate3d(-10rem, 0, 0);
+}
+
+#forgot-password-form {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition: transform 200ms, opacity 200ms;
+}
+
+#forgot-password-form.htmx-swapping,
+#forgot-password-form.htmx-added {
+  opacity: 0;
+  transform: translate3d(10rem, 0, 0);
+}
+
+#login-error {
+  opacity: 1;
+  transition: opacity 200ms;
+}
+
+#login-error.htmx-added {
+  opacity: 0;
+}
+
+#modal {
+  animation-name: fadeIn;
+  animation-duration: 150ms;
+  animation-timing-function: ease;
+}
+
+#modal>#modal-content {
+  animation-name: zoomIn;
+  animation-duration: 150ms;
+  animation-timing-function: ease;
+}
+
+#modal.closing {
+  animation-name: fadeOut;
+}
+
+#modal.closing>#modal-content {
+  animation-name: zoomOut;
+}
+
+.toast {
+  animation-name: slideIn;
+  animation-duration: 150ms;
+  animation-timing-function: ease;
+}
+
+.toast.removing {
+  animation-name: slideOut;
+}
+
+.toast.htmx-swapping {
+  animation-name: fadeOut;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes zoomIn {
+  0% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomOut {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(0.9);
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translate3d(0, -100%, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 0%, 0);
+  }
+}
+
+@keyframes slideOut {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(0, -100%, 0);
   }
 }

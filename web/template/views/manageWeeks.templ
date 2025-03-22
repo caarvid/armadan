@@ -15,21 +15,28 @@ templ ManageWeeks(weeks []armadan.Week, courses []armadan.Course) {
 				hx-target="#week-list"
 				hx-swap="outerHTML"
 				hx-ext="json-form"
-				_="on htmx:afterRequest(detail) if detail.successful and target is me then reset() me then hide #finals-date"
 			>
-				<input min="1" max="52" name="nr" type="number" class="input flex-grow" placeholder="Vecka" required/>
+				<script>
+					me().onHtmxSuccess((e, el) => {
+						if (e.target === el) {
+							el.reset();
+							me('#finals-date').hide();
+						}
+					});
+				</script>
+				<input min="1" max="52" name="nr" type="number" class="input-number grow" placeholder="Vecka" required/>
 				<input
 					id="finals-date"
 					name="finalsDate"
 					type="date"
-					class="input flex-grow flex-auto w-auto flex-shrink-0"
+					class="input grow flex-auto w-auto shrink-0"
 					style="display: none;"
 				/>
 				<div class="select-wrapper">
 					<select name="courseId" class="select" hx-get="/admin/weeks/tees" hx-target="#tees" hx-swap="outerHTML" required>
 						<option hidden disabled selected value>Bana</option>
 						for _, course := range courses {
-							<option value={ course.ID.String() }>{ course.Name }</option>
+							<option value={ course.ID }>{ course.Name }</option>
 						}
 					</select>
 				</div>
@@ -43,9 +50,13 @@ templ ManageWeeks(weeks []armadan.Week, courses []armadan.Course) {
 						id="is-finals"
 						name="isFinalsWeek"
 						type="checkbox"
-						_="on change(target) if target.checked then show #finals-date else hide #finals-date"
 					/>
 					Finalvecka
+					<script>
+						me('#is-finals').on('change', (ev) => { 
+							me('#finals-date').toggle(ev.target.checked); 
+						});
+					</script>
 				</label>
 				<button type="submit" class="btn-default">
 					Lägg till	

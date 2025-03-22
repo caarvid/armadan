@@ -1,15 +1,22 @@
 package partials
 
 templ SuccessToast(text string) {
-	<div id="toast-list" hx-swap-oob="afterbegin">
+	<div id="toast-list" hx-swap-oob="innerHTML">
 		<div
-			class="toast z-[60] flex items-center gap-3 py-2 px-5 bg-green-600 text-primary-foreground rounded shadow-md"
-			_="init wait for closeToast or 4s then add .removing then wait for animationend then remove me"
+			class="toast z-60 flex items-center gap-3 py-2 px-5 bg-green-600 text-primary-foreground rounded shadow-md"
 		>
 			{ text }
-			<span class="cursor-pointer" _="on click trigger closeToast">
+			<span class="cursor-pointer flex">
 				@CloseIcon()
 			</span>
+			<script>
+				{
+					 me('-').on('click', (ev) => me(ev).send('closeToast'));
+					 let target = me();
+					 let timeout = setTimeout(() => { target.removeAfterEvent('removing', 'animationend') }, 4000);
+					 target.on('closeToast', (ev) => { clearTimeout(timeout); target.removeAfterEvent('removing', 'animationend') });
+				}
+			</script>
 		</div>
 	</div>
 }
@@ -17,13 +24,20 @@ templ SuccessToast(text string) {
 templ ErrorToast(text string) {
 	<div id="toast-list" hx-swap-oob="afterbegin">
 		<div
-			class="toast z-[60] flex items-center gap-3 py-2 px-5 bg-red-600 text-primary-foreground rounded shadow-md"
-			_="init wait for closeToast or 4s then add .removing then wait for animationend then remove me"
+			class="toast z-60 flex items-center gap-3 py-2 px-5 bg-red-600 text-primary-foreground rounded shadow-md"
 		>
 			{ text }
-			<span class="cursor-pointer" _="on click trigger closeToast">
+			<span class="cursor-pointer flex">
 				@CloseIcon()
 			</span>
+			<script>
+				{
+					 me('-').on('click', (ev) => me(ev).send('closeToast'));
+					 let target = me();
+					 let timeout = setTimeout(() => { target.removeAfterEvent('removing', 'animationend') }, 4000);
+					 target.on('closeToast', (ev) => { clearTimeout(timeout); target.removeAfterEvent('removing', 'animationend') });
+				}
+			</script>
 		</div>
 	</div>
 }

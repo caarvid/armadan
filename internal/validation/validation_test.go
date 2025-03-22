@@ -44,7 +44,7 @@ func TestValidateIdParam(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			req.SetPathValue(test.path, test.value)
-			id, err := v.ValidateIdParam(req)
+			id, err := v.ValidateIdParam(req, "id")
 
 			if test.expectsError {
 				assert.Error(t, err)

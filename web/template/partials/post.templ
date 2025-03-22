@@ -6,7 +6,7 @@ import "github.com/caarvid/armadan/internal/utils/markdown"
 import "github.com/caarvid/armadan/internal/armadan"
 
 templ PostCard(post armadan.Post) {
-	<div class="rounded-l border bg-card text-card-foreground shadow p-3">
+	<div class="rounded-l border bg-card text-card-foreground shadow-sm p-3 border-border/40">
 		<h3 class="font-semibold leading-none tracking-tight mb-2 text-2xl">{ post.Title }</h3>
 		<div class="mb-3 flex flex-col gap-4">
 			@templ.Raw(string(markdown.MdToHtml([]byte(post.Body))))
@@ -78,15 +78,20 @@ templ EditPost(post armadan.Post) {
 			<input required type="text" class="input" name="title" value={ post.Title }/>
 			<div class="flex justify-between">
 				<div class="flex gap-1">
-					<span class="p-1 hover:bg-slate-200/60 cursor-pointer" _="on click call textAction(#post-body, surround('**'))">
+					<span class="p-1 hover:bg-slate-200/60 cursor-pointer" data-surround="**">
 						@BoldIcon()
 					</span>
-					<span class="p-1 hover:bg-slate-200/60 cursor-pointer" _="on click call textAction(#post-body, surround('_'))">
+					<span class="p-1 hover:bg-slate-200/60 cursor-pointer" data-surround="_">
 						@ItalicIcon()
 					</span>
-					<span class="p-1 hover:bg-slate-200/60 cursor-pointer" _="on click call textAction(#post-body, surround('~~'))">
+					<span class="p-1 hover:bg-slate-200/60 cursor-pointer" data-surround="~~">
 						@StrikeTextIcon()
 					</span>
+					<script>
+						any('div > span', me()).on('click', (ev) => { 
+							textAction(me("#post-body"), surround(me(ev).attribute("data-surround")))
+						});	
+					</script>
 				</div>
 				<div class="flex items-center space-x-2">
 					<button
@@ -98,19 +103,21 @@ templ EditPost(post armadan.Post) {
 						hx-target="#preview-body"
 						hx-swap="innerHTML"
 						type="button"
-						_="
-							on input(target) from #post-body if target.value.length is not 0 then remove @disabled else add @disabled end 
-							on click toggle [@data-state=checked] on .switch-target 	
-								if @data-state is 'checked' then
-									trigger preview
-									hide #post-body then show #preview-body
-								else
-									show #post-body then hide #preview-body
-								end
-						"
 					>
 						<span class="switch-target switch-thumb"></span>
 					</button>
+					<script>
+						me('-').on('click', (ev) => {
+							if (me('span', me(ev)).setAttr("data-checked", (v) => v !== "true") === "true") {
+								me(ev).send("preview");	
+								me("#post-body").hide();
+								me("#preview-body").show();
+							} else {
+								me("#post-body").show();
+								me("#preview-body").hide();
+							}
+						});
+					</script>
 					<label for="preview" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Förhandsvisa</label>
 				</div>
 			</div>
@@ -119,8 +126,11 @@ templ EditPost(post armadan.Post) {
 				required
 				name="body"
 				rows="12"
-				class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+				class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 			>{ post.Body }</textarea>
+			<script>
+				me("-").on('input', (ev) => { me("#preview").disabled = me(ev).value.length === 0; })
+			</script>
 			<div id="preview-body" style="display: none" class="flex flex-col gap-4 mb-4"></div>
 			<input type="text" required class="input" name="author" value={ post.Author }/>
 		</form>
@@ -129,8 +139,10 @@ templ EditPost(post armadan.Post) {
 				form="edit-post-form"
 				class="btn-default"
 				type="submit"
-				_="on click wait for htmx:afterRequest(successful) from #edit-post-form if successful trigger closeModal"
 			>Spara</button>
 		</span>
+		<script>
+			me("#edit-post-form").onHtmxSuccess(() => me("#modal").send("closeModal"));
+		</script>
 	}
 }

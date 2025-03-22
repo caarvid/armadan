@@ -6,7 +6,7 @@ templ WeekTeeSelect(tees []armadan.Tee) {
 	<select name="teeId" class="select" id="tees" required>
 		<option hidden disabled selected value>Tee</option>
 		for _, tee := range tees {
-			<option value={ tee.ID.String() }>{ tee.Name }</option>
+			<option value={ tee.ID }>{ tee.Name }</option>
 		}
 	</select>
 }
