@@ -3,5 +3,8 @@
     "@tailwindcss/cli": "^4.0.15",
     "tailwindcss": "^4.0.0"
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "packageManager": "pnpm@8.6.2+sha1.343879a68ea9ba1427ee1392072c8ad68537c534"
 }

@@ -4,6 +4,11 @@ command_exists() {
         command -v "$1" >/dev/null 2>&1
 }
 
+# Check for node
+if ! command_exists node; then
+        echo "Node is required, please make sure it is installed and available"
+fi
+
 # Install Air
 if ! command_exists air; then
         echo "Air not found. Installing..."
