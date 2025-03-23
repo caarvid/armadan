@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"golang.org/x/crypto/argon2"
@@ -66,12 +67,17 @@ func GenerateHash(pass string, salt []byte) (*Password, error) {
 		return nil, err
 	}
 
+	saltLen, err := intToUint32(len(salt))
+	if err != nil {
+		return nil, err
+	}
+
 	p := &Password{
 		iter:    HashIter,
 		memory:  HashMemory,
 		threads: HashThreads,
 		keyLen:  KeyLen,
-		saltLen: uint32(len(salt)),
+		saltLen: saltLen,
 	}
 
 	p.Hash = argon2.IDKey([]byte(pass), salt, p.iter, p.memory, p.threads, p.keyLen)
@@ -108,8 +114,13 @@ func DecodeHash(encodedHash string) (*Password, error) {
 		return nil, err
 	}
 
+	saltLen, err := intToUint32(len(salt))
+	if err != nil {
+		return nil, err
+	}
+
 	p.Salt = salt
-	p.saltLen = uint32(len(salt))
+	p.saltLen = saltLen
 
 	hash, err := base64.RawStdEncoding.Strict().DecodeString(vals[5])
 	if err != nil {
@@ -117,7 +128,7 @@ func DecodeHash(encodedHash string) (*Password, error) {
 	}
 
 	p.Hash = hash
-	p.keyLen = uint32(len(salt))
+	p.keyLen = saltLen
 
 	return p, nil
 }
@@ -132,4 +143,12 @@ func generateSalt(length uint32) ([]byte, error) {
 	}
 
 	return salt, nil
+}
+
+func intToUint32(val int) (uint32, error) {
+	if val < 0 || val > math.MaxUint32 {
+		return 0, errors.New("could not convert int to uint32")
+	}
+
+	return uint32(val), nil
 }

@@ -63,8 +63,9 @@ func run(
 	)
 
 	httpServer := http.Server{
-		Addr:    fmt.Sprintf(":%s", port),
-		Handler: srv,
+		Addr:              fmt.Sprintf(":%s", port),
+		ReadHeaderTimeout: 3 * time.Second,
+		Handler:           srv,
 	}
 
 	eg, egCtx := errgroup.WithContext(ctx)

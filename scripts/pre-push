@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+info() {
+    echo -e "\n\033[1;34m[INFO]\033[0m $1"
+}
+
+error() {
+    echo -e "\n\033[1;31m[ERROR]\033[0m $1"
+}
+
+#Run tests
+info "Running tests..."
+if ! go test ./...; then
+    error "Tests failed. Push aborted."
+    exit 1
+fi
+
+info "Checking for security vulnerabilities..."
+if ! gosec -exclude-generated -quiet -severity=medium ./...; then
+    error "Security vulnerabilities found. Push aborted."
+    exit 1
+fi
+
+exit 0
