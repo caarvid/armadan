@@ -49,7 +49,7 @@ func TestValidateIdParam(t *testing.T) {
 			if test.expectsError {
 				assert.Error(t, err)
 			} else {
-				assert.Equal(t, test.value, id.String())
+				assert.Equal(t, test.value, id)
 				assert.NoError(t, err)
 			}
 

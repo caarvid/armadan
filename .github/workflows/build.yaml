@@ -2,8 +2,6 @@ name: CI
 
 on:
   push:
-    branches:
-      - "main"
     tags:
       - "v*"
 
@@ -18,9 +16,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: "./go.mod"
-
-      - name: "Build"
-        run: make ci/build
+      - run: |
+          go get ./.. 
+          go build -o ./dist/armadan ./cmd/armadan/main.go
 
       - name: "Login to ghcr.io"
         uses: docker/login-action@v1

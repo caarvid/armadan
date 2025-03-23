@@ -8,49 +8,62 @@ SERVICE_NAME ?= armadan
 
 export BUILD_VERSION := $(GIT_VERSION)
 
+
 .PHONY: clean
 clean:
+	@go clean
 	@rm -rf ./tmp ./dist
 
-.PHONE: install
-install:
+.PHONY: install/hooks
+install/hooks:
+	@echo "Installing Git hooks..."
+	@cp scripts/pre-commit .git/hooks/pre-commit
+	@cp scripts/pre-push .git/hooks/pre-push
+	@chmod +x .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-push
+	@echo "Git hooks installed."
+
+.PHONY: install/deps
+install/deps:
 	@go get ./...
-	@npm ci
+	@pnpm install --frozen-lockfile
+
+.PHONY: setup
+setup: clean install/hooks install/deps
+	@./scripts/setup
 
 ## DEV ##
 .PHONY: dev/templ
 dev/templ:
-	@templ generate --watch --proxy="http://localhost:$(PORT)" --open-browser=false
+	@templ generate --watch
 
 .PHONY: dev/css
 dev/css:
-	@npx --yes @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify --watch
+	@pnpx @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify --watch
 
 .PHONY: dev/sql
 dev/sql:
-	@go run github.com/air-verse/air@v1.61.1 \
+	@air \
 		--build.cmd "sqlc generate" \
 		--build.bin "true" \
 		--build.delay "100" \
-		--build.exclude_dir "" \
 		--build.include_dir "db" \
 		--build.include_ext "sql" \
 		--log.silent "true"
 
 .PHONY: dev/sync
 dev/sync:
-	@go run github.com/air-verse/air@v1.61.1 \
+	@air \
 		--build.cmd "templ generate --notify-proxy" \
 		--build.bin "true" \
 		--build.delay "100" \
-		--build.exclude_dir "" \
 		--build.include_dir "web/static" \
 		--build.include_ext "js,css" \
 		--log.silent "true"
 
 .PHONY: dev/server
 dev/server:
-	@go run github.com/air-verse/air@v1.61.1 \
+	@air \
 		--build.cmd "go build -o ./tmp/bin/main ./cmd/armadan/main.go" \
 		--build.bin "./tmp/bin/main" \
 		--build.delay "100" \
@@ -64,42 +77,24 @@ dev/server:
 
 .PHONY: dev
 dev:
-	make -j5 dev/templ dev/css dev/sql dev/sync dev/server 
+	make -j4 dev/templ dev/css dev/sql dev/server 
 
 ### BUILD ###
 .PHONY: build/css
 build/css: 
-	@npx --yes @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify
+	@npx @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify
 
-.PHONY: build/templ
-build/templ:  
-	@go run github.com/a-h/templ/cmd/templ@latest generate
+.PHONY: build/html
+build/html:  
+	@templ generate
 
 .PHONY: build/sql
 build/sql: 
-	@go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate 
-
-.PHONY: build/armadan
-build: clean build/css build/templ build/sql
-	@GOOS=linux GOARCH=amd64 go build -o ./dist/armadan ./cmd/armadan/main.go	
+	@sqlc generate 
 
 .PHONY: build/usertool
 build/usertool: 
 	@go build -o ./dist/usertool ./cmd/usertool/main.go	
-
-### DOCKER ###
-.PHONY: docker/build
-docker/build: build
-	@docker build \
-		--build-arg BUILD_VERSION=$(GIT_VERSION) \
-		-f ./Dockerfile \
-		-t $(SERVICE_NAME) .
-	@docker tag $(SERVICE_NAME):latest $(SERVICE_NAME):$(GIT_VERSION)
-
-### CI/CD ###
-.PHONY: ci/build
-ci/build: clean install
-	@GOOS=linux GOARCH=amd64 go build -o ./dist/armadan ./cmd/armadan/main.go	
 
 ### MIGRATIONS ###
 .PHONY: migrate/new
@@ -114,3 +109,6 @@ migrate/up:
 migrate/down:
 	@goose -dir ./db/migrations sqlite3 $(DB_PATH) down
 
+## HOOKS ##
+.PHONY: hooks/pre-commit
+hooks/pre-commit: build/css build/sql build/html

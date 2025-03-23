@@ -2,8 +2,7 @@ version: "3.8"
 
 services:
   app:
-    build: ..
-    container_name: armadan
+    container_name: ghcr.io/caarvid/armadan
     restart: unless-stopped
     environment:
       - DB_PATH=/var/lib/armadan/data/armadan.sqlite
