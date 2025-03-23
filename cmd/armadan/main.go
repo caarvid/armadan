@@ -111,8 +111,8 @@ var logLevelMap = map[string]zerolog.Level{
 }
 
 func init() {
-	flag.StringVar(&appEnv, "env", "development", "app environment")
-	flag.StringVar(&logLevel, "log_level", "INFO", "log level")
+	flag.StringVar(&appEnv, "env", os.Getenv("APP_ENV"), "app environment")
+	flag.StringVar(&logLevel, "log_level", os.Getenv("LOG_LEVEL"), "log level")
 
 	flag.StringVar(&dbPath, "dbPath", os.Getenv("DB_PATH"), "path to sqlite db")
 	flag.StringVar(&port, "port", os.Getenv("PORT"), "port, defaults to env.PORT")

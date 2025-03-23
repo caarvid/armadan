@@ -8,7 +8,6 @@ SERVICE_NAME ?= armadan
 
 export BUILD_VERSION := $(GIT_VERSION)
 
-
 .PHONY: clean
 clean:
 	@go clean
@@ -31,6 +30,16 @@ install/deps:
 .PHONY: setup
 setup: clean install/hooks install/deps
 	@./scripts/setup
+
+.PHONY: release
+release:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Error: VERSION is not set."; \
+		echo "Usage: make release VERSION=x.y.z"; \
+		exit 1; \
+	fi
+	git tag -a "v$(VERSION)" -m "Release v$(VERSION)"
+	git push origin "v$(VERSION)"
 
 ## DEV ##
 .PHONY: dev/templ
