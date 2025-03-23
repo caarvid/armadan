@@ -112,3 +112,4 @@ migrate/down:
 ## HOOKS ##
 .PHONY: hooks/pre-commit
 hooks/pre-commit: build/css build/sql build/html
+	@git add ./web/static/main.css
