@@ -1,16 +1,15 @@
-version: "3.8"
-
 services:
-  app:
-    container_name: ghcr.io/caarvid/armadan
-    restart: unless-stopped
+  armadan:
+    image: ghcr.io/caarvid/armadan:latest
+    container_name: armadan
+    restart: always
     environment:
-      - DB_PATH=/var/lib/armadan/data/armadan.sqlite
+      - DB_PATH=/data/armadan.sqlite
       - PORT=8080
       - APP_ENV=production
       - LOG_LEVEL=ERROR
     volumes:
-      - sqlitedb:/var/lib/armadan/data
+      - /srv/armadan/data:/data:rw
     expose:
       - "8080"
     networks:
@@ -19,18 +18,26 @@ services:
   nginx:
     image: nginx:latest
     container_name: nginx
-    restart: unless-stopped
+    restart: always
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./certs:/etc/letsencrypt
-      - ./nginx/html:/usr/share/nginx/html
+      - /srv/armadan/nginx:/etc/nginx/conf.d:ro
+      - /srv/armadan/ssl:/etc/letsencrypt:ro
+      - /srv/armadan/www:/var/www/certbot:ro
     depends_on:
-      - app
+      - armadan
     networks:
       - app-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    restart: always
+    volumes:
+      - /srv/armadan/ssl:/etc/letsencrypt
+      - /srv/armadan/www:/var/www/certbot
 
 networks:
   app-network:

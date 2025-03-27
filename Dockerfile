@@ -1,19 +1,3 @@
-# FROM alpine:3.20
-# WORKDIR /app
-#
-# COPY dist/armadan .
-# COPY web/static ./web/static
-#
-# RUN chmod +x armadan
-#
-# RUN adduser -D -u 10001 appuser
-# USER appuser
-#
-# ARG BUILD_VERSION
-# ENV BUILD_VERSION=${BUILD_VERSION}
-#
-# ENTRYPOINT ["./armadan"]
-
 FROM golang:1.24-alpine AS builder
 
 RUN apk update && apk add --no-cache sqlite-dev build-base
@@ -44,5 +28,3 @@ ARG BUILD_VERSION
 ENV BUILD_VERSION=${BUILD_VERSION}
 
 ENTRYPOINT ["./armadan"]
-
-
