@@ -50,9 +50,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-
     steps:
       - name: Deploy to Production
         uses: appleboy/ssh-action@master
@@ -64,5 +61,5 @@ jobs:
             cd ./armadan
             git pull
             make migrate/up
-            docker compose pull
-            docker compose up -f ./docker/compose.yml -d armadan nginx
+            docker compose -f ./docker/compose.yml pull
+            docker compose -f ./docker/compose.yml up -d armadan nginx
