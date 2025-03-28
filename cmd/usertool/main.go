@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database"
@@ -57,7 +58,7 @@ func init() {
 }
 
 func main() {
-	_, writeDB, err := database.Create()
+	_, writeDB, err := database.Create(os.Getenv("DB_PATH"))
 	if err != nil {
 		log.Fatal(err)
 	}

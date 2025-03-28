@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
@@ -41,7 +40,6 @@ func NewPostService(reader schema.Querier, writer schema.Querier, cache *cache.C
 }
 
 func (s *posts) All(ctx context.Context) ([]armadan.Post, error) {
-	fmt.Println("reading all posts")
 	if cachedPosts, found := s.cache.Get(POSTS_CACHE_KEY); found {
 		return cachedPosts.([]armadan.Post), nil
 	}

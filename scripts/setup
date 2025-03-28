@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+command_exists() {
+        command -v "$1" >/dev/null 2>&1
+}
+
+# Check for node
+if ! command_exists node; then
+        echo "Node is required, please make sure it is installed and available"
+fi
+
+# Install Air
+if ! command_exists air; then
+        echo "Air not found. Installing..."
+        go install github.com/air-verse/air@latest
+fi
+
+# Install Gosec
+if ! command_exists gosec; then
+        echo "Gosec not found. Installing..."
+        go install github.com/securego/gosec/v2/cmd/gosec@latest
+fi
+
+# Install Goose
+if ! command_exists goose; then
+        echo "Goose not found. Installing..."
+        go install github.com/pressly/goose/v3/cmd/goose@latest
+fi
+
+# Install Templ
+if ! command_exists templ; then
+        echo "Templ not found. Installing..."
+        go install github.com/a-h/templ/cmd/templ@latest
+fi
+
+# Install SQLC
+if ! command_exists sqlc; then
+        echo "SQLC not found. Installing..."
+        go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
+fi
+
