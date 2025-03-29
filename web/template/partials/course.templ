@@ -1,7 +1,6 @@
 package partials
 
 import "strconv"
-import "github.com/caarvid/armadan/internal/utils"
 import "fmt"
 import "github.com/caarvid/armadan/internal/armadan"
 
@@ -9,7 +8,7 @@ templ CourseRow(course armadan.Course) {
 	<tr class="tr group">
 		<td class="td">{ course.Name }</td>
 		<td class="td">{ strconv.Itoa(int(course.Par)) }</td>
-		<td class="td">{ utils.TeeNameList(course.Tees) }</td>
+		<td class="td">{ course.TeeList() }</td>
 		<td class="td">
 			<div class="flex gap-3 text-sm ml-auto justify-end">
 				<button

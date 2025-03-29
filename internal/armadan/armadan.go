@@ -25,7 +25,7 @@ func MapEntities[E, M any](entities []E, mapFn func(any) *M) []M {
 }
 
 func GetId() string {
-	return uuid.NewString()
+	return uuid.New().String()
 }
 
 func ParseTime(val string) time.Time {

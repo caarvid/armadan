@@ -6,6 +6,7 @@ import (
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
+	"github.com/caarvid/armadan/internal/utils/dateutil"
 	"github.com/patrickmn/go-cache"
 )
 
@@ -85,7 +86,7 @@ func (s *weeks) Get(ctx context.Context, id string) (*armadan.Week, error) {
 }
 
 func (s *weeks) Create(ctx context.Context, data *armadan.Week) (*armadan.Week, error) {
-	dates := armadan.GetWeekDates(int(data.Nr))
+	dates := dateutil.GetWeekDates(0, int(data.Nr))
 	week, err := s.dbWriter.CreateWeek(ctx, &schema.CreateWeekParams{
 		ID:         armadan.GetId(),
 		Nr:         data.Nr,
@@ -107,7 +108,7 @@ func (s *weeks) Create(ctx context.Context, data *armadan.Week) (*armadan.Week, 
 }
 
 func (s *weeks) Update(ctx context.Context, data *armadan.Week) (*armadan.Week, error) {
-	dates := armadan.GetWeekDates(int(data.Nr))
+	dates := dateutil.GetWeekDates(0, int(data.Nr))
 	week, err := s.dbWriter.UpdateWeek(ctx, &schema.UpdateWeekParams{
 		ID:        data.ID,
 		Nr:        data.Nr,

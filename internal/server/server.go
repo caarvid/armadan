@@ -15,6 +15,8 @@ func New(
 	sessionService armadan.SessionService,
 	courseService armadan.CourseService,
 	resultService armadan.ResultService,
+	resetPasswordService armadan.ResetPasswordService,
+	emailService armadan.EmailService,
 	validator armadan.Validator,
 ) http.Handler {
 	mux := http.NewServeMux()
@@ -28,6 +30,8 @@ func New(
 		sessionService,
 		courseService,
 		resultService,
+		resetPasswordService,
+		emailService,
 		validator,
 	)
 

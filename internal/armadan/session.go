@@ -21,5 +21,5 @@ type Session struct {
 }
 
 func (s *Session) IsValid() bool {
-	return s.ExpiresAt.After(time.Now())
+	return s.ExpiresAt.After(time.Now().UTC())
 }

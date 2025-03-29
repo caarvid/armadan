@@ -8,14 +8,17 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"slices"
+	"strings"
 	"syscall"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database"
 	"github.com/caarvid/armadan/internal/logger"
 	"github.com/caarvid/armadan/internal/server"
 	"github.com/caarvid/armadan/internal/service"
-	"github.com/caarvid/armadan/pkg/assert"
 	"github.com/patrickmn/go-cache"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -26,14 +29,23 @@ import (
 )
 
 var (
-	appEnv   string
-	logLevel string
-	dbPath   string
-	port     string
+	appEnv      string
+	logLevel    string
+	dbPath      string
+	port        string
+	logLevelMap = map[string]zerolog.Level{
+		"DEBUG": zerolog.DebugLevel,
+		"INFO":  zerolog.InfoLevel,
+		"WARN":  zerolog.WarnLevel,
+		"ERROR": zerolog.ErrorLevel,
+		"FATAL": zerolog.FatalLevel,
+		"OFF":   zerolog.Disabled,
+	}
 )
 
 func run(
 	ctx context.Context,
+	getEnv func(string) string,
 	_ []string,
 ) error {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
@@ -47,9 +59,20 @@ func run(
 	defer readDB.Close()
 	defer writeDB.Close()
 
+	awsConfig, err := config.LoadDefaultConfig(ctx)
+
+	if err != nil {
+		return err
+	}
+
 	dbReader := schema.New(readDB)
 	dbWriter := schema.New(writeDB)
 	cache := cache.New(30*time.Minute, 15*time.Minute)
+	emailOverride := getEnv("EMAIL_TARGET_OVERRIDE")
+
+	if appEnv == "production" {
+		emailOverride = ""
+	}
 
 	srv := server.New(
 		service.NewPostService(dbReader, dbWriter, cache),
@@ -59,6 +82,14 @@ func run(
 		service.NewSessionService(dbReader, dbWriter),
 		service.NewCourseService(dbReader, dbWriter, writeDB, cache),
 		service.NewResultService(dbReader, dbWriter, writeDB),
+		service.NewResetPasswordService(dbReader, dbWriter, writeDB),
+		service.NewEmailService(
+			armadan.Senders{
+				ResetPassword: getEnv("RESET_PASSWORD_EMAIL_SENDER"),
+			},
+			awsConfig,
+			emailOverride,
+		),
 		validation.New(),
 	)
 
@@ -101,33 +132,33 @@ func run(
 	return eg.Wait()
 }
 
-var logLevelMap = map[string]zerolog.Level{
-	"DEBUG": zerolog.DebugLevel,
-	"INFO":  zerolog.InfoLevel,
-	"WARN":  zerolog.WarnLevel,
-	"ERROR": zerolog.ErrorLevel,
-	"FATAL": zerolog.FatalLevel,
-	"OFF":   zerolog.Disabled,
+func setDefaultStringValue(key string, f *string, allowedValues []string, fallback string) {
+	if slices.Contains(allowedValues, *f) {
+		return
+	}
+
+	fmt.Printf("%s must be one of [%s], falling back to %s", key, strings.Join(allowedValues, ", "), fallback)
+
+	*f = fallback
 }
 
 func init() {
-	flag.StringVar(&appEnv, "env", os.Getenv("APP_ENV"), "app environment")
-	flag.StringVar(&logLevel, "log_level", os.Getenv("LOG_LEVEL"), "log level")
-
-	flag.StringVar(&dbPath, "dbPath", os.Getenv("DB_PATH"), "path to sqlite db")
+	flag.StringVar(&appEnv, "env", os.Getenv("APP_ENV"), "app environment, default to env.APP_ENV")
+	flag.StringVar(&logLevel, "log_level", os.Getenv("LOG_LEVEL"), "log level, default to env.LOG_LEVEL")
+	flag.StringVar(&dbPath, "db_path", os.Getenv("DB_PATH"), "path to sqlite db, defaults to env.DB_PATH")
 	flag.StringVar(&port, "port", os.Getenv("PORT"), "port, defaults to env.PORT")
 
 	flag.Parse()
 }
 
 func main() {
-	assert.OneOf(appEnv, []string{"development", "production", "test"}, "env must be one of [development, production, test]")
-	assert.OneOf(logLevel, []string{"DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF"}, "log_level must be one of [DEBUG, INFO, WARN, ERROR, FATAL, OFF]")
+	setDefaultStringValue("env", &appEnv, []string{"development", "production", "test"}, "production")
+	setDefaultStringValue("log level", &logLevel, []string{"DEBUG", "INFO", "WARN", "ERROR", "FATAL", "OFF"}, "ERROR")
 
 	ctx := context.Background()
 	log.Logger = logger.Create(logLevelMap[logLevel], appEnv == "development")
 
-	if err := run(ctx, os.Args); err != nil {
+	if err := run(ctx, os.Getenv, os.Args); err != nil {
 		log.Fatal().Err(err).Msg("an unexpected error occurred")
 	}
 }

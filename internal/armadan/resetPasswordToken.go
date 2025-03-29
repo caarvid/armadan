@@ -19,5 +19,5 @@ type ResetPasswordToken struct {
 }
 
 func (t *ResetPasswordToken) IsExpired() bool {
-	return t.ExpiresAt.Before(time.Now())
+	return time.Now().UTC().After(t.ExpiresAt.UTC())
 }

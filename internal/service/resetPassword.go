@@ -8,7 +8,6 @@ import (
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
 	"github.com/caarvid/armadan/internal/utils"
-	"github.com/google/uuid"
 )
 
 type resetPassword struct {
@@ -34,6 +33,7 @@ func (rp *resetPassword) Get(ctx context.Context, token string) (*armadan.ResetP
 	return &armadan.ResetPasswordToken{
 		ID:        resetToken.ID,
 		UserId:    resetToken.UserID,
+		Token:     resetToken.Token,
 		ExpiresAt: armadan.ParseTime(resetToken.ExpiresAt),
 	}, nil
 }
@@ -41,8 +41,8 @@ func (rp *resetPassword) Get(ctx context.Context, token string) (*armadan.ResetP
 func (rp *resetPassword) Create(ctx context.Context, userId string) (*armadan.ResetPasswordToken, error) {
 	resetToken, err := rp.dbWriter.CreateResetPasswordToken(ctx, &schema.CreateResetPasswordTokenParams{
 		UserID:    userId,
-		Token:     uuid.NewString(),
-		ExpiresAt: time.Now().Add(15 * time.Minute).Format(armadan.DEFAULT_TIME_FORMAT),
+		Token:     armadan.GetId(),
+		ExpiresAt: time.Now().UTC().Add(15 * time.Minute).Format(armadan.DEFAULT_TIME_FORMAT),
 	})
 	if err != nil {
 		return nil, err

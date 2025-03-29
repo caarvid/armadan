@@ -7,77 +7,9 @@ import (
 	"github.com/caarvid/armadan/internal/utils"
 	"github.com/caarvid/armadan/internal/utils/response"
 	"github.com/caarvid/armadan/internal/utils/session"
+	"github.com/caarvid/armadan/web/template/views"
 	"github.com/rs/zerolog"
 )
-
-func ResetPassword(rps armadan.ResetPasswordService, v armadan.Validator) http.Handler {
-	type resetPasswordData struct {
-		ResetToken     string `json:"resetToken" validate:"required"`
-		NewPassword    string `json:"newPassword" validate:"required"`
-		RepeatPassword string `json:"repeatPassword" validate:"required"`
-	}
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		l := zerolog.Ctx(r.Context()).With().Str("location", "handlers:resetPassword").Logger()
-
-		data := &resetPasswordData{}
-		if err := v.Validate(r, data); err != nil {
-			l.Error().AnErr("raw_err", err).Msg("validation failed")
-			return
-		}
-
-		if data.NewPassword != data.RepeatPassword {
-			return
-		}
-
-		token, err := rps.Get(r.Context(), data.ResetToken)
-		if err != nil {
-			return
-		}
-
-		if token.IsExpired() {
-			l.Warn().Msg("reset password failed :: token expired")
-			return
-		}
-
-		if err = rps.UpdateUserPassword(r.Context(), token, data.NewPassword); err != nil {
-			l.Error().AnErr("raw_err", err).Msg("reset password failed :: could not set new password")
-			return
-		}
-
-		// return to login here with success toast?
-	})
-}
-
-func ForgotPassword(us armadan.UserService, rps armadan.ResetPasswordService, v armadan.Validator) http.Handler {
-	type forgotPasswordData struct {
-		Email string `json:"email" validate:"required"`
-	}
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		l := zerolog.Ctx(r.Context()).With().Str("location", "handlers:forgotPassword").Logger()
-
-		data := &forgotPasswordData{}
-		if err := v.Validate(r, data); err != nil {
-			l.Error().AnErr("raw_err", err).Msg("validation failed")
-			return
-		}
-
-		user, err := us.GetByEmail(r.Context(), data.Email)
-		if err != nil {
-			// send success toast here to not leak email info
-			return
-		}
-
-		_, err = rps.Create(r.Context(), user.ID)
-		if err != nil {
-			l.Error().AnErr("raw_err", err).Msg("failed to create reset password token")
-			return
-		}
-
-		// return success toast and start separate go routine to send reset email
-	})
-}
 
 func Login(us armadan.UserService, ss armadan.SessionService, v armadan.Validator) http.Handler {
 	type loginData struct {
@@ -154,5 +86,88 @@ func Logout(s armadan.SessionService) http.Handler {
 		session.ClearCookie(w)
 		w.Header().Add("HX-Redirect", "/login")
 		w.WriteHeader(http.StatusOK)
+	})
+}
+
+func ForgotPassword(us armadan.UserService, rps armadan.ResetPasswordService, es armadan.EmailService, v armadan.Validator) http.Handler {
+	type forgotPasswordData struct {
+		Email string `json:"email" validate:"required,email"`
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		l := zerolog.Ctx(r.Context()).With().Str("location", "handlers:forgotPassword").Logger()
+
+		data := &forgotPasswordData{}
+		if err := v.Validate(r, data); err != nil {
+			l.Error().AnErr("raw_err", err).Msg("validation failed")
+			return
+		}
+
+		user, err := us.GetByEmail(r.Context(), data.Email)
+		if err != nil {
+			l.Error().AnErr("raw_err", err).Msgf("reset password :: email %s not found", data.Email)
+			response.ResetPasswordEmailSent(w, r, data.Email)
+			return
+		}
+
+		rsToken, err := rps.Create(r.Context(), user.ID)
+		if err != nil {
+			l.Error().AnErr("raw_err", err).Msg("failed to create reset password token")
+			response.ResetPasswordEmailSent(w, r, data.Email)
+			return
+		}
+
+		go func(token string) {
+			if err := es.SendResetPassword(user.Email, token); err != nil {
+				l.Error().AnErr("raw_err", err).Msg("failed to send reset password email")
+			}
+		}(rsToken.Token)
+
+		response.ResetPasswordEmailSent(w, r, data.Email)
+	})
+}
+
+func ResetPassword(rps armadan.ResetPasswordService, v armadan.Validator) http.Handler {
+	type resetPasswordData struct {
+		ResetToken     string `json:"resetToken" validate:"required,uuid4"`
+		NewPassword    string `json:"newPassword" validate:"required"`
+		RepeatPassword string `json:"repeatPassword" validate:"required"`
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		l := zerolog.Ctx(r.Context()).With().Str("location", "handlers:resetPassword").Logger()
+
+		data := &resetPasswordData{}
+		if err := v.Validate(r, data); err != nil {
+			l.Error().AnErr("raw_err", err).Msg("validation failed")
+			response.ResetPasswordMessage(w, r, "Något gick fel, försök igen", "error")
+			return
+		}
+
+		if data.NewPassword != data.RepeatPassword {
+			response.ResetPasswordMessage(w, r, "Lösenord måste vara lika", "error")
+			return
+		}
+
+		token, err := rps.Get(r.Context(), data.ResetToken)
+		if err != nil {
+			response.ResetPasswordMessage(w, r, "Något gick fel, försök igen", "error")
+			return
+		}
+
+		if token.IsExpired() {
+			l.Warn().Msg("reset password failed :: token expired")
+			response.ResetPasswordMessage(w, r, "Denna länk har gått ut", "error")
+			return
+		}
+
+		if err = rps.UpdateUserPassword(r.Context(), token, data.NewPassword); err != nil {
+			l.Error().AnErr("raw_err", err).Msg("reset password failed :: could not set new password")
+			response.ResetPasswordMessage(w, r, "Något gick fel, försök igen", "error")
+			return
+		}
+
+		w.Header().Add("HX-Replace-Url", "/login")
+		response.New(w, r, views.Login()).WithSuccess("Lösenord återställt").HTML()
 	})
 }

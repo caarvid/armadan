@@ -70,7 +70,9 @@ func ForgotPasswordView() http.Handler {
 
 func ResetPasswordView() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		views.ResetPassword().Render(r.Context(), w)
+		token := r.URL.Query().Get("token")
+
+		views.ResetPassword(token).Render(r.Context(), w)
 	})
 }
 

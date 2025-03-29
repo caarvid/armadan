@@ -88,6 +88,11 @@ dev/server:
 dev:
 	make -j4 dev/templ dev/css dev/sql dev/server 
 
+### TESTING ###
+.PHONY: test
+test:
+	@go test ./...	
+
 ### BUILD ###
 .PHONY: build/css
 build/css: 
@@ -101,9 +106,14 @@ build/html:
 build/sql: 
 	@sqlc generate 
 
-.PHONY: build/usertool
-build/usertool: 
-	@go build -o ./dist/usertool ./cmd/usertool/main.go	
+.PHONY: build
+build: clean build/css build/html build/sql 
+	@go build -o dist/armadan ./cmd/armadan/main.go
+
+### TOOLS ###
+.PHONY: tools/create_user
+tools/create_user:
+	@go run ./tools/create_user.go --email=$(EMAIL) --password=$(PASSWORD) --role=$(ROLE) 
 
 ### MIGRATIONS ###
 .PHONY: migrate/new

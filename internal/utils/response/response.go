@@ -2,6 +2,7 @@ package response
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 
 	"github.com/a-h/templ"
@@ -46,6 +47,28 @@ func (rb *ResponseBuilder) WithError(msg string) *ResponseBuilder {
 
 func (rb *ResponseBuilder) HTML() {
 	rb.res.Write(rb.buf.Bytes())
+}
+
+func ResetPasswordEmailSent(w http.ResponseWriter, r *http.Request, email string) {
+	w.Header().Add("HX-Retarget", "#forgot-password-message")
+	w.Header().Add("HX-Reselect", "#forgot-password-message")
+	w.WriteHeader(http.StatusOK)
+
+	partials.ForgotPasswordMessage(fmt.Sprintf("En återställningslänk har skickats till %s", email)).Render(r.Context(), w)
+}
+
+func ResetPasswordMessage(w http.ResponseWriter, r *http.Request, msg, t string) {
+	status := http.StatusOK
+
+	if t == "error" {
+		status = http.StatusUnprocessableEntity
+	}
+
+	w.Header().Add("HX-Retarget", "#reset-password-message")
+	w.Header().Add("HX-Reselect", "#reset-password-message")
+	w.WriteHeader(status)
+
+	partials.ResetPasswordMessage(msg, t).Render(r.Context(), w)
 }
 
 func InvalidCredentialsError(w http.ResponseWriter, r *http.Request) {
