@@ -1,17 +1,17 @@
 package armadan
 
 const RESET_PASSWORD_EMAIL_TEMPLATE_TEXT = `
-	Återställ ditt lösenord
+Återställ ditt lösenord
 
-	Vi har fått en begäran om att återställa ditt lösenord. Följ länken nedan för att välja ett nytt lösenord:
+Vi har fått en begäran om att återställa ditt lösenord. Följ länken nedan för att välja ett nytt lösenord:
 
-	%s
+%s
 
-	Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
+Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
 
-	Med vänliga hälsningar,  
-	Armadan support
-`
+Med vänliga hälsningar,  
+Armadan support
+` // #nosec G101 -- False positive
 
 const RESET_PASSWORD_EMAIL_TEMPLATE_HTML = `
 <!DOCTYPE html>
@@ -32,7 +32,7 @@ const RESET_PASSWORD_EMAIL_TEMPLATE_HTML = `
     </div>
 </body>
 </html>
-`
+` // #nosec G101 -- False positive
 
 type EmailService interface {
 	SendResetPassword(string, string) error
