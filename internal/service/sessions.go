@@ -56,10 +56,10 @@ func (s *sessions) GetByToken(ctx context.Context, token string) (*armadan.Sessi
 
 func getExpiration(keepLoggedIn bool) string {
 	if keepLoggedIn {
-		return time.Now().Add(30 * 24 * time.Hour).Format("2006-01-02 15:04:05")
+		return time.Now().UTC().Add(30 * 24 * time.Hour).Format("2006-01-02 15:04:05")
 	}
 
-	return time.Now().Add(1 * time.Hour).Format("2006-01-02 15:04:05")
+	return time.Now().UTC().Add(1 * time.Hour).Format("2006-01-02 15:04:05")
 }
 
 func (s *sessions) Create(ctx context.Context, id string, keepLoggedIn bool) (*armadan.Session, error) {

@@ -3,11 +3,10 @@ services:
     image: ghcr.io/caarvid/armadan:latest
     container_name: armadan
     restart: always
+    env_file: ../.env
     environment:
-      - DB_PATH=/data/armadan.sqlite
       - PORT=8080
       - APP_ENV=production
-      - LOG_LEVEL=ERROR
     volumes:
       - /srv/armadan/data:/data:rw
     expose:
@@ -23,7 +22,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /srv/armadan/nginx:/etc/nginx/conf.d:ro
+      - /srv/armadan/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
       - /srv/armadan/ssl:/etc/letsencrypt:ro
       - /srv/armadan/www:/var/www/certbot:ro
     depends_on:
@@ -34,7 +33,6 @@ services:
   certbot:
     image: certbot/certbot
     container_name: certbot
-    restart: always
     volumes:
       - /srv/armadan/ssl:/etc/letsencrypt
       - /srv/armadan/www:/var/www/certbot

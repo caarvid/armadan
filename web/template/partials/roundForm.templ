@@ -3,7 +3,6 @@ package partials
 import "fmt"
 import (
 	"github.com/caarvid/armadan/internal/armadan"
-	courseUtils "github.com/caarvid/armadan/internal/utils/course"
 )
 
 templ NewRoundRow(hole armadan.Hole, bottomBorder bool) {
@@ -71,7 +70,7 @@ templ RoundForm(
 				}
 				<tr class="tr bg-muted/80 hover:bg-muted/80 font-medium text-muted-foreground border-border!">
 					<td class="td text-center">UT</td>
-					<td class="td text-center">{ fmt.Sprint(courseUtils.GetParInfo(course).Out) }</td>
+					<td class="td text-center">{ fmt.Sprint(course.ParInfo().Out) }</td>
 					<td class="td text-center border-r">-</td>
 					<td id="round-out" class="td text-center">0</td>
 				</tr>
@@ -80,13 +79,13 @@ templ RoundForm(
 				}
 				<tr class="tr bg-muted/80 hover:bg-muted/80 font-medium border-b-0 text-muted-foreground">
 					<td class="td text-center">IN</td>
-					<td class="td text-center">{ fmt.Sprint(courseUtils.GetParInfo(course).In) }</td>
+					<td class="td text-center">{ fmt.Sprint(course.ParInfo().In) }</td>
 					<td class="td text-center border-r">-</td>
 					<td id="round-in" class="td text-center">0</td>
 				</tr>
 				<tr class="tr bg-muted/80 hover:bg-muted/80 font-medium border-b border-border! text-muted-foreground">
 					<td class="td text-center">UT</td>
-					<td class="td text-center">{ fmt.Sprint(courseUtils.GetParInfo(course).Out) }</td>
+					<td class="td text-center">{ fmt.Sprint(course.ParInfo().Out) }</td>
 					<td class="td text-center border-r">-</td>
 					<td id="round-out-end" class="td text-center">0</td>
 				</tr>
@@ -185,7 +184,7 @@ templ EditRoundModal(
 					}
 					<tr class="tr bg-muted/80 hover:bg-muted/80 font-medium text-muted-foreground border-border!">
 						<td class="td text-center">UT</td>
-						<td class="td text-center">{ fmt.Sprint(courseUtils.GetParInfo(course).Out) }</td>
+						<td class="td text-center">{ fmt.Sprint(course.ParInfo().Out) }</td>
 						<td class="td text-center border-r">-</td>
 						<td id="round-out" class="td text-center">{ fmt.Sprint(round.GrossOut) }</td>
 					</tr>
@@ -194,13 +193,13 @@ templ EditRoundModal(
 					}
 					<tr class="tr bg-muted/80 hover:bg-muted/80 font-medium border-b-0 text-muted-foreground">
 						<td class="td text-center">IN</td>
-						<td class="td text-center">{ fmt.Sprint(courseUtils.GetParInfo(course).In) }</td>
+						<td class="td text-center">{ fmt.Sprint(course.ParInfo().In) }</td>
 						<td class="td text-center border-r">-</td>
 						<td id="round-in" class="td text-center">{ fmt.Sprint(round.GrossIn) }</td>
 					</tr>
 					<tr class="tr bg-muted/80 hover:bg-muted/80 font-medium border-b border-border! text-muted-foreground">
 						<td class="td text-center">UT</td>
-						<td class="td text-center">{ fmt.Sprint(courseUtils.GetParInfo(course).Out) }</td>
+						<td class="td text-center">{ fmt.Sprint(course.ParInfo().Out) }</td>
 						<td class="td text-center border-r">-</td>
 						<td id="round-out-end" class="td text-center">{ fmt.Sprint(round.GrossOut) }</td>
 					</tr>

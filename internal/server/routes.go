@@ -18,6 +18,8 @@ func setupRoutes(
 	sessionService armadan.SessionService,
 	courseService armadan.CourseService,
 	resultService armadan.ResultService,
+	resetPasswordService armadan.ResetPasswordService,
+	emailService armadan.EmailService,
 	validator armadan.Validator,
 ) {
 	api := http.NewServeMux()
@@ -97,6 +99,8 @@ func setupRoutes(
 	// Auth
 	auth.Handle("POST /login", h.Login(userService, sessionService, validator))
 	auth.Handle("GET /logout", protected(h.Logout(sessionService)))
+	auth.Handle("POST /forgot-password", h.ForgotPassword(userService, resetPasswordService, emailService, validator))
+	auth.Handle("POST /reset-password", h.ResetPassword(resetPasswordService, validator))
 
 	// Healthz
 	api.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {

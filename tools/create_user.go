@@ -14,14 +14,13 @@ import (
 )
 
 var (
-	create   bool
 	email    string
 	password string
 	role     string
 )
 
 func createUser(writer schema.Querier) {
-	ctx := context.TODO()
+	ctx := context.Background()
 	hash, err := utils.GenerateHash(password, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -47,17 +46,13 @@ func createUser(writer schema.Querier) {
 	fmt.Println("User created!")
 }
 
-func init() {
-	flag.BoolVar(&create, "create", false, "create user")
-
+func main() {
 	flag.StringVar(&email, "email", "", "user email")
 	flag.StringVar(&password, "password", "", "user password")
 	flag.StringVar(&role, "role", "user", "user role")
 
 	flag.Parse()
-}
 
-func main() {
 	_, writeDB, err := database.Create(os.Getenv("DB_PATH"))
 	if err != nil {
 		log.Fatal(err)
@@ -65,7 +60,5 @@ func main() {
 
 	dbWriter := schema.New(writeDB)
 
-	if create {
-		createUser(dbWriter)
-	}
+	createUser(dbWriter)
 }
