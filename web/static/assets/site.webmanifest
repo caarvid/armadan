@@ -1,0 +1,36 @@
+{
+  "short_name": "Armadan",
+  "name": "Armadan",
+  "start_url": "https://armadan.se",
+  "scope": "https://armadan.se",
+  "orientation": "natural",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+        "src": "/public/assets/favicon_192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+    },
+    {
+        "src": "/public/assets/favicon_512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Schema",
+      "url": "/schedule"
+    },
+    {
+      "name": "Ledartavla",
+      "url": "/leaderboard"
+    },
+    {
+      "name": "Resultat",
+      "url": "/results"
+    }
+  ]
+}
