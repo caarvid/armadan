@@ -3,6 +3,7 @@ package views
 import (
 	"github.com/caarvid/armadan/web/template/partials"
 	"github.com/caarvid/armadan/internal/utils/user"
+	"os"
 )
 
 type item struct {
@@ -56,6 +57,10 @@ templ sidebarList() {
 	</ul>
 }
 
+func getAppVersion() string {
+	return os.Getenv("BUILD_VERSION")
+}
+
 templ adminSidebar() {
 	<aside class="relative flex min-w-0 shrink-0 grow-0 basis-48 border-r">
 		<div class="flex pt-6 flex-col w-full">
@@ -72,6 +77,7 @@ templ adminSidebar() {
 				}
 			}
 		</div>
+		<div class="absolute text-primary/30 bottom-5 left-[50%] translate-x-[-50%]">{ getAppVersion() }</div>
 	</aside>
 }
 
