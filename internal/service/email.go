@@ -14,12 +14,12 @@ import (
 	"golang.org/x/time/rate"
 )
 
-const dailyLimit = 200
+const dailyLimit = 1000
 
 var (
 	dailyCalls int
 	dailyReset = time.Now().Truncate(time.Hour * 24).Add(time.Hour * 24)
-	limiter    = rate.NewLimiter(rate.Every(time.Second), 1)
+	limiter    = rate.NewLimiter(rate.Every(time.Second), 14)
 	mu         sync.Mutex
 )
 

@@ -7,6 +7,7 @@ import (
 	"github.com/caarvid/armadan/internal/utils"
 	"github.com/caarvid/armadan/internal/utils/response"
 	"github.com/caarvid/armadan/internal/utils/session"
+	"github.com/caarvid/armadan/internal/validation"
 	"github.com/caarvid/armadan/web/template/views"
 	"github.com/rs/zerolog"
 )
@@ -129,9 +130,9 @@ func ForgotPassword(us armadan.UserService, rps armadan.ResetPasswordService, es
 
 func ResetPassword(rps armadan.ResetPasswordService, v armadan.Validator) http.Handler {
 	type resetPasswordData struct {
-		ResetToken     string `json:"resetToken" validate:"required,uuid4"`
-		NewPassword    string `json:"newPassword" validate:"required"`
-		RepeatPassword string `json:"repeatPassword" validate:"required"`
+		ResetToken     string `json:"resetToken"`
+		NewPassword    string `json:"newPassword" validate:"required,min=8"`
+		RepeatPassword string `json:"repeatPassword" validate:"required,min=8"`
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -140,6 +141,17 @@ func ResetPassword(rps armadan.ResetPasswordService, v armadan.Validator) http.H
 		data := &resetPasswordData{}
 		if err := v.Validate(r, data); err != nil {
 			l.Error().AnErr("raw_err", err).Msg("validation failed")
+
+			// TODO: make this nicer?
+			if vErr, ok := err.(validation.FieldErrors); ok {
+				for _, e := range vErr {
+					if e.Tag == "min" {
+						response.ResetPasswordMessage(w, r, "Lösenord måste vara minst 8 karaktärer", "error")
+						return
+					}
+				}
+			}
+
 			response.ResetPasswordMessage(w, r, "Något gick fel, försök igen", "error")
 			return
 		}

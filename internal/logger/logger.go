@@ -6,6 +6,7 @@ import (
 	"runtime/debug"
 	"time"
 
+	"github.com/caarvid/armadan/internal/utils/apputil"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
 )
@@ -34,7 +35,7 @@ func Create(logLevel zerolog.Level, isDev bool) zerolog.Logger {
 		Level(logLevel).
 		With().
 		Timestamp().
-		Str("build_version", os.Getenv("BUILD_VERSION")).
+		Str("build_version", apputil.Version()).
 		Str("go_version", buildInfo.GoVersion).
 		Logger()
 }

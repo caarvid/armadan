@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const DEFAULT_TIME_FORMAT = "2006-01-02 15:04:05"
+const DEFAULT_TIME_FORMAT = time.DateTime
 
 type Validator interface {
 	ValidateIdParam(*http.Request, string) (string, error)

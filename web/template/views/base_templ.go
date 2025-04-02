@@ -8,6 +8,9 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "fmt"
+import "github.com/caarvid/armadan/internal/utils/apputil"
+
 func document(title string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -36,13 +39,26 @@ func document(title string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/base.templ`, Line: 7, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/base.templ`, Line: 10, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta charset=\"UTF-8\"><meta name=\"description\" content=\"Sign in to your Armadan account and access the latest results, see the leaderboard and more.\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/public/assets/favicon.svg\"><link rel=\"icon\" sizes=\"32x32\" type=\"image/png\" href=\"/public/assets/favicon_32.png\"><link rel=\"icon\" sizes=\"192x192\" type=\"image/png\" href=\"/public/assets/favicon_192.png\"><link rel=\"icon\" sizes=\"512x512\" type=\"image/png\" href=\"/public/assets/favicon_512.png\"><link rel=\"apple-touch-icon\" href=\"/public/assets/apple_touch_icon.png\"><link rel=\"manifest\" href=\"/public/assets/site.webmanifest\"><link rel=\"stylesheet\" href=\"/public/main.css\"><script src=\"/public/scripts/htmx.min.js\"></script><script src=\"/public/scripts/surreal.min.js\"></script><script src=\"/public/scripts/json-form.js\" defer></script><script src=\"/public/scripts/editor-utils.js\" defer></script><script>\n\t\t\t\thtmx.config.allowNestedOobSwaps = false;\n\t\t\t\thtmx.config.responseHandling.unshift({ code: \"422\", swap: true });\n\t\t\t\tfunction customPlugin(e) {\n\t\t\t\t\tfunction toggle(e, val) {\n\t\t\t\t\t\te.style.display = val ? null : 'none';\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\t\t\t\t\tfunction toggleAttr(e, key, fn) {\n\t\t\t\t\t\te.attr(key, fn(e.attr(key)));\n\t\t\t\t\t\treturn e.attr(key);\n\t\t\t\t\t}\n\t\t\t\t\tfunction once(e, name, fn) {\n\t\t\t\t\t\te.addEventListener(name, fn, { once: true });\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\t\t\t\t\tfunction onHtmxSuccess(e, fn) {\n\t\t\t\t\t\te.on('htmx:afterRequest', (ev) => {\n\t\t\t\t\t\t\tif (ev.detail.successful) {\n\t\t\t\t\t\t\t\tfn(ev, e);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\t\t\t\t\tfunction removeAfterEvent(e, cl, ev) {\n\t\t\t\t\t\te.addClass(cl).once(ev, () => e.remove());\n\t\t\t\t\t\treturn e\n\t\t\t\t\t}\n\t\t\t\t\tfunction onMutation(e, fn) {\n\t\t\t\t\t\tlet observer = new MutationObserver((list) => {\n\t\t\t\t\t\t\tfor (const mutation of list) {\n\t\t\t\t\t\t\t\tif (mutation.type === \"childList\") { \n\t\t\t\t\t\t\t\t\tfn(e); \n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t\tobserver.observe(e, { childList: true } );\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\n\t\t\t\t\te.toggle = (val) => toggle(e, val);\n\t\t\t\t\te.hide = () => toggle(e, false);\n\t\t\t\t\te.show = () => toggle(e, true);\n\t\t\t\t\te.setAttr = (k, fn) => toggleAttr(e, k, fn);\n\t\t\t\t\te.once = (name, fn) => once(e, name, fn);\n\t\t\t\t\te.onHtmxSuccess = (fn) => onHtmxSuccess(e, fn);\n\t\t\t\t\te.removeAfterEvent = (cl, ev) => removeAfterEvent(e, cl, ev);\n\t\t\t\t\te.onMutation = (fn) => onMutation(e, fn);\n\t\t\t\t}\n\t\t\t\tsurreal.plugins.push(customPlugin);\n\t\t\t</script></head><body class=\"overflow-y-hidden\"><section class=\"overflow-y-hidden flex flex-auto flex-col min-h-dvh max-h-dvh\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta charset=\"UTF-8\"><meta name=\"description\" content=\"Sign in to your Armadan account and access the latest results, see the leaderboard and more.\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/public/assets/favicon.svg\"><link rel=\"icon\" sizes=\"32x32\" type=\"image/png\" href=\"/public/assets/favicon_32.png\"><link rel=\"icon\" sizes=\"192x192\" type=\"image/png\" href=\"/public/assets/favicon_192.png\"><link rel=\"icon\" sizes=\"512x512\" type=\"image/png\" href=\"/public/assets/favicon_512.png\"><link rel=\"apple-touch-icon\" href=\"/public/assets/apple_touch_icon.png\"><link rel=\"manifest\" href=\"/public/assets/site.webmanifest\"><link rel=\"stylesheet\" href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/public/main.css?v=%s", apputil.Version()))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/views/base.templ`, Line: 20, Col: 88}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><script src=\"/public/scripts/htmx-204.min.js\"></script><script src=\"/public/scripts/surreal.min.js\"></script><script src=\"/public/scripts/json-form.js\" defer></script><script src=\"/public/scripts/editor-utils.js\" defer></script><script>\n\t\t\t\thtmx.config.allowNestedOobSwaps = false;\n\t\t\t\thtmx.config.responseHandling.unshift({ code: \"422\", swap: true });\n\t\t\t\tfunction customPlugin(e) {\n\t\t\t\t\tfunction toggle(e, val) {\n\t\t\t\t\t\te.style.display = val ? null : 'none';\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\t\t\t\t\tfunction toggleAttr(e, key, fn) {\n\t\t\t\t\t\te.attr(key, fn(e.attr(key)));\n\t\t\t\t\t\treturn e.attr(key);\n\t\t\t\t\t}\n\t\t\t\t\tfunction once(e, name, fn) {\n\t\t\t\t\t\te.addEventListener(name, fn, { once: true });\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\t\t\t\t\tfunction onHtmxSuccess(e, fn) {\n\t\t\t\t\t\te.on('htmx:afterRequest', (ev) => {\n\t\t\t\t\t\t\tif (ev.detail.successful) {\n\t\t\t\t\t\t\t\tfn(ev, e);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\t\t\t\t\tfunction removeAfterEvent(e, cl, ev) {\n\t\t\t\t\t\te.addClass(cl).once(ev, () => e.remove());\n\t\t\t\t\t\treturn e\n\t\t\t\t\t}\n\t\t\t\t\tfunction onMutation(e, fn) {\n\t\t\t\t\t\tlet observer = new MutationObserver((list) => {\n\t\t\t\t\t\t\tfor (const mutation of list) {\n\t\t\t\t\t\t\t\tif (mutation.type === \"childList\") { \n\t\t\t\t\t\t\t\t\tfn(e); \n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t\tobserver.observe(e, { childList: true } );\n\t\t\t\t\t\treturn e;\n\t\t\t\t\t}\n\n\t\t\t\t\te.toggle = (val) => toggle(e, val);\n\t\t\t\t\te.hide = () => toggle(e, false);\n\t\t\t\t\te.show = () => toggle(e, true);\n\t\t\t\t\te.setAttr = (k, fn) => toggleAttr(e, k, fn);\n\t\t\t\t\te.once = (name, fn) => once(e, name, fn);\n\t\t\t\t\te.onHtmxSuccess = (fn) => onHtmxSuccess(e, fn);\n\t\t\t\t\te.removeAfterEvent = (cl, ev) => removeAfterEvent(e, cl, ev);\n\t\t\t\t\te.onMutation = (fn) => onMutation(e, fn);\n\t\t\t\t}\n\t\t\t\tsurreal.plugins.push(customPlugin);\n\t\t\t</script></head><body class=\"overflow-y-hidden\"><section class=\"overflow-y-hidden flex flex-auto flex-col min-h-dvh max-h-dvh\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +66,7 @@ func document(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</section><div id=\"toast-list\" class=\"absolute flex flex-col top-2 left-[50%] translate-x-[-50%] gap-3\"></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</section><div id=\"toast-list\" class=\"absolute flex flex-col top-2 left-[50%] translate-x-[-50%] gap-3\"></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
