@@ -48,7 +48,7 @@ dev/templ:
 
 .PHONY: dev/css
 dev/css:
-	@pnpx @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify --watch
+	@npx @tailwindcss/cli -i ./web/css/style.css -o ./web/static/main.css --minify --watch
 
 .PHONY: dev/sql
 dev/sql:
@@ -118,15 +118,15 @@ tools/create_user:
 ### MIGRATIONS ###
 .PHONY: migrate/new
 migrate/new:
-	@goose -dir ./db/migrations sqlite3 $(DB_PATH) create $(name) sql
+	@goose -dir ./db/migrations sqlite3 $(DB_PATH_MIGRATIONS) create $(name) sql
 
 .PHONY: migrate/up
 migrate/up:
-	@goose -dir ./db/migrations sqlite3 $(DB_PATH) up
+	@goose -dir ./db/migrations sqlite3 $(DB_PATH_MIGRATIONS) up
 
 .PHONY: migrate/down
 migrate/down:
-	@goose -dir ./db/migrations sqlite3 $(DB_PATH) down
+	@goose -dir ./db/migrations sqlite3 $(DB_PATH_MIGRATIONS) down
 
 ## HOOKS ##
 .PHONY: hooks/pre-commit

@@ -1,5 +1,8 @@
 package views
 
+import "fmt"
+import "github.com/caarvid/armadan/internal/utils/apputil"
+
 templ document(title string) {
 	<!DOCTYPE html>
 	<html lang="se">
@@ -14,8 +17,8 @@ templ document(title string) {
 			<link rel="icon" sizes="512x512" type="image/png" href="/public/assets/favicon_512.png"/>
 			<link rel="apple-touch-icon" href="/public/assets/apple_touch_icon.png"/>
 			<link rel="manifest" href="/public/assets/site.webmanifest"/>
-			<link rel="stylesheet" href="/public/main.css"/>
-			<script src="/public/scripts/htmx.min.js"></script>
+			<link rel="stylesheet" href={ fmt.Sprintf("/public/main.css?v=%s", apputil.Version()) }/>
+			<script src="/public/scripts/htmx-204.min.js"></script>
 			<script src="/public/scripts/surreal.min.js"></script>
 			<script src="/public/scripts/json-form.js" defer></script>
 			<script src="/public/scripts/editor-utils.js" defer></script>

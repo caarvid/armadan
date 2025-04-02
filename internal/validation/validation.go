@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,8 +16,23 @@ type customValidator struct {
 	validator *validator.Validate
 }
 
-type errorMessage map[string]string
-type validationErrors []errorMessage
+type validationError struct {
+	Field   string
+	Tag     string
+	Message string
+}
+type FieldErrors []validationError
+
+func (fe FieldErrors) Error() string {
+	buff := bytes.NewBufferString("Validation failed:\n")
+
+	for i := range fe {
+		buff.WriteString(fe[i].Message)
+		buff.WriteString("\n")
+	}
+
+	return buff.String()
+}
 
 func New() *customValidator {
 	return &customValidator{
@@ -46,7 +62,7 @@ func (cv *customValidator) ValidateIdParam(r *http.Request, name string) (string
 	return val.String(), nil
 }
 
-func (cv *customValidator) Validate(r *http.Request, i interface{}) error {
+func (cv *customValidator) Validate(r *http.Request, i any) error {
 	b, err := io.ReadAll(r.Body)
 	defer r.Body.Close()
 
@@ -63,26 +79,17 @@ func (cv *customValidator) Validate(r *http.Request, i interface{}) error {
 			return errors.New("invalid data")
 		}
 
-		var vErr validationErrors
+		var vErr FieldErrors
 
 		for _, err := range err.(validator.ValidationErrors) {
-			e := make(errorMessage)
-
-			e["field"] = err.Field()
-
-			switch err.Tag() {
-			case "required":
-				e["message"] = "required field"
-			case "email":
-				e["message"] = "Ogiltig email"
-			default:
-				e["message"] = fmt.Sprintf("must satisfy '%s' '%v' criteria", err.Tag(), err.Param())
-			}
-
-			vErr = append(vErr, e)
+			vErr = append(vErr, validationError{
+				Field:   err.Field(),
+				Tag:     err.Tag(),
+				Message: fmt.Sprintf("Field: %s - tag: %s", err.Field(), err.Tag()),
+			})
 		}
 
-		return errors.New("validation failed")
+		return vErr
 	}
 
 	return nil
