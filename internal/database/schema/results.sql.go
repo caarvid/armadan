@@ -154,6 +154,36 @@ func (q *Queries) DeleteWinnersByWeek(ctx context.Context, weekID string) error 
 	return err
 }
 
+const getLatestResult = `-- name: GetLatestResult :one
+SELECT
+  r.id, r.is_published, r.week_id,
+  w.nr as week_nr
+FROM results r
+JOIN weeks w on w.id = r.week_id
+WHERE r.is_published = 1
+ORDER BY week_nr DESC
+LIMIT 1
+`
+
+type GetLatestResultRow struct {
+	ID          string `json:"id"`
+	IsPublished int64  `json:"isPublished"`
+	WeekID      string `json:"weekId"`
+	WeekNr      int64  `json:"weekNr"`
+}
+
+func (q *Queries) GetLatestResult(ctx context.Context) (GetLatestResultRow, error) {
+	row := q.queryRow(ctx, q.getLatestResultStmt, getLatestResult)
+	var i GetLatestResultRow
+	err := row.Scan(
+		&i.ID,
+		&i.IsPublished,
+		&i.WeekID,
+		&i.WeekNr,
+	)
+	return i, err
+}
+
 const getLeaderboardSummary = `-- name: GetLeaderboardSummary :many
 SELECT
   weeks.id, weeks.nr, weeks.is_finals, weeks.finals_date, weeks.start_date, weeks.end_date, weeks.course_id, weeks.tee_id,
@@ -162,7 +192,7 @@ SELECT
 FROM weeks
 JOIN results r ON r.week_id = weeks.id
 JOIN winners w ON w.week_id = weeks.id AND w.player_id = ?
-ORDER BY weeks.nr
+ORDER BY weeks.nr ASC
 `
 
 type GetLeaderboardSummaryRow struct {
@@ -379,6 +409,70 @@ func (q *Queries) GetResultById(ctx context.Context, id string) (GetResultByIdRo
 		&i.CourseID,
 		&i.Slope,
 		&i.Cr,
+	)
+	return i, err
+}
+
+const getResultSummaryByWeek = `-- name: GetResultSummaryByWeek :one
+SELECT
+  w.id, w.nr, w.is_finals, w.finals_date, w.start_date, w.end_date, w.course_id, w.tee_id,
+  c.name AS course_name,
+  t.name AS tee_name,
+  COALESCE((SELECT nr FROM weeks WHERE nr = w.nr - 1), 0) AS previous_week,
+  COALESCE((SELECT nr FROM weeks JOIN results r2 ON r2.week_id = weeks.id WHERE nr = w.nr + 1 AND r2.is_published = 1), 0) AS next_week,
+  json_group_array(
+    json_object(
+      'id', rd.id,
+      'total', rd2.net_total,
+      'playerName', CONCAT(p.first_name, ' ', p.last_name),
+      'points', COALESCE(wi.points, 0)
+    )
+  ) AS rounds
+FROM weeks w
+JOIN courses c ON c.id = w.course_id
+JOIN tees t ON t.id = w.tee_id
+JOIN results r ON r.week_id = w.id
+JOIN rounds rd ON rd.result_id = r.id
+JOIN round_details rd2 ON rd2.round_id = rd.id
+JOIN players p ON p.id = rd.player_id
+LEFT JOIN winners wi ON wi.week_id = w.id AND wi.player_id = p.id
+WHERE w.nr = ?
+GROUP BY w.id, t.name, c.name
+`
+
+type GetResultSummaryByWeekRow struct {
+	ID           string         `json:"id"`
+	Nr           int64          `json:"nr"`
+	IsFinals     int64          `json:"isFinals"`
+	FinalsDate   sql.NullString `json:"finalsDate"`
+	StartDate    string         `json:"startDate"`
+	EndDate      string         `json:"endDate"`
+	CourseID     string         `json:"courseId"`
+	TeeID        string         `json:"teeId"`
+	CourseName   string         `json:"courseName"`
+	TeeName      string         `json:"teeName"`
+	PreviousWeek interface{}    `json:"previousWeek"`
+	NextWeek     interface{}    `json:"nextWeek"`
+	Rounds       interface{}    `json:"rounds"`
+}
+
+func (q *Queries) GetResultSummaryByWeek(ctx context.Context, nr int64) (GetResultSummaryByWeekRow, error) {
+	row := q.queryRow(ctx, q.getResultSummaryByWeekStmt, getResultSummaryByWeek, nr)
+	var i GetResultSummaryByWeekRow
+	err := row.Scan(
+		&i.ID,
+		&i.Nr,
+		&i.IsFinals,
+		&i.FinalsDate,
+		&i.StartDate,
+		&i.EndDate,
+		&i.CourseID,
+		&i.TeeID,
+		&i.CourseName,
+		&i.TeeName,
+		&i.PreviousWeek,
+		&i.NextWeek,
+		&i.Rounds,
 	)
 	return i, err
 }

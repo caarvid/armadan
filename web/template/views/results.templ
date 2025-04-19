@@ -1,0 +1,92 @@
+package views
+
+import "github.com/caarvid/armadan/web/template/partials"
+import "github.com/caarvid/armadan/internal/armadan"
+import "fmt"
+
+const lGradient = "linear-gradient(to right, #FFFFFF 0%, rgba(255, 255, 255, 0.9) 65%, rgba(255, 255, 255, 0) 100%);"
+const rGradient = "linear-gradient(to left, #FFFFFF 0%, rgba(255, 255, 255, 0.9) 65%, rgba(255, 255, 255, 0) 100%);"
+
+templ NoResults() {
+	@document("Armadan") {
+		@partials.Header()
+		@partials.Content("content") {
+			<div class="flex flex-col gap-2 flex-1 lg:w-8/12 lg:flex-none mt-2 items-center">
+				<img src="/public/assets/golf_cart.png" alt="golf cart" class="w-[90%] md:max-w-[50%]"/>
+				<div class="-mt-[15%] font-semibold md:text-xl md:-mt-[10%]">Inga resultat än, kom tillbaka senare!</div>
+			</div>
+		}
+	}
+}
+
+templ weekSwitch(summary *armadan.WeeklyResult) {
+	<div class="flex overflow-hidden relative md:w-7/12 md:self-center">
+		if summary.PreviousWeek != 0 {
+			<div
+				class="absolute h-full w-1/5 text-4xl flex content-center cursor-pointer text-gray-600"
+				style={ fmt.Sprintf("background: %s", lGradient) }
+				hx-get={ fmt.Sprintf("/results/%d", summary.PreviousWeek) }
+				hx-swap="outerHTML"
+				hx-target="#content"
+				hx-select="#content"
+			>
+				@partials.LeftArrow()
+			</div>
+			<div class="flex flex-col text-center grow shrink basis-0 justify-center">
+				<div class="text-3xl font-bold text-gray-400">{ fmt.Sprintf("v.%d", summary.PreviousWeek) }</div>
+			</div>
+		} else {
+			<div class="grow shrink basis-0"></div>
+		}
+		<div class="flex flex-col text-center grow shrink basis-0">
+			<div class="text-2xl font-bold">{ fmt.Sprintf("v.%d", summary.Nr) }</div>
+			<div class="text-sm text-gray-400">{ fmt.Sprintf("%s - Tee: %s", summary.Course, summary.Tee) }</div>
+		</div>
+		if summary.NextWeek != 0 {
+			<div class="flex flex-col text-center grow shrink basis-0 justify-center">
+				<div class="text-3xl font-bold text-gray-400">{ fmt.Sprintf("v.%d", summary.NextWeek) }</div>
+			</div>
+			<div
+				class="absolute right-0 h-full w-1/5 text-4xl flex content-center justify-end cursor-pointer text-gray-600"
+				style={ fmt.Sprintf("background: %s", rGradient) }
+				hx-get={ fmt.Sprintf("/results/%d", summary.NextWeek) }
+				hx-swap="outerHTML"
+				hx-target="#content"
+				hx-select="#content"
+			>
+				@partials.RightArrow()
+			</div>
+		} else {
+			<div class="grow shrink basis-0"></div>
+		}
+	</div>
+}
+
+templ Results(summary *armadan.WeeklyResult) {
+	@document("Armadan") {
+		@partials.Header()
+		@partials.Content("content") {
+			<div class="flex flex-col gap-2 flex-1 lg:w-8/12 lg:flex-none mt-2">
+				@weekSwitch(summary)
+				@partials.Table("results-table") {
+					<thead class="thead">
+						<tr class="tr">
+							<th class="th w-4/6"></th>
+							<th class="th w-1/6 text-center">Poäng</th>
+							<th class="th w-1/6 text-center">Netto</th>
+						</tr>
+					</thead>
+					<tbody class="tbody">
+						for _, round := range summary.Rounds {
+							<tr class="tr">
+								<td class="td">{ round.PlayerName }</td>
+								<td class="td text-center">{ fmt.Sprint(round.Points) }</td>
+								<td class="td text-center">{ fmt.Sprint(round.Total) }</td>
+							</tr>
+						}
+					</tbody>
+				}
+			</div>
+		}
+	}
+}

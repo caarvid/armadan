@@ -4,25 +4,30 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
 	"github.com/caarvid/armadan/internal/utils/hcp"
 	resultUtils "github.com/caarvid/armadan/internal/utils/result"
+	"github.com/patrickmn/go-cache"
 )
 
 type results struct {
 	dbReader schema.Querier
 	dbWriter schema.Querier
 	pool     *sql.DB
+	cache    *cache.Cache
 }
 
-func NewResultService(reader, writer schema.Querier, pool *sql.DB) *results {
+func NewResultService(reader, writer schema.Querier, pool *sql.DB, cache *cache.Cache) *results {
 	return &results{
 		dbReader: reader,
 		dbWriter: writer,
 		pool:     pool,
+		cache:    cache,
 	}
 }
 
@@ -123,6 +128,71 @@ func (rs *results) GetRound(ctx context.Context, id string) (*armadan.Round, err
 		ResultID:   round.ResultID,
 		Scores:     scores,
 	}, nil
+}
+
+func (rs *results) LatestResult(ctx context.Context) (*armadan.Result, error) {
+	if cachedLatest, found := rs.cache.Get("latest_result"); found {
+		return cachedLatest.(*armadan.Result), nil
+	}
+
+	res, err := rs.dbReader.GetLatestResult(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	latestResult := &armadan.Result{
+		ID:     res.ID,
+		WeekNr: res.WeekNr,
+	}
+
+	rs.cache.Set("latest_result", latestResult, cache.NoExpiration)
+
+	return latestResult, nil
+}
+
+func (rs *results) WeekSummary(ctx context.Context, nr int64) (*armadan.WeeklyResult, error) {
+	cacheKey := fmt.Sprintf("/results/%d", nr)
+
+	if cachedSummary, found := rs.cache.Get(cacheKey); found {
+		return cachedSummary.(*armadan.WeeklyResult), nil
+	}
+
+	res, err := rs.dbReader.GetResultSummaryByWeek(ctx, nr)
+	if err != nil {
+		return nil, err
+	}
+
+	r, ok := res.Rounds.(string)
+
+	if !ok {
+		return nil, errors.New("could not convert rounds to string")
+	}
+
+	var rounds []armadan.RoundSummary
+	err = json.Unmarshal([]byte(r), &rounds)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Should be able to sort this in the sql query but sqlc is complaining
+	slices.SortFunc(rounds, func(a, b armadan.RoundSummary) int {
+		return int(a.Total - b.Total)
+	})
+
+	summary := &armadan.WeeklyResult{
+		ID:           res.ID,
+		Nr:           res.Nr,
+		Course:       res.CourseName,
+		Tee:          res.TeeName,
+		NextWeek:     res.NextWeek.(int64),
+		PreviousWeek: res.PreviousWeek.(int64),
+		Rounds:       rounds,
+	}
+
+	rs.cache.Set(cacheKey, summary, cache.NoExpiration)
+
+	return summary, nil
 }
 
 func (rs *results) GetRemainingPlayers(ctx context.Context, id string) ([]armadan.Player, error) {
@@ -422,6 +492,8 @@ func (rs *results) ManagementView(ctx context.Context) ([]armadan.ResultDetail, 
 }
 
 func (rs *results) Publish(ctx context.Context, id string) error {
+	rs.cache.Flush()
+
 	result, err := rs.Get(ctx, id)
 	if err != nil {
 		return err

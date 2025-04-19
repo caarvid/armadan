@@ -105,6 +105,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getCoursesStmt, err = db.PrepareContext(ctx, getCourses); err != nil {
 		return nil, fmt.Errorf("error preparing query GetCourses: %w", err)
 	}
+	if q.getLatestResultStmt, err = db.PrepareContext(ctx, getLatestResult); err != nil {
+		return nil, fmt.Errorf("error preparing query GetLatestResult: %w", err)
+	}
 	if q.getLeaderboardStmt, err = db.PrepareContext(ctx, getLeaderboard); err != nil {
 		return nil, fmt.Errorf("error preparing query GetLeaderboard: %w", err)
 	}
@@ -137,6 +140,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getResultByIdStmt, err = db.PrepareContext(ctx, getResultById); err != nil {
 		return nil, fmt.Errorf("error preparing query GetResultById: %w", err)
+	}
+	if q.getResultSummaryByWeekStmt, err = db.PrepareContext(ctx, getResultSummaryByWeek); err != nil {
+		return nil, fmt.Errorf("error preparing query GetResultSummaryByWeek: %w", err)
 	}
 	if q.getRoundByIdStmt, err = db.PrepareContext(ctx, getRoundById); err != nil {
 		return nil, fmt.Errorf("error preparing query GetRoundById: %w", err)
@@ -335,6 +341,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getCoursesStmt: %w", cerr)
 		}
 	}
+	if q.getLatestResultStmt != nil {
+		if cerr := q.getLatestResultStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getLatestResultStmt: %w", cerr)
+		}
+	}
 	if q.getLeaderboardStmt != nil {
 		if cerr := q.getLeaderboardStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getLeaderboardStmt: %w", cerr)
@@ -388,6 +399,11 @@ func (q *Queries) Close() error {
 	if q.getResultByIdStmt != nil {
 		if cerr := q.getResultByIdStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getResultByIdStmt: %w", cerr)
+		}
+	}
+	if q.getResultSummaryByWeekStmt != nil {
+		if cerr := q.getResultSummaryByWeekStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getResultSummaryByWeekStmt: %w", cerr)
 		}
 	}
 	if q.getRoundByIdStmt != nil {
@@ -551,6 +567,7 @@ type Queries struct {
 	deleteWinnersByWeekStmt           *sql.Stmt
 	getCourseStmt                     *sql.Stmt
 	getCoursesStmt                    *sql.Stmt
+	getLatestResultStmt               *sql.Stmt
 	getLeaderboardStmt                *sql.Stmt
 	getLeaderboardSummaryStmt         *sql.Stmt
 	getManageResultViewStmt           *sql.Stmt
@@ -562,6 +579,7 @@ type Queries struct {
 	getRemainingPlayersByResultIdStmt *sql.Stmt
 	getResetPasswordTokenStmt         *sql.Stmt
 	getResultByIdStmt                 *sql.Stmt
+	getResultSummaryByWeekStmt        *sql.Stmt
 	getRoundByIdStmt                  *sql.Stmt
 	getRoundsByResultIdStmt           *sql.Stmt
 	getSessionByTokenStmt             *sql.Stmt
@@ -614,6 +632,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteWinnersByWeekStmt:           q.deleteWinnersByWeekStmt,
 		getCourseStmt:                     q.getCourseStmt,
 		getCoursesStmt:                    q.getCoursesStmt,
+		getLatestResultStmt:               q.getLatestResultStmt,
 		getLeaderboardStmt:                q.getLeaderboardStmt,
 		getLeaderboardSummaryStmt:         q.getLeaderboardSummaryStmt,
 		getManageResultViewStmt:           q.getManageResultViewStmt,
@@ -625,6 +644,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getRemainingPlayersByResultIdStmt: q.getRemainingPlayersByResultIdStmt,
 		getResetPasswordTokenStmt:         q.getResetPasswordTokenStmt,
 		getResultByIdStmt:                 q.getResultByIdStmt,
+		getResultSummaryByWeekStmt:        q.getResultSummaryByWeekStmt,
 		getRoundByIdStmt:                  q.getRoundByIdStmt,
 		getRoundsByResultIdStmt:           q.getRoundsByResultIdStmt,
 		getSessionByTokenStmt:             q.getSessionByTokenStmt,

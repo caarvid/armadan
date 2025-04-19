@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/web/template/views"
@@ -53,6 +55,36 @@ func LeaderboardView(rs armadan.ResultService) http.Handler {
 		}
 
 		views.Leaderboard(players).Render(r.Context(), w)
+	})
+}
+
+func ResultView(rs armadan.ResultService) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		latest, err := rs.LatestResult(r.Context())
+		if err != nil {
+			w.Header().Add("HX-Push-URL", r.URL.Path)
+			views.NoResults().Render(r.Context(), w)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/results/%d", latest.WeekNr), http.StatusTemporaryRedirect)
+	})
+}
+
+func WeekResultView(rs armadan.ResultService) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		nr, err := strconv.Atoi(r.PathValue("nr"))
+		if err != nil {
+			return
+		}
+
+		summary, err := rs.WeekSummary(r.Context(), int64(nr))
+		if err != nil {
+			views.NoResults().Render(r.Context(), w)
+			return
+		}
+
+		views.Results(summary).Render(r.Context(), w)
 	})
 }
 

@@ -33,6 +33,8 @@ func setupRoutes(
 	main.Handle("GET /{$}", protected(mw.HxPushPath("", h.HomeView(postService))))
 	main.Handle("GET /schedule", protected(mw.HxPushPath("", h.ScheduleView(weekService))))
 	main.Handle("GET /leaderboard", protected(mw.HxPushPath("", h.LeaderboardView(resultService))))
+	main.Handle("GET /results/{nr}", protected(mw.HxPushPath("", h.WeekResultView(resultService))))
+	main.Handle("GET /results", protected(h.ResultView(resultService)))
 	main.Handle("GET /login", mw.HxPushPath("", h.LoginView()))
 	main.Handle("GET /forgot-password", mw.HxPushPath("", h.ForgotPasswordView()))
 	main.Handle("GET /reset-password", mw.HxPushPath("", h.ResetPasswordView()))
