@@ -9,6 +9,7 @@ type ResultService interface {
 	Get(context.Context, string) (*Result, error)
 	GetRounds(context.Context, string) ([]Round, error)
 	GetRound(context.Context, string) (*Round, error)
+	LatestResult(context.Context) (*Result, error)
 	Create(context.Context, string) (*Result, error)
 	CreateRound(context.Context, *Round, []Score) error
 	UpdateRound(context.Context, *Round, []Score) error
@@ -16,6 +17,7 @@ type ResultService interface {
 	DeleteRound(context.Context, string) error
 	Leaderboard(context.Context) ([]Leader, error)
 	LeaderboardSummary(context.Context, string) ([]LeaderSummary, error)
+	WeekSummary(context.Context, int64) (*WeeklyResult, error)
 	ManagementView(context.Context) ([]ResultDetail, error)
 	GetRemainingPlayers(context.Context, string) ([]Player, error)
 	Publish(context.Context, string) error
@@ -44,6 +46,16 @@ type RoundSummary struct {
 	PlayerName string
 	Total      int64
 	Points     int64
+}
+
+type WeeklyResult struct {
+	ID           string
+	Nr           int64
+	Course       string
+	Tee          string
+	NextWeek     int64
+	PreviousWeek int64
+	Rounds       []RoundSummary
 }
 
 type Score struct {

@@ -81,7 +81,7 @@ func run(
 		service.NewPlayerService(dbReader, dbWriter, writeDB),
 		service.NewSessionService(dbReader, dbWriter),
 		service.NewCourseService(dbReader, dbWriter, writeDB, cache),
-		service.NewResultService(dbReader, dbWriter, writeDB),
+		service.NewResultService(dbReader, dbWriter, writeDB, cache),
 		service.NewResetPasswordService(dbReader, dbWriter, writeDB),
 		service.NewEmailService(
 			armadan.Senders{

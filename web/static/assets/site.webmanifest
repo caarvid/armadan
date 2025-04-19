@@ -2,7 +2,7 @@
   "short_name": "Armadan",
   "name": "Armadan",
   "start_url": "https://armadan.se",
-  "scope": "https://armadan.se",
+  "scope": "https://armadan.se/",
   "orientation": "natural",
   "display": "standalone",
   "theme_color": "#000000",

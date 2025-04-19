@@ -6,7 +6,7 @@ SELECT
 FROM weeks
 JOIN results r ON r.week_id = weeks.id
 JOIN winners w ON w.week_id = weeks.id AND w.player_id = ?
-ORDER BY weeks.nr;
+ORDER BY weeks.nr ASC;
 
 -- name: GetManageResultView :many
 SELECT
@@ -43,6 +43,42 @@ FROM results r
 JOIN weeks w ON w.id = r.week_id
 JOIN tees t ON t.id = w.tee_id
 WHERE r.id = ?;
+
+-- name: GetLatestResult :one
+SELECT
+  r.*,
+  w.nr as week_nr
+FROM results r
+JOIN weeks w on w.id = r.week_id
+WHERE r.is_published = 1
+ORDER BY week_nr DESC
+LIMIT 1;
+
+-- name: GetResultSummaryByWeek :one
+SELECT
+  w.*,
+  c.name AS course_name,
+  t.name AS tee_name,
+  COALESCE((SELECT nr FROM weeks WHERE nr = w.nr - 1), 0) AS previous_week,
+  COALESCE((SELECT nr FROM weeks JOIN results r2 ON r2.week_id = weeks.id WHERE nr = w.nr + 1 AND r2.is_published = 1), 0) AS next_week,
+  json_group_array(
+    json_object(
+      'id', rd.id,
+      'total', rd2.net_total,
+      'playerName', CONCAT(p.first_name, ' ', p.last_name),
+      'points', COALESCE(wi.points, 0)
+    )
+  ) AS rounds
+FROM weeks w
+JOIN courses c ON c.id = w.course_id
+JOIN tees t ON t.id = w.tee_id
+JOIN results r ON r.week_id = w.id
+JOIN rounds rd ON rd.result_id = r.id
+JOIN round_details rd2 ON rd2.round_id = rd.id
+JOIN players p ON p.id = rd.player_id
+LEFT JOIN winners wi ON wi.week_id = w.id AND wi.player_id = p.id
+WHERE w.nr = ?
+GROUP BY w.id, t.name, c.name;
 
 -- name: GetRoundsByResultId :many
 SELECT

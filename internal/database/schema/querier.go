@@ -37,6 +37,7 @@ type Querier interface {
 	DeleteWinnersByWeek(ctx context.Context, weekID string) error
 	GetCourse(ctx context.Context, id string) (CourseDetail, error)
 	GetCourses(ctx context.Context) ([]CourseDetail, error)
+	GetLatestResult(ctx context.Context) (GetLatestResultRow, error)
 	GetLeaderboard(ctx context.Context) ([]GetLeaderboardRow, error)
 	GetLeaderboardSummary(ctx context.Context, playerID string) ([]GetLeaderboardSummaryRow, error)
 	GetManageResultView(ctx context.Context) ([]GetManageResultViewRow, error)
@@ -48,6 +49,7 @@ type Querier interface {
 	GetRemainingPlayersByResultId(ctx context.Context, resultID string) ([]GetRemainingPlayersByResultIdRow, error)
 	GetResetPasswordToken(ctx context.Context, token string) (PasswordResetToken, error)
 	GetResultById(ctx context.Context, id string) (GetResultByIdRow, error)
+	GetResultSummaryByWeek(ctx context.Context, nr int64) (GetResultSummaryByWeekRow, error)
 	GetRoundById(ctx context.Context, id string) (FullRound, error)
 	GetRoundsByResultId(ctx context.Context, resultID string) ([]GetRoundsByResultIdRow, error)
 	GetSessionByToken(ctx context.Context, token string) (GetSessionByTokenRow, error)

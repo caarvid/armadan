@@ -127,8 +127,8 @@ templ ResetPasswordForm(token string) {
 			hx-disabled-elt="#save-btn"
 		>
 			<input type="hidden" name="resetToken" value={ token }/>
-			<input type="password" name="newPassword" class="input" placeholder="Nytt lösenord" autocomplete="off" required/>
-			<input type="password" name="repeatPassword" class="input" placeholder="Upprepa lösenord" autocomplete="off" required/>
+			<input type="password" name="newPassword" class="input" placeholder="Nytt lösenord" autocomplete="off" required minlength="8"/>
+			<input type="password" name="repeatPassword" class="input" placeholder="Upprepa lösenord" autocomplete="off" required minlength="8"/>
 			<button id="save-btn" class="btn-default w-1/2 self-center mt-2" type="submit">
 				Spara lösenord
 				@Spinner()

@@ -262,7 +262,7 @@ func ResetPasswordForm(token string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"> <input type=\"password\" name=\"newPassword\" class=\"input\" placeholder=\"Nytt lösenord\" autocomplete=\"off\" required> <input type=\"password\" name=\"repeatPassword\" class=\"input\" placeholder=\"Upprepa lösenord\" autocomplete=\"off\" required> <button id=\"save-btn\" class=\"btn-default w-1/2 self-center mt-2\" type=\"submit\">Spara lösenord")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"> <input type=\"password\" name=\"newPassword\" class=\"input\" placeholder=\"Nytt lösenord\" autocomplete=\"off\" required minlength=\"8\"> <input type=\"password\" name=\"repeatPassword\" class=\"input\" placeholder=\"Upprepa lösenord\" autocomplete=\"off\" required minlength=\"8\"> <button id=\"save-btn\" class=\"btn-default w-1/2 self-center mt-2\" type=\"submit\">Spara lösenord")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
