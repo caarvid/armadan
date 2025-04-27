@@ -44,7 +44,7 @@ func Protected(
 				return c.Str("user_id", session.UserID)
 			})
 
-			if roleMap[session.Role] <= roleMap[role] {
+			if roleMap[session.Role] < roleMap[role] {
 				l.Info().
 					Str("location", "middleware:authorize").
 					Str("user_role", string(session.Role)).
