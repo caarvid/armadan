@@ -94,19 +94,26 @@ func LeaderboardSummary(summary []armadan.LeaderSummary) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<tr class=\"tr bg-muted shadow-inner hover:bg-muted\"><td class=\"td\" colspan=\"9999\"><div class=\"grid gap-3 p-2 grid-cols-4 md:grid-cols-6 xl:grid-cols-8\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		for _, week := range summary {
-			templ_7745c5c3_Err = weekBadge(week.Nr, week.Points).Render(ctx, templ_7745c5c3_Buffer)
+		if len(summary) > 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<tr class=\"tr bg-muted shadow-inner hover:bg-muted\"><td class=\"td\" colspan=\"9999\"><div class=\"grid gap-3 p-2 grid-cols-4 md:grid-cols-6 xl:grid-cols-8\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></td></tr>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+			for _, week := range summary {
+				templ_7745c5c3_Err = weekBadge(week.Nr, week.Points).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></td></tr>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<tr></tr>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		return nil
 	})

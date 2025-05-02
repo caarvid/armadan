@@ -88,7 +88,7 @@ func WeekList(weeks []armadan.Week, isEditable bool) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div id=\"week-list\" class=\"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 items-start\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div id=\"week-list\" class=\"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 items-start pb-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

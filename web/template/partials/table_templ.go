@@ -42,7 +42,7 @@ func Table(id string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-col gap-2 flex-1\"><div class=\"relative w-full overflow-auto\"><table class=\"w-full caption-bottom text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-col gap-2 flex-1 pb-6\"><div class=\"relative w-full overflow-auto\"><table class=\"w-full caption-bottom text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -17,13 +17,17 @@ templ weekBadge(nr, points int64) {
 }
 
 templ LeaderboardSummary(summary []armadan.LeaderSummary) {
-	<tr class="tr bg-muted shadow-inner hover:bg-muted">
-		<td class="td" colspan="9999">
-			<div class="grid gap-3 p-2 grid-cols-4 md:grid-cols-6 xl:grid-cols-8">
-				for _, week := range summary {
-					@weekBadge(week.Nr, week.Points)
-				}
-			</div>
-		</td>
-	</tr>
+	if len(summary) > 0 {
+		<tr class="tr bg-muted shadow-inner hover:bg-muted">
+			<td class="td" colspan="9999">
+				<div class="grid gap-3 p-2 grid-cols-4 md:grid-cols-6 xl:grid-cols-8">
+					for _, week := range summary {
+						@weekBadge(week.Nr, week.Points)
+					}
+				</div>
+			</td>
+		</tr>
+	} else {
+		<tr></tr>
+	}
 }

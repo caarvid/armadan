@@ -22,7 +22,7 @@ templ WeekTable(weeks []armadan.Week) {
 }
 
 templ WeekList(weeks []armadan.Week, isEditable bool) {
-	<div id="week-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 items-start">
+	<div id="week-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 items-start pb-6">
 		for _, week := range weeks {
 			@WeekCard(week)
 		}
