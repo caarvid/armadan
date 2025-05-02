@@ -109,6 +109,25 @@ func (q *Queries) GetPlayer(ctx context.Context, id string) (PlayersExtended, er
 	return i, err
 }
 
+const getPlayerByUserId = `-- name: GetPlayerByUserId :one
+SELECT id, first_name, last_name, user_id, email, points, hcp FROM players_extended p WHERE p.user_id = ?
+`
+
+func (q *Queries) GetPlayerByUserId(ctx context.Context, userID string) (PlayersExtended, error) {
+	row := q.queryRow(ctx, q.getPlayerByUserIdStmt, getPlayerByUserId, userID)
+	var i PlayersExtended
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.UserID,
+		&i.Email,
+		&i.Points,
+		&i.Hcp,
+	)
+	return i, err
+}
+
 const getPlayers = `-- name: GetPlayers :many
 SELECT id, first_name, last_name, user_id, email, points, hcp FROM players_extended p ORDER BY p.last_name ASC, p.first_name ASC
 `

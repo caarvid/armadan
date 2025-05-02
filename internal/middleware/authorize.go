@@ -56,6 +56,7 @@ func Protected(
 
 			ctx := context.WithValue(r.Context(), "isLoggedIn", true)
 			ctx = context.WithValue(ctx, "role", session.Role)
+			ctx = context.WithValue(ctx, "user_id", session.UserID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

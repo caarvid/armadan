@@ -77,6 +77,15 @@ func (ps *players) Get(ctx context.Context, id string) (*armadan.Player, error) 
 	return toPlayer(p), nil
 }
 
+func (ps *players) GetByUserId(ctx context.Context, id string) (*armadan.Player, error) {
+	p, err := ps.dbReader.GetPlayerByUserId(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return toPlayer(p), nil
+}
+
 func (ps *players) Create(ctx context.Context, data *armadan.Player) (*armadan.Player, error) {
 	pw, err := randutil.Alphanumeric(24)
 	if err != nil {

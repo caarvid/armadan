@@ -13,6 +13,9 @@ LEFT JOIN rounds r ON r.player_id = p.id
 GROUP BY p.id
 ORDER BY p.points DESC, nr_of_rounds DESC;
 
+-- name: GetPlayerByUserId :one
+SELECT * FROM players_extended p WHERE p.user_id = ?;
+
 -- name: CreatePlayer :one
 INSERT INTO players (id, first_name, last_name, user_id) VALUES (?, ?, ?, ?) RETURNING *;
 

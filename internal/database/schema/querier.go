@@ -42,6 +42,7 @@ type Querier interface {
 	GetLeaderboardSummary(ctx context.Context, playerID string) ([]GetLeaderboardSummaryRow, error)
 	GetManageResultView(ctx context.Context) ([]GetManageResultViewRow, error)
 	GetPlayer(ctx context.Context, id string) (PlayersExtended, error)
+	GetPlayerByUserId(ctx context.Context, userID string) (PlayersExtended, error)
 	GetPlayerHcp(ctx context.Context, playerID sql.NullString) (float64, error)
 	GetPlayers(ctx context.Context) ([]PlayersExtended, error)
 	GetPost(ctx context.Context, id string) (Post, error)

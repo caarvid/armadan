@@ -88,6 +88,18 @@ func WeekResultView(rs armadan.ResultService) http.Handler {
 	})
 }
 
+func ProfileView(ps armadan.PlayerService) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		player, err := ps.GetByUserId(r.Context(), r.Context().Value("user_id").(string))
+		if err != nil {
+			views.MyProfile(&armadan.Player{Hcp: 0.0, Points: 0}).Render(r.Context(), w)
+			return
+		}
+
+		views.MyProfile(player).Render(r.Context(), w)
+	})
+}
+
 func LoginView() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		views.Login().Render(r.Context(), w)

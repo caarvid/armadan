@@ -188,12 +188,20 @@ func tabs() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+			templ_7745c5c3_Err = tab("/profile", "Min Profil", false).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 			templ_7745c5c3_Err = tab("/auth/logout", "Logga ut", false).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<script>\n\t\t\tany('li', me())?.run((el) => {\n\t\t\t\tlet { pathname } = window.location;\n\t\t\t\tlet route = me(el).attr('hx-get');\n\t\t\t\tif ((route !== '/' && pathname.startsWith(route)) || (route === '/' && pathname === '/')) {\n\t\t\t\t\tme(el).addClass('underline');\n\t\t\t\t}\n\t\t\t});\n\t\t\tany('li', me())?.on('click', (el) => {\n\t\t\t\tlet elem = me(el);\n\t\t\t\tlet list = any('li', elem.parentNode);\n\t\t\t\twindow.addEventListener('htmx:afterSwap', (ev) => {\n\t\t\t\t\tif (ev.target === me('#content')) {\n\t\t\t\t\t\tme('#hamburger-menu').send('close');\n\t\t\t\t\t\tme('#tab-list').send('toggle');\n\t\t\t\t\t\tlist.run((e) => me(e).removeClass('underline'));\n\t\t\t\t\t\telem.addClass('underline');\n\t\t\t\t\t}\n\t\t\t\t}, { once: true });\n\t\t\t});\n\t\t\tme().on('toggle', (ev) => {\n\t\t\t\tme(ev).classToggle('h-0');\n\t\t\t\tme(ev).classToggle('h-dvh');\n\t\t\t});\n\t\t</script></ul>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<script>\n\t\t\tany('li', me())?.run((el) => {\n\t\t\t\tlet { pathname } = window.location;\n\t\t\t\tlet route = me(el).attr('hx-get');\n\t\t\t\tif ((route !== '/' && pathname.startsWith(route)) || (route === '/' && pathname === '/')) {\n\t\t\t\t\tme(el).addClass('underline');\n\t\t\t\t}\n\t\t\t});\n\t\t\tany('li', me())?.on('click', (el) => {\n\t\t\t\tlet elem = me(el);\n\t\t\t\tlet list = any('li', elem.parentNode);\n\t\t\t\twindow.addEventListener('htmx:afterSwap', (ev) => {\n\t\t\t\t\tif (ev.target === me('#content')) {\n\t\t\t\t\t\tme('#hamburger-menu').send('close');\n\t\t\t\t\t\tme('#tab-list').send('toggle');\n\t\t\t\t\t\tlist.run((e) => me(e).removeClass('underline'));\n\t\t\t\t\t\telem.addClass('underline');\n\t\t\t\t\t}\n\t\t\t\t}, { once: true });\n\t\t\t});\n\t\t\tme().on('toggle', (ev) => {\n\t\t\t\tme(ev).classToggle('h-0');\n\t\t\t\tme(ev).classToggle('h-dvh');\n\t\t\t});\n\t\t</script></ul>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -229,7 +237,7 @@ func Header() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<header class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<header class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -242,7 +250,7 @@ func Header() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -251,7 +259,7 @@ func Header() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<img src=\"/public/assets/armadan.svg\" alt=\"armadan\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<img src=\"/public/assets/armadan.svg\" alt=\"armadan\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -264,7 +272,7 @@ func Header() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -272,7 +280,7 @@ func Header() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</header>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -301,20 +309,20 @@ func Content(id string) templ.Component {
 			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<main id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<main id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/layout.templ`, Line: 93, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/template/partials/layout.templ`, Line: 94, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" class=\"flex flex-auto justify-center min-h-0 overflow-y-auto pt-2 px-3\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" class=\"flex flex-auto justify-center min-h-0 overflow-y-auto pt-2 px-3\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -322,7 +330,7 @@ func Content(id string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,0 +1,27 @@
+package views
+
+import "github.com/caarvid/armadan/web/template/partials"
+import "github.com/caarvid/armadan/internal/armadan"
+import "fmt"
+
+templ infoBox(header, info string) {
+	<div class="flex flex-col flex-1 items-center gap-2 py-2 not-last:border-r">
+		<div class="font-bold text-lg">{ header }</div>
+		<div class="text-secondary-foreground">{ info }</div>
+	</div>
+}
+
+templ MyProfile(player *armadan.Player) {
+	@document("Armadan") {
+		@partials.Header()
+		@partials.Content("content") {
+			<div class="flex flex-col gap-2 flex-1 lg:w-8/12 lg:flex-none mt-2">
+				<div class="flex">
+					@infoBox("HCP", fmt.Sprintf("%2.1f", player.Hcp))
+					@infoBox("Poäng", fmt.Sprint(player.Points))
+					@infoBox("Rundor", "-")
+				</div>
+			</div>
+		}
+	}
+}
