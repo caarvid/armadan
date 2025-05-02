@@ -120,6 +120,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getPlayerStmt, err = db.PrepareContext(ctx, getPlayer); err != nil {
 		return nil, fmt.Errorf("error preparing query GetPlayer: %w", err)
 	}
+	if q.getPlayerByUserIdStmt, err = db.PrepareContext(ctx, getPlayerByUserId); err != nil {
+		return nil, fmt.Errorf("error preparing query GetPlayerByUserId: %w", err)
+	}
 	if q.getPlayerHcpStmt, err = db.PrepareContext(ctx, getPlayerHcp); err != nil {
 		return nil, fmt.Errorf("error preparing query GetPlayerHcp: %w", err)
 	}
@@ -366,6 +369,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getPlayerStmt: %w", cerr)
 		}
 	}
+	if q.getPlayerByUserIdStmt != nil {
+		if cerr := q.getPlayerByUserIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getPlayerByUserIdStmt: %w", cerr)
+		}
+	}
 	if q.getPlayerHcpStmt != nil {
 		if cerr := q.getPlayerHcpStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getPlayerHcpStmt: %w", cerr)
@@ -572,6 +580,7 @@ type Queries struct {
 	getLeaderboardSummaryStmt         *sql.Stmt
 	getManageResultViewStmt           *sql.Stmt
 	getPlayerStmt                     *sql.Stmt
+	getPlayerByUserIdStmt             *sql.Stmt
 	getPlayerHcpStmt                  *sql.Stmt
 	getPlayersStmt                    *sql.Stmt
 	getPostStmt                       *sql.Stmt
@@ -637,6 +646,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getLeaderboardSummaryStmt:         q.getLeaderboardSummaryStmt,
 		getManageResultViewStmt:           q.getManageResultViewStmt,
 		getPlayerStmt:                     q.getPlayerStmt,
+		getPlayerByUserIdStmt:             q.getPlayerByUserIdStmt,
 		getPlayerHcpStmt:                  q.getPlayerHcpStmt,
 		getPlayersStmt:                    q.getPlayersStmt,
 		getPostStmt:                       q.getPostStmt,

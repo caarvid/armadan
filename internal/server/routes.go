@@ -35,6 +35,7 @@ func setupRoutes(
 	main.Handle("GET /leaderboard", protected(mw.HxPushPath("", h.LeaderboardView(resultService))))
 	main.Handle("GET /results/{nr}", protected(mw.HxPushPath("", h.WeekResultView(resultService))))
 	main.Handle("GET /results", protected(h.ResultView(resultService)))
+	main.Handle("GET /profile", protected(mw.HxPushPath("", h.ProfileView(playerService))))
 	main.Handle("GET /login", mw.HxPushPath("", h.LoginView()))
 	main.Handle("GET /forgot-password", mw.HxPushPath("", h.ForgotPasswordView()))
 	main.Handle("GET /reset-password", mw.HxPushPath("", h.ResetPasswordView()))
