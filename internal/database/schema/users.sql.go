@@ -41,7 +41,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, password, user_role FROM users WHERE email = ?
+SELECT id, email, password, user_role FROM users WHERE LOWER(email) = ?
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {

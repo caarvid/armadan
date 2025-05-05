@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strings"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/database/schema"
@@ -54,7 +55,7 @@ func (s *users) Get(ctx context.Context, id string) (*armadan.User, error) {
 }
 
 func (s *users) GetByEmail(ctx context.Context, email string) (*armadan.User, error) {
-	user, err := s.dbReader.GetUserByEmail(ctx, email)
+	user, err := s.dbReader.GetUserByEmail(ctx, strings.ToLower(email))
 
 	if err != nil {
 		return nil, err

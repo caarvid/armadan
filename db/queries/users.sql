@@ -1,5 +1,5 @@
 -- name: GetUserByEmail :one
-SELECT * FROM users WHERE email = ?;
+SELECT * FROM users WHERE LOWER(email) = ?;
 
 -- name: GetUserById :one
 SELECT * FROM users WHERE id = ?;

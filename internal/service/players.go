@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/caarvid/armadan/internal/armadan"
@@ -171,7 +172,7 @@ func (ps *players) Update(ctx context.Context, data *armadan.Player) (*armadan.P
 	}
 
 	user, err := qtx.UpdateUserEmail(ctx, &schema.UpdateUserEmailParams{
-		Email: data.Email,
+		Email: strings.ToLower(data.Email),
 		ID:    player.UserID,
 	})
 
