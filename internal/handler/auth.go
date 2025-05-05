@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/caarvid/armadan/internal/armadan"
 	"github.com/caarvid/armadan/internal/utils"
@@ -104,27 +105,29 @@ func ForgotPassword(us armadan.UserService, rps armadan.ResetPasswordService, es
 			return
 		}
 
-		user, err := us.GetByEmail(r.Context(), data.Email)
+		email := strings.ToLower(data.Email)
+
+		user, err := us.GetByEmail(r.Context(), email)
 		if err != nil {
 			l.Error().AnErr("raw_err", err).Msgf("reset password :: email %s not found", data.Email)
-			response.ResetPasswordEmailSent(w, r, data.Email)
+			response.ResetPasswordEmailSent(w, r, email)
 			return
 		}
 
 		rsToken, err := rps.Create(r.Context(), user.ID)
 		if err != nil {
 			l.Error().AnErr("raw_err", err).Msg("failed to create reset password token")
-			response.ResetPasswordEmailSent(w, r, data.Email)
+			response.ResetPasswordEmailSent(w, r, email)
 			return
 		}
 
 		go func(token string) {
-			if err := es.SendResetPassword(user.Email, token); err != nil {
+			if err := es.SendResetPassword(email, token); err != nil {
 				l.Error().AnErr("raw_err", err).Msg("failed to send reset password email")
 			}
 		}(rsToken.Token)
 
-		response.ResetPasswordEmailSent(w, r, data.Email)
+		response.ResetPasswordEmailSent(w, r, email)
 	})
 }
 
