@@ -38,6 +38,7 @@ release:
 		echo "Usage: make release VERSION=x.y.z"; \
 		exit 1; \
 	fi
+	git pull
 	git tag -a "v$(VERSION)" -m "Release v$(VERSION)"
 	git push origin "v$(VERSION)"
 
