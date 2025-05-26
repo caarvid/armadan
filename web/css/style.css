@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme {
   --color-background: hsl(0 0% 100%);
@@ -28,7 +28,6 @@
 }
 
 @custom-variant htmx-settling {
-
   &.htmx-settling,
   .htmx-settling & {
     @slot;
@@ -36,7 +35,6 @@
 }
 
 @custom-variant htmx-request {
-
   &.htmx-request,
   .htmx-request & {
     @slot;
@@ -44,7 +42,6 @@
 }
 
 @custom-variant htmx-swapping {
-
   &.htmx-swapping,
   .htmx-swapping & {
     @slot;
@@ -52,7 +49,6 @@
 }
 
 @custom-variant htmx-added {
-
   &.htmx-added,
   .htmx-added & {
     @slot;
@@ -67,7 +63,6 @@
 }
 
 @layer base {
-
   *,
   ::after,
   ::before,
@@ -82,7 +77,9 @@
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 }
 
@@ -182,7 +179,9 @@ select {
 #login-form {
   opacity: 1;
   transform: translate3d(0, 0, 0);
-  transition: transform 200ms, opacity 200ms;
+  transition:
+    transform 200ms,
+    opacity 200ms;
 }
 
 #login-form.htmx-swapping,
@@ -194,7 +193,9 @@ select {
 #forgot-password-form {
   opacity: 1;
   transform: translate3d(0, 0, 0);
-  transition: transform 200ms, opacity 200ms;
+  transition:
+    transform 200ms,
+    opacity 200ms;
 }
 
 #forgot-password-form.htmx-swapping,
@@ -218,7 +219,7 @@ select {
   animation-timing-function: ease;
 }
 
-#modal>#modal-content {
+#modal > #modal-content {
   animation-name: zoomIn;
   animation-duration: 150ms;
   animation-timing-function: ease;
@@ -228,7 +229,7 @@ select {
   animation-name: fadeOut;
 }
 
-#modal.closing>#modal-content {
+#modal.closing > #modal-content {
   animation-name: zoomOut;
 }
 

@@ -20,7 +20,7 @@ templ NoResults() {
 }
 
 templ weekSwitch(summary *armadan.WeeklyResult) {
-	<div class="flex overflow-hidden relative md:w-7/12 md:self-center">
+	<div class="flex relative md:w-7/12 md:self-center">
 		if summary.PreviousWeek != 0 {
 			<div
 				class="absolute h-full w-1/5 text-4xl flex content-center cursor-pointer text-gray-600"
