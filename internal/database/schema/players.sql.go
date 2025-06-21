@@ -110,12 +110,28 @@ func (q *Queries) GetPlayer(ctx context.Context, id string) (PlayersExtended, er
 }
 
 const getPlayerByUserId = `-- name: GetPlayerByUserId :one
-SELECT id, first_name, last_name, user_id, email, points, hcp FROM players_extended p WHERE p.user_id = ?
+SELECT 
+    p.id, p.first_name, p.last_name, p.user_id, p.email, p.points, p.hcp,
+    count(r.id) as nr_of_rounds
+FROM players_extended p 
+LEFT JOIN rounds r ON r.player_id = p.id
+WHERE p.user_id = ?
 `
 
-func (q *Queries) GetPlayerByUserId(ctx context.Context, userID string) (PlayersExtended, error) {
+type GetPlayerByUserIdRow struct {
+	ID         string  `json:"id"`
+	FirstName  string  `json:"firstName"`
+	LastName   string  `json:"lastName"`
+	UserID     string  `json:"userId"`
+	Email      string  `json:"email"`
+	Points     int64   `json:"points"`
+	Hcp        float64 `json:"hcp"`
+	NrOfRounds int64   `json:"nrOfRounds"`
+}
+
+func (q *Queries) GetPlayerByUserId(ctx context.Context, userID string) (GetPlayerByUserIdRow, error) {
 	row := q.queryRow(ctx, q.getPlayerByUserIdStmt, getPlayerByUserId, userID)
-	var i PlayersExtended
+	var i GetPlayerByUserIdRow
 	err := row.Scan(
 		&i.ID,
 		&i.FirstName,
@@ -124,6 +140,7 @@ func (q *Queries) GetPlayerByUserId(ctx context.Context, userID string) (Players
 		&i.Email,
 		&i.Points,
 		&i.Hcp,
+		&i.NrOfRounds,
 	)
 	return i, err
 }
