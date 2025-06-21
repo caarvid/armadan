@@ -19,7 +19,7 @@ templ MyProfile(player *armadan.Player) {
 				<div class="flex">
 					@infoBox("HCP", fmt.Sprintf("%2.1f", player.Hcp))
 					@infoBox("Poäng", fmt.Sprint(player.Points))
-					@infoBox("Rundor", "-")
+					@infoBox("Rundor", fmt.Sprint(player.NrOfRounds))
 				</div>
 			</div>
 		}

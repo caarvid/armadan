@@ -132,7 +132,7 @@ func MyProfile(player *armadan.Player) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = infoBox("Rundor", "-").Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = infoBox("Rundor", fmt.Sprint(player.NrOfRounds)).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

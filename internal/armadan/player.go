@@ -14,11 +14,12 @@ type PlayerService interface {
 }
 
 type Player struct {
-	ID        string
-	FirstName string
-	LastName  string
-	Points    int64
-	UserID    string
-	Email     string
-	Hcp       float64
+	ID         string
+	FirstName  string
+	LastName   string
+	Points     int64
+	UserID     string
+	Email      string
+	Hcp        float64
+	NrOfRounds int64
 }

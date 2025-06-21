@@ -24,6 +24,17 @@ func toPlayer(entity any) *armadan.Player {
 			Email:     p.Email,
 			Hcp:       p.Hcp,
 		}
+	case schema.GetPlayerByUserIdRow:
+		return &armadan.Player{
+			ID:         p.ID,
+			FirstName:  p.FirstName,
+			LastName:   p.LastName,
+			Points:     p.Points,
+			UserID:     p.UserID,
+			Email:      p.Email,
+			Hcp:        p.Hcp,
+			NrOfRounds: p.NrOfRounds,
+		}
 	case schema.Player:
 		return &armadan.Player{
 			ID:        p.ID,
