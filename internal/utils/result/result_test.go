@@ -42,3 +42,37 @@ func TestGetWinners(t *testing.T) {
 		assert.Equal(t, expected[i].Points, w.Points)
 	}
 }
+
+func createScores() []armadan.Score {
+	scores := make([]armadan.Score, 18)
+
+	for i := range 9 {
+		scores[i].Strokes = 4
+		scores[i].Par = 4
+		scores[i].Index = int64((i * 2) + 1)
+	}
+
+	for i := range 9 {
+		scores[9+i].Strokes = 4
+		scores[9+i].Par = 4
+		scores[9+i].Index = int64((i + 1) * 2)
+	}
+
+	return scores
+}
+
+func TestGetRoundSummary(t *testing.T) {
+	scores := createScores()
+
+	result := GetRoundSummary(scores, 0)
+	assert.EqualValues(t, 36, result.NetOut)
+	assert.EqualValues(t, 36, result.NetIn)
+
+	result = GetRoundSummary(scores, -3)
+	assert.EqualValues(t, 37, result.NetOut)
+	assert.EqualValues(t, 38, result.NetIn)
+
+	result = GetRoundSummary(scores, 5)
+	assert.EqualValues(t, 33, result.NetOut)
+	assert.EqualValues(t, 34, result.NetIn)
+}
