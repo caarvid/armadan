@@ -33,6 +33,7 @@ func TestGetStrokes(t *testing.T) {
 	assert.Equal(t, -4, GetStrokes(-1.8, 70.5, 129, 72))
 	assert.Equal(t, 10, GetStrokes(9.7, 70.5, 129, 72))
 	assert.Equal(t, 18, GetStrokes(19.0, 70.5, 129, 72))
+	assert.Equal(t, -3, GetStrokes(2.8, 66.4, 121, 72))
 
 	assert.Equal(t, 9, GetStrokes(5.2, 74.2, 137, 72))
 	assert.Equal(t, 15, GetStrokes(10.5, 74.2, 137, 72))

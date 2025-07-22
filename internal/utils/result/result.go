@@ -148,3 +148,38 @@ func GetWinners(rounds []armadan.Round) []armadan.Winner {
 
 	return nil
 }
+
+type roundResults struct {
+	NetIn    int64
+	NetOut   int64
+	GrossIn  int64
+	GrossOut int64
+}
+
+func GetRoundSummary(scores []armadan.Score, strokes int64) roundResults {
+	results := roundResults{}
+
+	for i, s := range scores {
+		if i < 9 {
+			results.GrossOut += s.Strokes
+			results.NetOut += s.Strokes
+
+			if s.Index <= strokes {
+				results.NetOut -= 1
+			} else if s.Index > (18 + strokes) {
+				results.NetOut += 1
+			}
+		} else {
+			results.GrossIn += s.Strokes
+			results.NetIn += s.Strokes
+
+			if s.Index <= strokes {
+				results.NetIn -= 1
+			} else if s.Index > (18 + strokes) {
+				results.NetIn += 1
+			}
+		}
+	}
+
+	return results
+}

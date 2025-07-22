@@ -217,37 +217,6 @@ func (rs *results) Create(ctx context.Context, weekId string) (*armadan.Result, 
 	return toResult(result), nil
 }
 
-type roundResults struct {
-	NetIn    int64
-	NetOut   int64
-	GrossIn  int64
-	GrossOut int64
-}
-
-func getRoundSummary(scores []armadan.Score, strokes int64) roundResults {
-	results := roundResults{}
-
-	for i, s := range scores {
-		if i < 9 {
-			results.GrossOut += s.Strokes
-			results.NetOut += s.Strokes
-
-			if s.Index <= strokes {
-				results.NetOut -= 1
-			}
-		} else {
-			results.GrossIn += s.Strokes
-			results.NetIn += s.Strokes
-
-			if s.Index <= strokes {
-				results.NetIn -= 1
-			}
-		}
-	}
-
-	return results
-}
-
 func (rs *results) CreateRound(
 	ctx context.Context,
 	round *armadan.Round,
@@ -272,7 +241,7 @@ func (rs *results) CreateRound(
 	}
 
 	strokes := hcp.GetStrokes(round.Hcp, result.Cr, int(result.Slope), int(par))
-	roundSummary := getRoundSummary(scores, int64(strokes))
+	roundSummary := resultUtils.GetRoundSummary(scores, int64(strokes))
 	newHcp := hcp.GetNewHcp(round.Hcp, par, roundSummary.NetIn+roundSummary.NetOut)
 
 	roundId := armadan.GetId()
@@ -349,7 +318,7 @@ func (rs *results) UpdateRound(ctx context.Context, round *armadan.Round, scores
 	}
 
 	strokes := hcp.GetStrokes(round.Hcp, result.Cr, int(result.Slope), int(par))
-	roundSummary := getRoundSummary(scores, int64(strokes))
+	roundSummary := resultUtils.GetRoundSummary(scores, int64(strokes))
 	newHcp := hcp.GetNewHcp(round.Hcp, par, roundSummary.NetIn+roundSummary.NetOut)
 
 	roundId := armadan.GetId()
